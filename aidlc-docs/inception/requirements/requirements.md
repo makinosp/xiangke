@@ -47,12 +47,16 @@
 - **FR-4.3**: Audio playback shall be compatible with Web platform browser
   autoplay policies.
 
-### FR-5: Database Integration
+### FR-5: Local Storage
 
-- **FR-5.1**: The game shall connect to a database for persistent player data.
-- **FR-5.2**: The game shall store and retrieve leaderboard data.
-- **FR-5.3**: Data access shall be implemented via Godot's HTTP client or
-  appropriate web APIs.
+- **FR-5.1**: The game shall store player data locally using Godot's ConfigFile
+  or user data directory.
+- **FR-5.2**: The game shall maintain a local leaderboard (high scores per
+  session/device).
+- **FR-5.3**: Local storage shall persist between game sessions on the same
+  browser/device.
+- **FR-5.4**: No external database server is required; all data is stored
+  client-side.
 
 ---
 
@@ -79,9 +83,9 @@
 
 ### NFR-4: Security
 
-- **NFR-4.1**: Database connections shall use secure protocols (HTTPS).
-- **NFR-4.2**: Player data shall not be exposed in client-side code in plain
-  text.
+- **NFR-4.1**: Local player data shall be stored in Godot's user data directory
+  (sandboxed by the browser).
+- **NFR-4.2**: No sensitive data is transmitted to external servers.
 
 ---
 
@@ -98,8 +102,8 @@
 
 - **ASM-1**: The development team has familiarity with Godot Engine and
   GDScript.
-- **ASM-2**: A database service (e.g., PostgreSQL, Firebase, or similar) will be
-  provisioned separately.
+- **ASM-2**: All game data (scores, settings, progress) is stored locally using
+  Godot's built-in local storage mechanisms.
 - **ASM-3**: Art assets (sprites, audio files) will be provided or created
   separately from code generation.
 - **ASM-4**: The game genre and specific gameplay mechanics will be further

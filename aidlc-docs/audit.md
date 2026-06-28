@@ -50,3 +50,21 @@ provided yet.
 **Context**: INCEPTION phase - Workflow Planning complete. 10 stages to execute, 2 skipped.
 
 ---
+
+---
+
+## Application Design - Planning
+**Timestamp**: 2026-06-28T00:05:00Z **User Input**: "承認します。続行してください。"
+**AI Response**: Workflow Planning approved by user. Created application-design-plan.md with 6 design questions (DQ-1 to DQ-6) covering: game genre, scene organization, AI complexity, database backend, audio approach, and code architecture pattern. Awaiting user answers.
+**Context**: INCEPTION phase - Application Design Step 5. Design questions generated for user input.
+
+---
+
+---
+
+## Requirements Update - Local Storage Only
+**Timestamp**: 2026-06-28T00:06:00Z **User Input**: "**requirements**を修正します。データベースはローカルのみにします。"
+**AI Response**: Updated requirements.md: FR-5 changed from "Database Integration" to "Local Storage" (ConfigFile/user data directory). NFR-4 updated to remove external database security requirements. ASM-2 updated to reflect local-only storage. Scope estimate updated accordingly.
+**Context**: INCEPTION phase - Requirements Analysis updated based on user feedback. Database dependency removed; all data is now client-side only.
+
+---
