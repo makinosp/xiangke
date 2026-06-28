@@ -16,7 +16,7 @@ C) Both 2D and 3D elements
 
 D) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 6
 
@@ -42,7 +42,7 @@ I) Audio / music system
 
 J) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B, H, I
 
 ## Question 7
 
@@ -58,7 +58,7 @@ D) Multiple platforms
 
 E) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ## Question 8
 
@@ -72,7 +72,7 @@ C) No preference / use latest
 
 D) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: A
 
 ## Question 9
 
@@ -88,4 +88,4 @@ D) File-based import/export
 
 E) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
