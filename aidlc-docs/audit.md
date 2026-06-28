@@ -189,3 +189,17 @@ Resources. Plan generated with context-appropriate questions for Godot game data
 layer.
 
 ---
+
+## NFR Requirements - User Answers Received
+
+**Timestamp**: 2026-06-28T00:15:00Z **User Input**:
+"回答完了です。妥当性をチェックしてください。" → "続行してNFR
+Requirementsに進んでください。" **AI Response**: All 11 questions answered.
+Validated responses — all consistent with project context. P3 set to recommended
+value (A). Generated NFR Requirements artifacts: nfr-requirements.md (14 NFR
+categories) and tech-stack-decisions.md (6 decision areas). Updated
+aidlc-state.md. **Context**: CONSTRUCTION PHASE - NFR Requirements for Unit 1:
+Resources complete. Artifacts at
+aidlc-docs/construction/unit-1/nfr-requirements/.
+
+---
