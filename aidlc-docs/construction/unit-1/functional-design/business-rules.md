@@ -144,20 +144,30 @@ ensure data integrity and consistent behavior across all systems.
   out.
 - Maximum duration for any status MUST NOT exceed 10 turns.
 
-### SR-3: Status Damage
+### SR-3: Persistent Damage Validation
 
 - `damagePerTurn` MUST be an integer ≥ 0 (percentage of max HP).
 - Burn damage per turn MUST be 6.25% (1/16) of max HP.
 - Poison damage escalates: base 1.56% × turns_poisoned, capped at 25%.
-- Confusion, Chain, and Charm do NOT have damagePerTurn (value = 0).
+- Confusion, Chain, and Charm do NOT have persistent damage.
 
-### SR-4: Status Stat Modifications
+### SR-4: Status Effects — Stat Modifications and Persistent Damage
 
-- Burn: Attack ×0.5 (applied as flat multiplier, not stage change).
-- Charm: Attack ×0.5 (applied as flat multiplier, not stage change).
-- Chain: Speed ×0.5 (applied as flat multiplier, not stage change).
-- Poison: No stat modification.
-- Confusion: No stat modification.
+- **Burn**:
+  - Attack ×0.5 (applied as flat multiplier, not stage change).
+  - Deals 6.25% of max HP as damage at the end of each turn.
+- **Poison**:
+  - No stat modification.
+  - Deals increasing damage each turn: 1.56% × turns_poisoned, capped at 25%.
+- **Confusion**:
+  - No stat modification.
+  - 50% chance to hit itself with a typeless attack (power = 40).
+- **Chain**:
+  - Speed ×0.5 (applied as flat multiplier, not stage change).
+  - No persistent damage.
+- **Charm**:
+  - Attack ×0.5 (applied as flat multiplier, not stage change).
+  - No persistent damage.
 
 ### SR-5: Status Interaction Rules
 
