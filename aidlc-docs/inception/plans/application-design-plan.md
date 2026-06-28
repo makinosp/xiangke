@@ -104,4 +104,4 @@ D) Mix of node inheritance + signals (recommended for most Godot projects)
 
 E) Other (please describe after [Answer]: tag below)
 
-[Answer]: A
+[Answer]: D
