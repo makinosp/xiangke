@@ -28,7 +28,7 @@
 - [x] Workflow Planning (2026-06-28)
 - [x] Application Design (2026-06-28)
 - [x] Units Generation (2026-06-28)
-- [ ] Functional Design
+- [x] Functional Design (2026-06-28)
 - [ ] NFR Requirements
 - [ ] NFR Design
 - [ ] Infrastructure Design

@@ -155,3 +155,22 @@ character, character roster size, and stat system. Awaiting user answers.
 created at aidlc-docs/construction/plans/resources-functional-design-plan.md.
 
 ---
+
+## Functional Design - Unit 1: Resources (Complete)
+
+**Timestamp**: 2026-06-28T00:11:00Z **User Input**: "Using AI-DLC,
+回答を完了します。続行してください。" **AI Response**: All 6 design questions
+answered (Q1: 7 types Wood/Fire/Earth/Metal/Water/Yang/Yin, Q2:
+Burn/Poison/Confusion/Chain/Charm, Q3: Complex moves with
+status/stat-mod/multi-hit/recoil/healing, Q4: 4 moves per character, Q5: 9+
+characters, Q6: Unique stats per character). Generated 3 functional design
+artifacts: domain-entities.md (Character, Move, TypeChart, StatusEffect,
+StatModification entities), business-logic-model.md (Type Effectiveness
+Resolution, Status Effect Application, Damage Calculation, Stat Modification,
+Status Effect Tick, Multi-Hit Resolution, Move Execution Pipeline), and
+business-rules.md (Character/Move/Type/Status/Validation rules). All plan steps
+completed. **Context**: CONSTRUCTION PHASE - Functional Design for Unit 1:
+Resources complete. All artifacts generated at
+aidlc-docs/construction/unit-1/functional-design/.
+
+---

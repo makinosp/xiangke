@@ -110,13 +110,13 @@ D) Other (please describe after [Answer]: tag below)
 
 ## Plan Steps
 
-- [ ] Collect and analyze user answers to design questions
-- [ ] Define domain entities (Character, Move, TypeChart, StatusEffect)
-- [ ] Define data structures and property schemas
-- [ ] Define type effectiveness rules and lookup logic
-- [ ] Define status effect behavior rules
-- [ ] Define business rules for data validation
-- [ ] Generate `domain-entities.md`
-- [ ] Generate `business-logic-model.md`
-- [ ] Generate `business-rules.md`
-- [ ] Present completion message and await approval
+- [x] Collect and analyze user answers to design questions
+- [x] Define domain entities (Character, Move, TypeChart, StatusEffect)
+- [x] Define data structures and property schemas
+- [x] Define type effectiveness rules and lookup logic
+- [x] Define status effect behavior rules
+- [x] Define business rules for data validation
+- [x] Generate `domain-entities.md`
+- [x] Generate `business-logic-model.md`
+- [x] Generate `business-rules.md`
+- [x] Present completion message and await approval
