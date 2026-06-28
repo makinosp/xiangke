@@ -4,7 +4,8 @@
 
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-28T00:00:00Z
-- **Current Stage**: INCEPTION - Units Generation (Complete)
+- **Current Stage**: CONSTRUCTION - Functional Design - Unit 1: Resources (In
+  Progress)
 
 ## Workspace State
 
