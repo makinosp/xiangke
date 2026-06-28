@@ -77,3 +77,12 @@ provided yet.
 **Context**: INCEPTION phase - Application Design complete. All artifacts generated at aidlc-docs/inception/application-design/.
 
 ---
+
+---
+
+## Units Generation - Planning
+**Timestamp**: 2026-06-28T00:08:00Z **User Input**: "承認します。"
+**AI Response**: Application Design approved. Created unit-of-work-plan.md with 4 decomposition questions (UQ-1 to UQ-4) covering: unit grouping strategy, development priority, code organization, and shared resources. Awaiting user answers.
+**Context**: INCEPTION phase - Units Generation Part 1 (Planning). Decomposition questions generated.
+
+---
