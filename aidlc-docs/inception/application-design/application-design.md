@@ -2,8 +2,8 @@
 
 ## Project
 
-Turn-based command battle game (-style) Built with Godot Engine 4.x /
-GDScript Primary target: Web (HTML5/WebAssembly)
+Turn-based command battle game built with Godot Engine 4.x / GDScript Primary
+target: Web (HTML5/WebAssembly)
 
 ---
 
