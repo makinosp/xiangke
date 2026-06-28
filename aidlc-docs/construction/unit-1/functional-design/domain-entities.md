@@ -13,18 +13,20 @@ Represents a playable character or enemy in the battle system.
 
 ### Properties
 
-| Property      | Type    | Description                                    |
-| ------------- | ------- | ---------------------------------------------- |
-| id            | String  | Unique identifier (e.g., "zhuge_liang")        |
-| name          | String  | Display name (e.g., "諸葛亮")                  |
-| type          | Type    | Primary type (one of 7 types)                  |
-| secondaryType | Type    | Optional second type (one of 7 types, or null) |
-| hp            | Integer | Base HP stat (1–999)                           |
-| attack        | Integer | Base attack stat (1–999)                       |
-| defense       | Integer | Base defense stat (1–999)                      |
-| speed         | Integer | Base speed stat (1–999)                        |
-| moves         | [Move]  | List of 4 move IDs this character can use      |
-| description   | String  | Flavor text for the character                  |
+| Property      | Type    | Description                                                              |
+| ------------- | ------- | ------------------------------------------------------------------------ |
+| id            | String  | Unique identifier (e.g., "zhuge_liang")                                  |
+| name          | String  | Display name (e.g., "諸葛亮")                                            |
+| type          | Type    | Primary type (one of 7 types)                                            |
+| secondaryType | Type    | Optional second type (one of 7 types, or null)                           |
+| hp            | Integer | Base HP stat (1–999)                                                     |
+| attack        | Integer | Base attack stat (1–999)                                                 |
+| defense       | Integer | Base defense stat (1–999)                                                |
+| speed         | Integer | Base speed stat (1–999)                                                  |
+| intelligence  | Integer | Base intelligence stat (1–999) — attack power for arts and strategies    |
+| spirit        | Integer | Base spirit stat (1–999) — damage resistance against arts and strategies |
+| moves         | [Move]  | List of 4 move IDs this character can use                                |
+| description   | String  | Flavor text for the character                                            |
 
 ### Constraints
 
@@ -43,20 +45,21 @@ Represents a battle action a character can perform.
 
 ### Properties
 
-| Property     | Type             | Description                                        |
-| ------------ | ---------------- | -------------------------------------------------- |
-| id           | String           | Unique identifier (e.g., "fire_strike")            |
-| name         | String           | Display name (e.g., "火撃")                        |
-| type         | Type             | Move's type (one of 7 types)                       |
-| power        | Integer          | Base power (0–255, 0 = non-damage)                 |
-| accuracy     | Integer          | Hit chance percentage (0–100)                      |
-| effect       | EffectType       | Special effect category                            |
-| effectChance | Integer          | Percentage chance of effect triggering (0–100)     |
-| statMod      | StatModification | Stat change applied (if any)                       |
-| hitCount     | Integer          | Number of hits (1 for single, 2–5 for multi-hit)   |
-| recoil       | Integer          | Fraction of damage dealt returned to user (0–100)  |
-| healing      | Integer          | HP restored to user as percentage of power (0–100) |
-| description  | String           | Flavor text for the move                           |
+| Property       | Type             | Description                                        |
+| -------------- | ---------------- | -------------------------------------------------- |
+| id             | String           | Unique identifier (e.g., "fire_strike")            |
+| name           | String           | Display name (e.g., "火撃")                        |
+| type           | Type             | Move's type (one of 7 types)                       |
+| power          | Integer          | Base power (0–255, 0 = non-damage)                 |
+| accuracy       | Integer          | Hit chance percentage (0–100)                      |
+| effect         | EffectType       | Special effect category                            |
+| effectChance   | Integer          | Percentage chance of effect triggering (0–100)     |
+| statMod        | StatModification | Stat change applied (if any)                       |
+| hitCount       | Integer          | Number of hits (1 for single, 2–5 for multi-hit)   |
+| recoil         | Integer          | Fraction of damage dealt returned to user (0–100)  |
+| healing        | Integer          | HP restored to user as percentage of power (0–100) |
+| damageCategory | DamageCategory   | Whether the move deals physical or arts damage     |
+| description    | String           | Flavor text for the move                           |
 
 ### Effect Types
 
@@ -68,6 +71,13 @@ Represents a battle action a character can perform.
 | Confusion   | 混乱     | May cause the target to hit itself   |
 | Chain       | 連環     | Links damage across multiple targets |
 | Charm       | 魅了     | Reduces target's attack stat         |
+
+### Damage Categories
+
+| Category | Description                                                        |
+| -------- | ------------------------------------------------------------------ |
+| Physical | Uses attacker's Attack and defender's Defense for damage calc      |
+| Arts     | Uses attacker's Intelligence and defender's Spirit for damage calc |
 
 ### Move Categories
 
@@ -277,11 +287,13 @@ Represents a temporary change to a character's stats during battle.
 
 ### Stat Types
 
-| Stat Type | Description           |
-| --------- | --------------------- |
-| Attack    | Physical attack power |
-| Defense   | Physical defense      |
-| Speed     | Turn order priority   |
+| Stat Type    | Description                                   |
+| ------------ | --------------------------------------------- |
+| Attack       | Physical attack power                         |
+| Defense      | Physical defense                              |
+| Speed        | Turn order priority                           |
+| Intelligence | Attack power for arts and strategies          |
+| Spirit       | Damage resistance against arts and strategies |
 
 ### Stage Multiplier Table
 

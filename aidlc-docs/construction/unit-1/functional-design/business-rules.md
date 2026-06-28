@@ -19,9 +19,10 @@ ensure data integrity and consistent behavior across all systems.
 
 ### CR-2: Character Stats
 
-- All stats (hp, attack, defense, speed) MUST be integers in range [1, 999].
+- All stats (hp, attack, defense, speed, intelligence, spirit) MUST be integers
+  in range [1, 999].
 - Stats are unique per character (no shared templates).
-- The sum of all four base stats MUST NOT exceed 2000 (balance constraint).
+- The sum of all six base stats MUST NOT exceed 3000 (balance constraint).
 - No single stat MAY exceed 500 (prevent extreme specialization).
 
 ### CR-3: Character Type Assignment
@@ -73,7 +74,7 @@ ensure data integrity and consistent behavior across all systems.
 ### MR-4: Move Stat Modification
 
 - If `statMod` is defined, it MUST include a valid `stat` (Attack, Defense,
-  Speed).
+  Speed, Intelligence, Spirit).
 - `statMod.stage` MUST be an integer in range [-3, +3] per move application.
 - Multiple stat modifications from moves are cumulative but clamped to [-6, +6].
 
@@ -189,14 +190,15 @@ ensure data integrity and consistent behavior across all systems.
 
 ### VR-2: Completeness
 
-- All 9+ characters MUST be fully defined (all required fields populated).
+- All 9+ characters MUST be fully defined (all required fields populated,
+  including intelligence and spirit).
 - All moves referenced by characters MUST be fully defined.
 - The type chart MUST have all 49 entries populated.
 - All 5 status effects MUST be fully defined.
 
 ### VR-3: Balance
 
-- No character may have all four stats above 300 (prevent overpowered
+- No character may have all six stats above 300 (prevent overpowered
   characters).
 - No move may have power > 200 AND effectChance > 50 AND hitCount > 1 (prevent
   overpowered moves).

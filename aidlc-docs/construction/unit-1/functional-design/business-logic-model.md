@@ -111,16 +111,22 @@ Calculate the damage dealt by a move.
 
 ```
 1. If move.power == 0 → damage = 0 (non-damaging move)
-2. base_damage = ((2 * 50 / 5 + 2) * move.power * attacker.attack / defender.defense) / 50 + 2
-3. type_multiplier = TypeChart[move.type][defender.type]
+2. If move.damageCategory == Physical:
+     attack_stat = attacker.attack
+     defense_stat = defender.defense
+   If move.damageCategory == Arts:
+     attack_stat = attacker.intelligence
+     defense_stat = defender.spirit
+3. base_damage = ((2 * 50 / 5 + 2) * move.power * attack_stat / defense_stat) / 50 + 2
+4. type_multiplier = TypeChart[move.type][defender.type]
    - 2.0 if attacker overcomes defender (相克)
    - 1.25 if attacker generates defender (相生)
    - 1.0 if neutral
    - 0.5 if attacker is overcome by defender (被相克)
    - 0.0 if immune
-4. final_damage = floor(base_damage * type_multiplier)
-5. If final_damage < 1 AND type_multiplier > 0 → final_damage = 1 (minimum 1 damage)
-6. If type_multiplier == 0 → final_damage = 0 (immune)
+5. final_damage = floor(base_damage * type_multiplier)
+6. If final_damage < 1 AND type_multiplier > 0 → final_damage = 1 (minimum 1 damage)
+7. If type_multiplier == 0 → final_damage = 0 (immune)
 ```
 
 ### Output
