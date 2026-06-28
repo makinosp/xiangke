@@ -10,7 +10,7 @@
 
 - **Existing Code**: No (only .vendor/ dependency files)
 - **Reverse Engineering Needed**: No
-- **Workspace Root**: /Volumes/Data/Projects/xiangke
+- **Workspace Root**: .
 
 ## Extension Configuration
 
