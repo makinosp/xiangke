@@ -2,11 +2,11 @@
 
 ## Design Checklist
 
-- [ ] Generate `unit-of-work.md` with unit definitions and responsibilities
-- [ ] Generate `unit-of-work-dependency.md` with dependency matrix
-- [ ] Generate `unit-of-work-story-map.md` mapping stories to units
-- [ ] Document code organization strategy (greenfield)
-- [ ] Validate unit boundaries and dependencies
+- [x] Generate `unit-of-work.md` with unit definitions and responsibilities
+- [x] Generate `unit-of-work-dependency.md` with dependency matrix
+- [x] Generate `unit-of-work-story-map.md` mapping stories to units
+- [x] Document code organization strategy (greenfield)
+- [x] Validate unit boundaries and dependencies
 
 ---
 
