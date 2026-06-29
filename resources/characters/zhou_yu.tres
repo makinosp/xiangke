@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "zhou_yu"
+name = "周瑜"
+type = 1
+secondary_type = 5
+hp = 90
+attack = 55
+defense = 65
+speed = 110
+intelligence = 125
+spirit = 100
+moves = PackedStringArray("fire_strike", "flame_burst", "water_surge", "war_cry")
+description = "The handsome commander. His strategies burn bright and strike swift like a phoenix in battle."

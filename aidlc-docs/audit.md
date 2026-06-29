@@ -251,3 +251,43 @@ architecture, monitoring, cost estimation). Updated plan checkboxes.
 Artifacts at aidlc-docs/construction/unit-1/infrastructure-design/.
 
 ---
+
+## Infrastructure Design - Approval
+
+**Timestamp**: 2026-06-29T00:03:00Z **User Input**: "Using AI-DLC,
+Infrastructure Designを承認します。Code Generationに進んでください。" **AI
+Response**: Infrastructure Design approved by user. Proceeding to Code
+Generation for Unit 1: Resources. Creating code generation plan. **Context**:
+CONSTRUCTION PHASE - Infrastructure Design approved. Starting Code Generation
+Part 1 (Planning).
+
+---
+
+## Code Generation - Plan Created
+
+**Timestamp**: 2026-06-29T00:04:00Z **User Input**: (none — plan created based
+on approval) **AI Response**: Created code-generation-plan.md with 14 steps
+covering: project structure setup, resource type definitions, type chart
+implementation, validation utilities, data validator, data loader, data registry
+autoload, sample resource files, Godot project configuration, and code
+documentation summary. Plan stored at
+aidlc-docs/construction/unit-1/plans/code-generation-plan.md. Awaiting user
+approval. **Context**: CONSTRUCTION PHASE - Code Generation Part 1 (Planning)
+for Unit 1: Resources. Plan created with 14 numbered steps.
+
+---
+
+## Code Generation - Approval and Execution
+
+**Timestamp**: 2026-06-29T00:05:00Z **User Input**: "承認します。Code Generation
+Part 2に進んでください。" **AI Response**: Code Generation plan approved.
+Executing all 14 steps: created project structure, resource type definitions
+(CharacterData, MoveData, StatusEffectData, TypeEnums), type chart (7x7 matrix
+with dual-type resolution), validation utilities and validator (all business
+rules CR/MR/TR), data loader with graceful degradation, data registry autoload,
+3 sample character .tres files, 7 sample move .tres files, project.godot with
+autoload registration, and code summary documentation. All plan steps marked
+complete. **Context**: CONSTRUCTION PHASE - Code Generation Part 2 (Generation)
+for Unit 1: Resources complete. All artifacts generated.
+
+---

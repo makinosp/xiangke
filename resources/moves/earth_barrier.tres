@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MoveData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/move_data.gd" id="1_move"]
+
+[resource]
+script = ExtResource("1_move")
+id = "earth_barrier"
+name = "土壁"
+type = 2
+power = 0
+accuracy = 100
+effect = 0
+effect_chance = 0
+stat_mod_stat = 1
+stat_mod_stage = 2
+hit_count = 1
+recoil = 0
+healing = 0
+damage_category = 0
+description = "Raises a stone barrier. Sharply boosts the user's defense."

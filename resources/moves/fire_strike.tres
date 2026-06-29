@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MoveData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/move_data.gd" id="1_move"]
+
+[resource]
+script = ExtResource("1_move")
+id = "fire_strike"
+name = "火撃"
+type = 1
+power = 80
+accuracy = 95
+effect = 1
+effect_chance = 30
+stat_mod_stat = -1
+stat_mod_stage = 0
+hit_count = 1
+recoil = 0
+healing = 0
+damage_category = 0
+description = "A blazing strike that engulfs the foe. May inflict burn."
