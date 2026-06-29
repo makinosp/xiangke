@@ -215,3 +215,39 @@ for Unit 1: Resources complete. Artifacts at
 aidlc-docs/construction/unit-1/nfr-design/.
 
 ---
+
+## NFR Design - Approval
+
+**Timestamp**: 2026-06-29T00:00:00Z **User Input**: "Using AI-DLC, NFR
+Designを承認します。Infrrastructure Designに進んでください。" **AI Response**:
+NFR Design approved by user. Proceeding to Infrastructure Design for Unit 1:
+Resources. Created infrastructure-design-plan.md with 6 targeted questions
+covering: web hosting platform, build automation, development environment, asset
+delivery, versioning/updates, and monitoring. **Context**: CONSTRUCTION PHASE -
+NFR Design approved. Infrastructure Design plan created for user input
+collection.
+
+---
+
+## Infrastructure Design - Answers Received
+
+**Timestamp**: 2026-06-29T00:01:00Z **User Input**: (User provided answers via
+plan file) **AI Response**: All 6 infrastructure questions answered: Q1=A
+(GitHub Pages), Q2=C (CI + Local), Q3=A (Local Godot), Q4=A (Full bundle), Q5=A
+(Cache-busting), Q6=B (Basic error logging). **Context**: CONSTRUCTION PHASE -
+Infrastructure Design Step 4. Answers collected and analyzed.
+
+---
+
+## Infrastructure Design - Artifacts Generated
+
+**Timestamp**: 2026-06-29T00:02:00Z **User Input**:
+"承認します。次に進んでください。生成ファイルは英語で記述しなければならないことに注意してください。"
+**AI Response**: Generated Infrastructure Design artifacts in English:
+infrastructure-design.md (infrastructure mapping, decisions summary) and
+deployment-architecture.md (build pipeline, release process, runtime
+architecture, monitoring, cost estimation). Updated plan checkboxes.
+**Context**: CONSTRUCTION PHASE - Infrastructure Design Step 5-6 complete.
+Artifacts at aidlc-docs/construction/unit-1/infrastructure-design/.
+
+---
