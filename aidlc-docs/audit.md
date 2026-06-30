@@ -291,3 +291,17 @@ complete. **Context**: CONSTRUCTION PHASE - Code Generation Part 2 (Generation)
 for Unit 1: Resources complete. All artifacts generated.
 
 ---
+
+## Build and Test - Complete
+
+**Timestamp**: 2026-06-29T00:06:00Z **User Input**: "承認します。Build &
+Testに進んでください。" **AI Response**: Code Generation approved. Generated
+build and test instructions: build-instructions.md (Godot project setup, export,
+troubleshooting), unit-test-instructions.md (25 data validation test cases via
+DataValidator), integration-test-instructions.md (5 data access pattern
+scenarios), performance-test-instructions.md (load time, FPS, O(1) verification
+per NFR), and build-and-test-summary.md. Updated aidlc-state.md. **Context**:
+CONSTRUCTION PHASE - Build and Test complete. All instruction files generated at
+aidlc-docs/construction/build-and-test/.
+
+---
