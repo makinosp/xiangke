@@ -6,8 +6,8 @@
 - [x] Step 2: Create NFR Requirements Plan (this file)
 - [x] Step 3: Generate Context-Appropriate Questions
 - [x] Step 4: Store Plan
-- [ ] Step 5: Collect and Analyze Answers
-- [ ] Step 6: Generate NFR Requirements Artifacts
+- [x] Step 5: Collect and Analyze Answers
+- [x] Step 6: Generate NFR Requirements Artifacts
 - [ ] Step 7: Present Completion Message
 - [ ] Step 8: Wait for Explicit Approval
 - [ ] Step 9: Record Approval and Update Progress
