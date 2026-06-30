@@ -329,3 +329,16 @@ Updated aidlc-state.md. **Context**: CONSTRUCTION PHASE - Functional Design
 for Unit 2: Game Foundation complete. All artifacts generated at
 aidlc-docs/construction/unit-2/functional-design/.
 ---
+
+## NFR Requirements - Unit 2: Game Foundation (Planning)
+
+**Timestamp**: 2026-06-30T00:01:00Z **User Input**: "承認します。続行してNFR
+Requirementsに進んでください。" **AI Response**: Functional Design approved.
+Created NFR Requirements plan with 10 questions across 5 categories
+(Performance, Reliability, Security, Maintainability, Usability, Compatibility,
+Tech Stack). Plan stored at
+aidlc-docs/construction/unit-2/plans/nfr-requirements-plan.md. Awaiting user
+answers. **Context**: CONSTRUCTION PHASE - NFR Requirements for Unit 2: Game
+Foundation. Plan generated with context-appropriate questions.
+
+---
