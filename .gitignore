@@ -8,6 +8,9 @@ export.cfg
 export_credentials.cfg
 *.tmp
 
+# Godot auto-generated UID files (machine-specific, do not track)
+*.uid
+
 # Imported translations (automatically generated from CSV files)
 *.translation
 
