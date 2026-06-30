@@ -4,7 +4,7 @@
 
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-28T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Build and Test (Complete)
+- **Current Stage**: CONSTRUCTION - Functional Design Unit 2 (Complete)
 
 ## Workspace State
 
@@ -32,4 +32,5 @@
 - [x] NFR Design (2026-06-28)
 - [x] Infrastructure Design (2026-06-29)
 - [x] Code Generation (2026-06-29)
-- [x] Build and Test (2026-06-29)
+- [x] Build and Test (2026-06-29) — Unit 1
+- [x] Functional Design Unit 2 (2026-06-30)

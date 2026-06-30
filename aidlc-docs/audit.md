@@ -305,3 +305,27 @@ CONSTRUCTION PHASE - Build and Test complete. All instruction files generated at
 aidlc-docs/construction/build-and-test/.
 
 ---
+## Functional Design - Unit 2: Game Foundation (Complete)
+
+**Timestamp**: 2026-06-30T00:00:00Z **User Input**: "Using AI-DLC,
+回答を完了しました。続行してください。" **AI Response**: All 10 functional design
+questions answered for Unit 2: Game Foundation. Answers: Q1=A (Minimal state
+machine: Title→CharacterSelect→Battle→Result→Title), Q2=C (Custom transition
+system with fade/animation), Q3=A (Minimal save: selected character, volume,
+last battle), Q4=A (Single save.cfg with sections), Q5=C (Full audio: BGM/SFX,
+volume controls, crossfade, dynamic layers, Web autoplay handling), Q6=A
+(Minimal title screen: title, Start, version), Q7=D (Two-phase selection:
+Phase 1 select 6 for corps, Phase 2 select 3 to battle, with stats preview),
+Q8=A (Minimal result: Win/Loss, Return to Title), Q9=A (Minimal project
+settings: display, input map, autoloads), Q10=A (Godot default UI input
+actions only). Generated 3 functional design artifacts: domain-entities.md
+(GameState, CharacterSelectPhase, SaveData, AudioTrack, TransitionConfig,
+CorpsRoster entities), business-logic-model.md (State Transition, Scene
+Transition with Animation, Two-Phase Character Selection, Save Data
+Persistence, Audio Playback Management, Audio Bus Configuration), and
+business-rules.md (GR-1 through PCR-3 rules covering state machine, scene
+transitions, character selection, save data, audio, and project config).
+Updated aidlc-state.md. **Context**: CONSTRUCTION PHASE - Functional Design
+for Unit 2: Game Foundation complete. All artifacts generated at
+aidlc-docs/construction/unit-2/functional-design/.
+---

@@ -38,6 +38,8 @@
 - **FR-3.2**: The UI shall be responsive and adapt to the Web platform's
   viewport.
 - **FR-3.3**: Menu systems (start, pause, game over) shall be implemented.
+- **FR-3.4**: Pause and Game Over menus are deferred to v2; v1 implements only
+  the Title and Result screens as terminal states.
 
 ### FR-4: Audio / Music System
 
