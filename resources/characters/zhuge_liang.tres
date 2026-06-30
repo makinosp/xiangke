@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "zhuge_liang"
+name = "諸葛亮"
+type = 0
+secondary_type = 4
+hp = 85
+attack = 45
+defense = 60
+speed = 70
+intelligence = 130
+spirit = 120
+moves = PackedStringArray("wood_heal", "water_surge", "metal_slash", "earth_barrier")
+description = "The Sleeping Dragon. A brilliant strategist who commands the elements with wisdom and foresight."

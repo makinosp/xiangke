@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MoveData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/move_data.gd" id="1_move"]
+
+[resource]
+script = ExtResource("1_move")
+id = "water_surge"
+name = "水衝"
+type = 4
+power = 70
+accuracy = 100
+effect = 0
+effect_chance = 0
+stat_mod_stat = 2
+stat_mod_stage = -1
+hit_count = 1
+recoil = 0
+healing = 0
+damage_category = 1
+description = "A surge of water that slows the target. Reduces target's speed."

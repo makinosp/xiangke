@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "guan_yu"
+name = "関羽"
+type = 3
+secondary_type = -1
+hp = 120
+attack = 135
+defense = 95
+speed = 80
+intelligence = 60
+spirit = 70
+moves = PackedStringArray("metal_slash", "iron_cleave", "war_cry", "earth_barrier")
+description = "The God of War. His blade is as sharp as his loyalty, cutting through all who oppose him."
