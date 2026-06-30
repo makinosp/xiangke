@@ -3,7 +3,7 @@
 A turn-based strategy game inspired by the Romance of the Three Kingdoms, built
 with Godot Engine.
 
-![Godot Engine](https://img.shields.io/badge/Godot%20Engine-v4.3-%23478CBF?logo=godot-engine)
+![Godot Engine](https://img.shields.io/badge/Godot%20Engine-v4.7-%23478CBF?logo=godot-engine)
 ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 
 ## 📖 Overview
