@@ -1,17 +1,17 @@
-# Xiangke: Three Kingdoms Turn-Based Command Battle Game
+# Xiangke: Three Kingdoms Turn-Based Combat Game
 
-A turn-based strategy game inspired by the Romance of the Three Kingdoms, built
+A turn-based combat game inspired by the Romance of the Three Kingdoms, built
 with Godot Engine.
 
-![Godot Engine](https://img.shields.io/badge/Godot%20Engine-v4.3-%23478CBF?logo=godot-engine)
+![Godot Engine](https://img.shields.io/badge/Godot%20Engine-v4.7-%23478CBF?logo=godot-engine)
 ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 
 ## 📖 Overview
 
-Xiangke (相剋) is a turn-based command battle game set in the era of the Three
-Kingdoms. Players command legendary generals, each with unique abilities based
-on the Five Elements (五行) and Yin-Yang (陰陽) principles. Engage in strategic
-battles where elemental affinities and tactical decisions determine victory!
+Xiangke (相剋) is a turn-based combat game set in the era of the Three Kingdoms.
+Players command legendary generals, each with unique abilities based on Yin-Yang
+and the Five Elements (陰陽五行) principles. Engage in combat where elemental
+affinities and tactical decisions determine victory!
 
 ## 📁 Project Structure
 
