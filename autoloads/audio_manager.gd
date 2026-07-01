@@ -37,6 +37,9 @@ var sfx_player: AudioStreamPlayer
 
 
 func _ready() -> void:
+	# Ensure audio buses exist (create if missing)
+	_ensure_audio_buses()
+	
 	# Create audio player nodes since autoloads don't have scene children
 	bgm_player = AudioStreamPlayer.new()
 	bgm_player.name = "BGMPlayer"
@@ -51,6 +54,39 @@ func _ready() -> void:
 	_apply_save_volume()
 
 
+## Ensures the required audio buses exist.
+func _ensure_audio_buses() -> void:
+	var master_idx := AudioServer.get_bus_index(BUS_MASTER)
+	if master_idx < 0:
+		# Master bus should always exist, but check anyway
+		push_warning("AudioManager: Master bus not found")
+		return
+	
+	# Check and add BGM bus if missing
+	var bgm_idx := AudioServer.get_bus_index(BUS_BGM)
+	if bgm_idx < 0:
+		AudioServer.add_bus(master_idx + 1)
+		bgm_idx = AudioServer.get_bus_index(BUS_BGM)
+		if bgm_idx >= 0:
+			AudioServer.set_bus_name(bgm_idx, BUS_BGM)
+	
+	# Check and add SFX bus if missing
+	var sfx_idx := AudioServer.get_bus_index(BUS_SFX)
+	if sfx_idx < 0:
+		AudioServer.add_bus(master_idx + 1)
+		sfx_idx = AudioServer.get_bus_index(BUS_SFX)
+		if sfx_idx >= 0:
+			AudioServer.set_bus_name(sfx_idx, BUS_SFX)
+
+
+## Path to silent audio file for Web autoplay unlock.
+const SILENT_AUDIO_PATH: String = "res://audio/silent.ogg"
+const SILENT_AUDIO_FALLBACK: String = "res://audio/silent.wav"
+
+
+## Path to silent audio file for Web autoplay unlock.
+const SILENT_AUDIO_PATH: String = "res://audio/silent.ogg"
+
 ## Initializes audio system.
 ## Must be called from a user interaction (click) to satisfy Web autoplay policy.
 func initialize_audio() -> void:
@@ -58,9 +94,21 @@ func initialize_audio() -> void:
 		return
 
 	# Play silent sound to unlock Web Audio API
-	bgm_player.stream = AudioStreamMicrophone.new()
-	bgm_player.play()
-	bgm_player.stop()
+	var silent_stream := load(SILENT_AUDIO_PATH) as AudioStream
+	if silent_stream == null:
+		silent_stream = load(SILENT_AUDIO_FALLBACK) as AudioStream
+	
+	if silent_stream != null:
+		bgm_player.stream = silent_stream
+		bgm_player.play()
+		await bgm_player.finished
+	else:
+		# Fallback: create a silent AudioStreamGenerator
+		var generator := AudioStreamGenerator.new()
+		bgm_player.stream = generator
+		bgm_player.play()
+		await get_tree().create_timer(0.1).timeout
+		bgm_player.stop()
 
 	audio_initialized = true
 	print("AudioManager: Audio initialized")
@@ -96,7 +144,7 @@ func play_bgm(track_id: String, crossfade_duration: float = 1.0) -> void:
 	else:
 		# Fade out old track
 		var tween := create_tween()
-		tween.tween_method(_set_volume.bind(bgm_player), bgm_player.volume_db, -80.0, crossfade_duration)
+		tween.tween_method(_set_player_volume.bind(bgm_player), bgm_player.volume_db, -80.0, crossfade_duration)
 		await tween.finished
 		bgm_player.stop()
 
@@ -107,7 +155,7 @@ func play_bgm(track_id: String, crossfade_duration: float = 1.0) -> void:
 
 		# Fade in new track
 		var fade_in := create_tween()
-		fade_in.tween_method(_set_volume.bind(bgm_player), -80.0, _volume_to_db(track.volume), crossfade_duration)
+		fade_in.tween_method(_set_player_volume.bind(bgm_player), -80.0, _volume_to_db(track.volume), crossfade_duration)
 		await fade_in.finished
 
 	current_bgm = track_id
@@ -170,6 +218,9 @@ func set_master_muted(muted: bool) -> void:
 
 ## Applies saved volume settings from SaveManager.
 func _apply_save_volume() -> void:
+	# Apply current save data immediately
+	_on_save_loaded(SaveManager.current_data)
+	
 	# Connect to SaveManager signal to apply settings when save loads
 	if SaveManager.save_loaded.is_connected(_on_save_loaded):
 		return
@@ -194,6 +245,7 @@ func _set_volume_db(player: AudioStreamPlayer, bus_name: String, volume: float) 
 	player.volume_db = _volume_to_db(volume)
 
 
-## Tween helper: sets player volume.
-func _set_volume(value: float, player: AudioStreamPlayer) -> void:
+## Tween helper: sets player volume for crossfade.
+## Used with tween_method where player is bound first, then value.
+func _set_player_volume(value: float, player: AudioStreamPlayer) -> void:
 	player.volume_db = value

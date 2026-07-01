@@ -20,10 +20,12 @@ signal transition_requested(from_state: GameState, to_state: GameState)
 var current_state: GameState = GameState.TITLE
 
 ## The player's corps roster for battle preparation.
-var corps_roster: CorpsRoster = CorpsRoster.new()
+var corps_roster: RefCounted
 
 
 func _ready() -> void:
+	# Initialize corps_roster using preload to ensure class is resolved
+	corps_roster = preload("res://scripts/foundation/corps_roster.gd").new()
 	_process_state(current_state)
 
 
@@ -87,4 +89,11 @@ func _process_state(state: GameState) -> void:
 	if scene_path.is_empty():
 		push_error("GameManager: No scene path for state: %s" % GameState.keys()[state])
 		return
-	get_tree().change_scene_to_file(scene_path)
+	
+	# Use SceneTransition for animated transitions
+	var transition := get_node("/root/SceneTransitionLayer") as Node
+	if transition and transition.has_method("transition_to"):
+		transition.transition_to(scene_path)
+	else:
+		# Fallback to direct scene change if transition layer not available
+		get_tree().change_scene_to_file(scene_path)

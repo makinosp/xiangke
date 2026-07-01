@@ -16,6 +16,18 @@ extends Control
 @onready var stats_preview: Panel = $StatsPreview
 ## Reference to the character name in stats preview.
 @onready var preview_name: Label = $StatsPreview/NameLabel
+## Reference to the character type in stats preview.
+@onready var preview_type: Label = $StatsPreview/TypeLabel
+## Reference to the HP stat in stats preview.
+@onready var preview_hp: Label = $StatsPreview/HPLabel
+## Reference to the Attack stat in stats preview.
+@onready var preview_attack: Label = $StatsPreview/AttackLabel
+## Reference to the Defense stat in stats preview.
+@onready var preview_defense: Label = $StatsPreview/DefenseLabel
+## Reference to the Speed stat in stats preview.
+@onready var preview_speed: Label = $StatsPreview/SpeedLabel
+## Reference to the description in stats preview.
+@onready var preview_desc: Label = $StatsPreview/DescLabel
 
 ## Current selection phase.
 var _phase: int = 1 # 1 = Corps selection, 2 = Battle selection
@@ -52,6 +64,11 @@ func _load_characters() -> void:
 
 ## Called when a character button is pressed.
 func _on_character_pressed(char_id: String) -> void:
+	# Phase 2: only allow selection from corps_characters
+	if _phase == 2:
+		if not GameManager.corps_roster.corps_characters.has(char_id):
+			return # Cannot select character not in corps
+
 	var max_per_phase := 6 if _phase == 1 else 3
 
 	if _selected_ids.has(char_id):
@@ -66,13 +83,29 @@ func _on_character_pressed(char_id: String) -> void:
 
 ## Called when hovering over a character to show stats preview.
 func _on_character_hovered(char_id: String) -> void:
-	var char_data := DataRegistry.get_character(char_id)
+	var char_data := DataRegistry.get_character(char_id) as CharacterData
 	if char_data == null:
 		return
 
 	preview_name.text = char_data.character_name
-	# Update other stats fields in the preview panel
+	# Update stats fields
+	preview_type.text = "Type: %s" % _format_types(char_data.types)
+	preview_hp.text = "HP: %d" % char_data.base_stats.hp
+	preview_attack.text = "Attack: %d" % char_data.base_stats.attack
+	preview_defense.text = "Defense: %d" % char_data.base_stats.defense
+	preview_speed.text = "Speed: %d" % char_data.base_stats.speed
+	preview_desc.text = char_data.description if char_data.description else ""
 	stats_preview.show()
+
+
+## Formats character types for display.
+func _format_types(types: Array) -> String:
+	var result := ""
+	for i in range(min(types.size(), 2)):
+		if i > 0:
+			result += "/"
+		result += TypeEnums.Type.keys()[types[i]]
+	return result
 
 
 ## Called when the mouse exits a character button.
@@ -91,7 +124,36 @@ func _on_confirm_corps_pressed() -> void:
 	# Move to Phase 2
 	_phase = 2
 	_selected_ids.clear()
+	
+	# Clear and reload only corps characters for Phase 2
+	_character_buttons.clear()
+	for child in character_grid.get_children():
+		child.queue_free()
+	character_grid.remove_from_group("character_buttons")
+	
+	# Load only the 6 corps characters
+	_load_corps_characters()
 	_update_ui()
+
+
+## Loads only the corps characters for Phase 2 selection.
+func _load_corps_characters() -> void:
+	var corps_ids := GameManager.corps_roster.corps_characters
+	for char_id in corps_ids:
+		var char_data := DataRegistry.get_character(char_id) as CharacterData
+		if char_data == null:
+			continue
+
+		var btn := Button.new()
+		btn.text = char_data.character_name
+		btn.connect("pressed", Callable(self, "_on_character_pressed").bind(char_id))
+		btn.connect("mouse_entered", Callable(self, "_on_character_hovered").bind(char_id))
+		btn.connect("mouse_exited", Callable(self, "_on_character_hover_exit"))
+		btn.size_flags_horizontal = Control.SIZE_EXPAND
+		character_grid.add_child(btn)
+		_character_buttons.append(btn)
+
+	UIFocusManager.register_focus_group(_character_buttons)
 
 
 ## Called when the Deploy button is pressed (Phase 2 completion).

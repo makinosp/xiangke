@@ -66,3 +66,54 @@ offset_top = 10.0
 offset_right = 200.0
 offset_bottom = 40.0
 text = "Character Name"
+custom_colors/font_color = Color(1, 1, 1)
+
+[node name="TypeLabel" type="Label" parent="StatsPreview"]
+offset_left = 10.0
+offset_top = 45.0
+offset_right = 200.0
+offset_bottom = 65.0
+text = "Type: --"
+custom_colors/font_color = Color(0.8, 0.8, 0.8)
+
+[node name="HPLabel" type="Label" parent="StatsPreview"]
+offset_left = 10.0
+offset_top = 68.0
+offset_right = 180.0
+offset_bottom = 88.0
+text = "HP: --"
+custom_colors/font_color = Color(0.8, 0.8, 0.8)
+
+[node name="AttackLabel" type="Label" parent="StatsPreview"]
+offset_left = 10.0
+offset_top = 91.0
+offset_right = 180.0
+offset_bottom = 111.0
+text = "Attack: --"
+custom_colors/font_color = Color(0.8, 0.8, 0.8)
+
+[node name="DefenseLabel" type="Label" parent="StatsPreview"]
+offset_left = 10.0
+offset_top = 114.0
+offset_right = 180.0
+offset_bottom = 134.0
+text = "Defense: --"
+custom_colors/font_color = Color(0.8, 0.8, 0.8)
+
+[node name="SpeedLabel" type="Label" parent="StatsPreview"]
+offset_left = 10.0
+offset_top = 137.0
+offset_right = 180.0
+offset_bottom = 157.0
+text = "Speed: --"
+custom_colors/font_color = Color(0.8, 0.8, 0.8)
+
+[node name="DescLabel" type="Label" parent="StatsPreview"]
+offset_left = 10.0
+offset_top = 160.0
+offset_right = 200.0
+offset_bottom = 220.0
+text = "Description will appear here..."
+custom_colors/font_color = Color(0.9, 0.9, 0.9)
+lines_truncated = true
+max_lines_visible = 6
