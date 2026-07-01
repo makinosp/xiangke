@@ -35,3 +35,4 @@
 - [x] Build and Test (2026-06-29) — Unit 1
 - [x] Functional Design Unit 2 (2026-06-30)
 - [x] NFR Requirements Unit 2 (2026-06-30)
+- [x] NFR Design Unit 2 (2026-07-01)
