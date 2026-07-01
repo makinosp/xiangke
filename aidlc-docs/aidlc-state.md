@@ -36,3 +36,4 @@
 - [x] Functional Design Unit 2 (2026-06-30)
 - [x] NFR Requirements Unit 2 (2026-06-30)
 - [x] NFR Design Unit 2 (2026-07-01)
+- [x] Infrastructure Design Unit 2 (2026-07-01)
