@@ -22,12 +22,18 @@ config/icon="res://icon.svg"
 [autoload]
 
 DataRegistry="*res://autoloads/data_registry.gd"
+GameManager="*res://autoloads/game_manager.gd"
+SaveManager="*res://autoloads/save_manager.gd"
+AudioManager="*res://autoloads/audio_manager.gd"
+UIFocusManager="*res://autoloads/ui_focus_manager.gd"
+SceneTransitionLayer="*res://scenes/scene_transition_layer.tscn"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [rendering]
 

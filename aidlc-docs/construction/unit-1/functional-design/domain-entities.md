@@ -96,15 +96,15 @@ Defines the effectiveness relationships between the 7 types.
 
 ### Types
 
-| Type  | Japanese | Element        |
-| ----- | -------- | -------------- |
-| Wood  | 木       | Wood / Plant   |
-| Fire  | 火       | Fire           |
-| Earth | 土       | Earth          |
-| Metal | 金       | Metal          |
-| Water | 水       | Water          |
-| Yang  | 陽       | Light / Active |
-| Yin   | 陰       | Dark / Passive |
+| Type  | Japanese | Element |
+| ----- | -------- | ------- |
+| Wood  | 木       | Wood    |
+| Fire  | 火       | Fire    |
+| Earth | 土       | Earth   |
+| Metal | 金       | Metal   |
+| Water | 水       | Water   |
+| Yang  | 陽       | Light   |
+| Yin   | 陰       | Dark    |
 
 ### Type Effectiveness Values
 
