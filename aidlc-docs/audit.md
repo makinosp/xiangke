@@ -379,3 +379,11 @@ aidlc-docs/construction/unit-2/nfr-requirements/.
 **Timestamp**: 2026-07-01T00:02:00Z **User Input**: "承認します。Code Generation Part 2に進んでください。" **AI Response**: Code Generation plan approved. Generated all artifacts: autoloads (GameManager with state machine, SaveManager with ConfigFile/checksum, AudioManager with bus management/Web unlock, UIFocusManager with keyboard nav), core scripts (SceneTransition with CanvasLayer, TransitionConfig, CorpsRoster), UI scripts/screens (TitleScreen, CharacterSelect, ResultScreen, BattleScene placeholder), scene files (title_screen, character_select, result_screen, battle_scene, scene_transition_layer), and project.godot (autoload registrations, input map, window config). Created code summary at aidlc-docs/construction/unit-2/code/foundation-summary.md. Updated plan checkboxes and aidlc-state.md. **Context**: CONSTRUCTION PHASE - Code Generation for Unit 2: Game Foundation complete. All artifacts generated.
 
 ---
+
+---
+
+## Build and Test - Unit 2: Game Foundation (Complete)
+
+**Timestamp**: 2026-07-01T00:03:00Z **User Input**: "承認します。Build & Testに進んでください。" **AI Response**: Code Generation approved. Generated build and test instructions: build-instructions-unit2.md (Godot project setup, HTML5/Desktop export), integration-test-instructions-unit2.md (5 integration test scenarios for state machine, save, audio, focus, corps roster), performance-test-instructions-unit2.md (5 performance test scenarios for transition time, audio latency, load time, FPS, memory). Updated aidlc-state.md. **Context**: CONSTRUCTION PHASE - Build and Test for Unit 2: Game Foundation complete. Artifacts at aidlc-docs/construction/build-and-test/.
+
+---
