@@ -371,3 +371,11 @@ aidlc-docs/construction/unit-2/nfr-requirements/.
 **Timestamp**: 2026-07-01T00:01:00Z **User Input**: "回答完了。" **AI Response**: All 6 infrastructure questions answered (INF1: D Cloudflare Pages, INF2: C CI/CD + PR preview, INF3: A Local Godot, INF4: A Full bundle, INF5: A Cache-busting, INF6: B Basic error logging). Generated Infrastructure Design artifacts: infrastructure-design.md (infrastructure mapping, deployment environment, build infrastructure) and deployment-architecture.md (build pipeline, release process, runtime architecture, cache-busting). Updated plan checkboxes and aidlc-state.md. **Context**: CONSTRUCTION PHASE - Infrastructure Design for Unit 2: Game Foundation complete. Artifacts at aidlc-docs/construction/unit-2/infrastructure-design/.
 
 ---
+
+---
+
+## Code Generation - Unit 2: Game Foundation (Complete)
+
+**Timestamp**: 2026-07-01T00:02:00Z **User Input**: "承認します。Code Generation Part 2に進んでください。" **AI Response**: Code Generation plan approved. Generated all artifacts: autoloads (GameManager with state machine, SaveManager with ConfigFile/checksum, AudioManager with bus management/Web unlock, UIFocusManager with keyboard nav), core scripts (SceneTransition with CanvasLayer, TransitionConfig, CorpsRoster), UI scripts/screens (TitleScreen, CharacterSelect, ResultScreen, BattleScene placeholder), scene files (title_screen, character_select, result_screen, battle_scene, scene_transition_layer), and project.godot (autoload registrations, input map, window config). Created code summary at aidlc-docs/construction/unit-2/code/foundation-summary.md. Updated plan checkboxes and aidlc-state.md. **Context**: CONSTRUCTION PHASE - Code Generation for Unit 2: Game Foundation complete. All artifacts generated.
+
+---
