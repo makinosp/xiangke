@@ -4,15 +4,14 @@
 class_name TypeEnums
 extends Node
 
-## The seven elemental types based on 五行 (Five Elements) + 陰陽 (Yin-Yang).
 enum Type {
-	WOOD, ## Wood / Plant
-	FIRE, ## Fire
-	EARTH, ## Earth
-	METAL, ## Metal
-	WATER, ## Water
-	YANG, ## Light / Active
-	YIN ## Dark / Passive
+	WOOD,
+	FIRE,
+	EARTH,
+	METAL,
+	WATER,
+	YANG,
+	YIN
 }
 
 ## Status effect types that can be inflicted by moves.
