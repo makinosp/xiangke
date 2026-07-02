@@ -84,9 +84,6 @@ const SILENT_AUDIO_PATH: String = "res://audio/silent.ogg"
 const SILENT_AUDIO_FALLBACK: String = "res://audio/silent.wav"
 
 
-## Path to silent audio file for Web autoplay unlock.
-const SILENT_AUDIO_PATH: String = "res://audio/silent.ogg"
-
 ## Initializes audio system.
 ## Must be called from a user interaction (click) to satisfy Web autoplay policy.
 func initialize_audio() -> void:
@@ -128,7 +125,7 @@ func play_bgm(track_id: String, crossfade_duration: float = 1.0) -> void:
 	if track_id == current_bgm:
 		return # No-op if same track is already playing
 
-	var track := AUDIO_REGISTRY[track_id]
+	var track: Dictionary = AUDIO_REGISTRY[track_id]
 	var stream := load(track.path) as AudioStream
 	if stream == null:
 		push_warning("AudioManager: Failed to load BGM: %s" % track.path)
@@ -172,7 +169,7 @@ func play_sfx(track_id: String) -> void:
 		push_warning("AudioManager: Unknown SFX track: %s" % track_id)
 		return
 
-	var track := AUDIO_REGISTRY[track_id]
+	var track: Dictionary = AUDIO_REGISTRY[track_id]
 	var stream := load(track.path) as AudioStream
 	if stream == null:
 		push_warning("AudioManager: Failed to load SFX: %s" % track.path)

@@ -9,7 +9,7 @@ extends Control
 
 
 func _ready() -> void:
-	var last_won := SaveManager.current_data.get("last_battle_won", false)
+	var last_won: bool = SaveManager.current_data.get("last_battle_won", false)
 	result_label.text = "Victory!" if last_won else "Defeat..."
 	return_button.grab_focus()
 

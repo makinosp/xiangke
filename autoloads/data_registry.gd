@@ -23,7 +23,8 @@ func _ready() -> void:
 ## Uses DataLoader to discover and load all .tres files from the
 ## characters and moves directories.
 func load_all() -> void:
-	var data := DataLoader.load_all()
+	var data_loader = DataLoader.new()
+	var data: Dictionary = data_loader.load_all()
 	_characters = data["characters"]
 	_moves = data["moves"]
 	_is_loaded = true
@@ -131,5 +132,6 @@ func get_type_effectiveness_against(move_id: String, defender_id: String) -> flo
 	var defender := get_character(defender_id)
 	if defender == null:
 		return -1.0
-	return TypeChart.resolve_type_effectiveness(
+	var type_chart = TypeChart.new()
+	return type_chart.resolve_type_effectiveness(
 			move.type, defender.type, defender.secondary_type)
