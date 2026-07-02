@@ -62,21 +62,13 @@ func _ensure_audio_buses() -> void:
 		push_warning("AudioManager: Master bus not found")
 		return
 	
-	# Check and add BGM bus if missing
-	var bgm_idx := AudioServer.get_bus_index(BUS_BGM)
-	if bgm_idx < 0:
-		AudioServer.add_bus(master_idx + 1)
-		bgm_idx = AudioServer.get_bus_index(BUS_BGM)
-		if bgm_idx >= 0:
-			AudioServer.set_bus_name(bgm_idx, BUS_BGM)
-	
-	# Check and add SFX bus if missing
-	var sfx_idx := AudioServer.get_bus_index(BUS_SFX)
-	if sfx_idx < 0:
-		AudioServer.add_bus(master_idx + 1)
-		sfx_idx = AudioServer.get_bus_index(BUS_SFX)
-		if sfx_idx >= 0:
-			AudioServer.set_bus_name(sfx_idx, BUS_SFX)
+	for bus_name in [BUS_BGM, BUS_SFX]:
+		var idx := AudioServer.get_bus_index(bus_name)
+		if idx < 0:
+			var new_idx := AudioServer.get_bus_count()
+			AudioServer.add_bus()
+			AudioServer.set_bus_name(new_idx, bus_name)
+			print("AudioManager: Created bus %s at index %d" % [bus_name, new_idx])
 
 
 ## Path to silent audio file for Web autoplay unlock.
