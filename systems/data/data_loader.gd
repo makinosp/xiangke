@@ -61,10 +61,10 @@ static func create_placeholder_move(id: String) -> MoveData:
 ## Returns:
 ##   PackedStringArray of character IDs (filenames without extension).
 func discover_characters() -> PackedStringArray:
-	var ids := _discover_ids_in_dir(CHARACTERS_DIR)
+	var ids: PackedStringArray = _discover_ids_in_dir(CHARACTERS_DIR)
 	# Include DLC characters if directory exists
 	if DirAccess.dir_exists_absolute(DLC_CHARACTERS_DIR):
-		var dlc_ids := _discover_ids_in_dir(DLC_CHARACTERS_DIR)
+		var dlc_ids: PackedStringArray = _discover_ids_in_dir(DLC_CHARACTERS_DIR)
 		for dlc_id in dlc_ids:
 			if not ids.has(dlc_id):
 				ids.append(dlc_id)
@@ -76,10 +76,10 @@ func discover_characters() -> PackedStringArray:
 ## Returns:
 ##   PackedStringArray of move IDs (filenames without extension).
 func discover_moves() -> PackedStringArray:
-	var ids := _discover_ids_in_dir(MOVES_DIR)
+	var ids: PackedStringArray = _discover_ids_in_dir(MOVES_DIR)
 	# Include DLC moves if directory exists
 	if DirAccess.dir_exists_absolute(DLC_MOVES_DIR):
-		var dlc_ids := _discover_ids_in_dir(DLC_MOVES_DIR)
+		var dlc_ids: PackedStringArray = _discover_ids_in_dir(DLC_MOVES_DIR)
 		for dlc_id in dlc_ids:
 			if not ids.has(dlc_id):
 				ids.append(dlc_id)

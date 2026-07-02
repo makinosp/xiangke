@@ -85,7 +85,7 @@ func _is_valid_transition(from: GameState, to: GameState) -> bool:
 
 ## Processes the current state, typically triggering a scene change.
 func _process_state(state: GameState) -> void:
-	var scene_path := get_scene_for_state(state)
+	var scene_path: String = get_scene_for_state(state)
 	if scene_path.is_empty():
 		push_error("GameManager: No scene path for state: %s" % GameState.keys()[state])
 		return

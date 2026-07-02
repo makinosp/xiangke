@@ -27,7 +27,7 @@ func _ready() -> void:
 ##   Dictionary with loaded save data, or defaults on error.
 func load_save() -> Dictionary:
 	var config := ConfigFile.new()
-	var err := config.load(SAVE_PATH)
+	var err: Error = config.load(SAVE_PATH)
 
 	if err != OK:
 		# First launch: file does not exist
@@ -35,7 +35,7 @@ func load_save() -> Dictionary:
 		return current_data
 
 	# Validate checksum
-	var stored_checksum := config.get_value("meta", "checksum", "")
+	var stored_checksum: String = config.get_value("meta", "checksum", "")
 	var calculated_checksum := _calculate_checksum(config)
 
 	if not stored_checksum.is_empty() and stored_checksum != calculated_checksum:
@@ -76,7 +76,7 @@ func save_game(data: Dictionary = {}) -> void:
 	config.set_value("meta", "save_version", SAVE_VERSION)
 	config.set_value("meta", "checksum", _calculate_checksum(config))
 
-	var err := config.save(SAVE_PATH)
+	var err: Error = config.save(SAVE_PATH)
 	if err != OK:
 		push_warning("SaveManager: Failed to save game (error %d)" % err)
 		return
@@ -135,7 +135,7 @@ func _parse_save_data(config: ConfigFile) -> Dictionary:
 	data["last_battle_time"] = config.get_value("progress", "last_battle_time", "")
 
 	# Validate version
-	var save_version := config.get_value("meta", "save_version", 0)
+	var save_version: int = config.get_value("meta", "save_version", 0)
 	if save_version != SAVE_VERSION:
 		push_warning("SaveManager: Save version mismatch (got %d, expected %d) — resetting" % [save_version, SAVE_VERSION])
 		return _create_default_save()

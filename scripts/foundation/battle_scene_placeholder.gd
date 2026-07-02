@@ -18,7 +18,7 @@ func _ready() -> void:
 ## Called when the battle ends.
 func _on_battle_ended(won: bool) -> void:
 	# Record battle result in save data
-	var data := SaveManager.current_data.duplicate()
+	var data: Dictionary = SaveManager.current_data.duplicate()
 	data["last_battle_won"] = won
 	data["last_battle_time"] = Time.get_datetime_string_from_system()
 	SaveManager.save_game(data)
