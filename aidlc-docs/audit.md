@@ -454,3 +454,27 @@ correctly. All issues have been fixed:
 
 **Context**: CONSTRUCTION PHASE - PR Review and Fixes complete. All blocking
 issues resolved.
+
+---
+
+## Functional Design - Unit 3: Approval
+
+**Timestamp**: 2026-07-02T23:35:02Z **User Input**: "承認します。NFR
+Requirementsに進んでください。" **AI Response**: Functional Design approved for
+Unit 3: Battle System. Proceeding to NFR Requirements stage. **Context**:
+CONSTRUCTION phase - Unit 3 Functional Design Step 8/9. Approval recorded in
+audit.md and aidlc-state.md.
+
+---
+
+## NFR Requirements - Unit 3: Plan Created
+
+**Timestamp**: 2026-07-02T23:35:02Z **User Input**: (Generated NFR requirements
+plan with questions) **AI Response**: Created NFR requirements plan for Unit 3
+Battle System with 6 questions covering: max participants, turn timer, animation
+speed, battle state persistence, error handling, and debug tools. Plan stored at
+`aidlc-docs/construction/unit-3/plans/nfr-requirements-plan.md`. Awaiting user
+answers. **Context**: CONSTRUCTION phase - Unit 3 NFR Requirements Step 3/4.
+Plan saved with embedded questions.
+
+---
