@@ -16,6 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Xiangke"
 config/description="Three Kingdoms turn-based command battle game"
+run/main_scene="res://scenes/battle_scene.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
