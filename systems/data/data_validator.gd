@@ -13,7 +13,7 @@ class ValidationError:
 		code = p_code
 		message = p_message
 		context = p_context
-	func to_string() -> String:
+	func _to_string() -> String:
 		if context.is_empty():
 			return "[%s] %s" % [code, message]
 		return "[%s] %s: %s" % [code, context, message]
@@ -27,7 +27,7 @@ class ValidationWarning:
 		code = p_code
 		message = p_message
 		context = p_context
-	func to_string() -> String:
+	func _to_string() -> String:
 		if context.is_empty():
 			return "[%s] %s" % [code, message]
 		return "[%s] %s: %s" % [code, context, message]
@@ -60,11 +60,11 @@ class ValidationResult:
 		if not errors.is_empty():
 			result += "\n--- Errors (%d) ---\n" % errors.size()
 			for err in errors:
-				result += err.to_string() + "\n"
+				result += err._to_string() + "\n"
 		if not warnings.is_empty():
 			result += "\n--- Warnings (%d) ---\n" % warnings.size()
 			for warn in warnings:
-				result += warn.to_string() + "\n"
+				result += warn._to_string() + "\n"
 		result += "\nValidation complete. %d errors, %d warnings." % [
 				errors.size(), warnings.size()]
 		return result
