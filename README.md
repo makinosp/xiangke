@@ -4,7 +4,7 @@ A turn-based combat game inspired by the Romance of the Three Kingdoms, built
 with Godot Engine.
 
 ![Godot Engine](https://img.shields.io/badge/Godot%20Engine-v4.7-%23478CBF?logo=godot-engine)
-![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
+![License](https://img.shields.io/badge/License-AGPLv3-blue.svg)
 
 ## 📖 Overview
 
@@ -93,5 +93,5 @@ xiangke/
 
 ## 📜 License
 
-This project is licensed under the GNU General Public License v3.0 - see the
-[LICENSE](LICENSE) file for details.
+This project is licensed under the GNU Affero General Public License v3.0 - see
+the [LICENSE](LICENSE) file for details.
