@@ -26,7 +26,7 @@ B) Medium: 4v4 (max 8 participants)
 
 C) Large: 6v6 or more (max 12+ participants)
 
-[Answer]:
+[Answer]: A — 1vs1 only.
 
 ### Question 2: Turn Timer / Action Time Limit
 
@@ -39,7 +39,7 @@ action
 
 C) Hard limit — player must act within N seconds or skip turn
 
-[Answer]:
+[Answer]: A — No time limit for MVP.
 
 ### Question 3: Battle Animation Speed
 
@@ -52,7 +52,7 @@ B) Fast-paced — quick animations (~0.5-1s per action), minimal delay
 
 C) Standard — full animations (~1.5-2s per action), with natural pacing
 
-[Answer]:
+[Answer]: B
 
 ### Question 4: Battle State Persistence
 
@@ -62,7 +62,7 @@ A) No — battles must be completed in one session; no mid-battle saves
 
 B) Yes — allow saving mid-battle and restoring later
 
-[Answer]:
+[Answer]: A
 
 ### Question 5: Error Handling for Invalid States
 
@@ -76,7 +76,7 @@ B) Graceful fallback — log the error, skip the action, continue battle
 C) Defensive — validate all data before action execution; show user-friendly
 error message and recover
 
-[Answer]:
+[Answer]: A
 
 ### Question 6: Observability / Debug Tools
 
@@ -90,17 +90,17 @@ dealt)
 C) Full — in-game battle log + debug console with detailed calculation breakdown
 (stat values, modifiers, random variance)
 
-[Answer]:
+[Answer]: C
 
 ---
 
 ## Plan Steps
 
-- [ ] Collect and analyze user answers to NFR questions
-- [ ] Define performance requirements for the battle system
-- [ ] Define reliability and error handling requirements
-- [ ] Define maintainability and code organization conventions
-- [ ] Define usability requirements for battle pacing
-- [ ] Generate `nfr-requirements.md`
-- [ ] Generate `tech-stack-decisions.md`
+- [x] Collect and analyze user answers to NFR questions
+- [x] Define performance requirements for the battle system
+- [x] Define reliability and error handling requirements
+- [x] Define maintainability and code organization conventions
+- [x] Define usability requirements for battle pacing
+- [x] Generate `nfr-requirements.md`
+- [x] Generate `tech-stack-decisions.md`
 - [ ] Present completion message and await approval

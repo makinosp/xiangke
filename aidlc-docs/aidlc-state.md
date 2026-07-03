@@ -39,4 +39,4 @@
 - [x] Infrastructure Design Unit 2 (2026-07-01)
 - [x] Code Generation Unit 2 (2026-07-01)
 - [x] Functional Design Unit 3 (2026-07-02)
-- [ ] NFR Requirements Unit 3
+- [x] NFR Requirements Unit 3 (2026-07-03)
