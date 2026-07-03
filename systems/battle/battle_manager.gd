@@ -1,4 +1,4 @@
-## BattleManager class.
+  ## BattleManager class.
 ## Manages the turn loop, initiative calculation, and turn queue generation.
 class_name BattleManager
 extends RefCounted
@@ -36,7 +36,7 @@ static func calculate_turn_queue(state: BattleState) -> Array[int]:
 	entries.shuffle()
 
 	# Sort by speed descending (stable sort preserves shuffle for ties)
-	entries.sort_cu(_compare_speed_descending)
+	entries.sort_custom(_compare_speed_descending)
 
 	var queue: Array[int] = []
 	for entry: Dictionary in entries:

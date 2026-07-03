@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://d1n4b2jo25xp0"]
 
-[ext_resource type="Script" path="res://scripts/foundation/battle_scene.gd" id="1_wd6yu"]
+[ext_resource type="Script" uid="uid://ditdl3sfqrpht" path="res://scripts/foundation/battle_scene.gd" id="1_wd6yu"]
 
 [node name="BattleScene" type="Control" unique_id=2115787393]
 layout_mode = 3
@@ -18,7 +18,6 @@ anchor_top = 0.02
 anchor_right = 0.5
 anchor_bottom = 0.02
 offset_left = -300.0
-offset_top = 0.0
 offset_right = 300.0
 offset_bottom = 40.0
 grow_horizontal = 2
@@ -27,7 +26,7 @@ text = "Battle!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PlayerHPContainer" type="HBoxContainer" parent="."]
+[node name="PlayerHPContainer" type="HBoxContainer" parent="." unique_id=1680800554]
 layout_mode = 0
 anchor_left = 0.02
 anchor_top = 0.1
@@ -37,7 +36,7 @@ offset_bottom = 30.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="EnemyHPContainer" type="HBoxContainer" parent="."]
+[node name="EnemyHPContainer" type="HBoxContainer" parent="." unique_id=1365237612]
 layout_mode = 0
 anchor_left = 0.52
 anchor_top = 0.1
@@ -47,7 +46,7 @@ offset_bottom = 30.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ActionContainer" type="VBoxContainer" parent="."]
+[node name="ActionContainer" type="VBoxContainer" parent="." unique_id=1971235323]
 layout_mode = 0
 anchor_left = 0.02
 anchor_top = 0.75
@@ -56,7 +55,7 @@ anchor_bottom = 0.95
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="MoveContainer" type="VBoxContainer" parent="."]
+[node name="MoveContainer" type="VBoxContainer" parent="." unique_id=1878473471]
 layout_mode = 0
 anchor_left = 0.35
 anchor_top = 0.85
@@ -65,7 +64,7 @@ anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BattleLog" type="RichTextLabel" parent="."]
+[node name="BattleLog" type="RichTextLabel" parent="." unique_id=1437781952]
 layout_mode = 0
 anchor_left = 0.02
 anchor_top = 0.2
@@ -74,5 +73,3 @@ anchor_bottom = 0.4
 grow_horizontal = 2
 grow_vertical = 2
 bbcode_enabled = true
-text = ""
-scroll_active = true

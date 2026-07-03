@@ -55,7 +55,7 @@ func start_battle(
 	battle_state = BattleState.create(player_participants, enemy_participants)
 
 	# Start the battle
-	var started := BattleManager.start_battle(battle_state)
+	var started = BattleManager.start_battle(battle_state)
 	if not started:
 		push_error("BattleFlowService: failed to start battle")
 		return false
@@ -93,11 +93,11 @@ func run_battle_loop() -> void:
 		await get_tree().process_frame
 
 		# Request action: AI for enemies, signal for player
-		var action_result: ActionSystem.ActionResult? = null
+		var action_result: ActionSystem.ActionResult = null
 		var target: BattleParticipant = null
 
 		if current_participant.team == BattleParticipant.Team.ENEMY:
-			var action: Dictionary? = _get_ai_action(current_participant)
+			var action: Dictionary = _get_ai_action(current_participant)
 			if action == null:
 				# AI skipped turn (e.g., confused and hit self)
 				action_result = ActionSystem.ActionResult.new()
@@ -139,7 +139,7 @@ func execute_player_action(move: MoveData, target: BattleParticipant) -> ActionS
 	assert(move != null, "BattleFlowService: move must not be null")
 	assert(target != null, "BattleFlowService: target must not be null")
 
-	var participant: BattleParticipant = battle_state.active_participant
+	var participant = battle_state.active_participant as BattleParticipant
 	assert(participant != null, "BattleFlowService: no active participant")
 	assert(participant.team == BattleParticipant.Team.PLAYER,
 			"BattleFlowService: cannot execute player action for enemy team")
@@ -171,13 +171,13 @@ func get_enemy_participants() -> Array[BattleParticipant]:
 # --- Private members ---
 
 var _has_pending_action: bool = false
-var _pending_action_result: ActionSystem.ActionResult? = null
+var _pending_action_result: ActionSystem.ActionResult = null
 var _pending_target: BattleParticipant = null
 
 
 ## Waits for the player to provide an action via execute_player_action().
 ## This is a non-static method that yields until player input is received.
-func _wait_for_player_action() -> ActionSystem.ActionResult?:
+func _wait_for_player_action() -> ActionSystem.ActionResult:
 	# Yield until player provides an action
 	while not _has_pending_action and not _should_stop:
 		await get_tree().process_frame
@@ -203,14 +203,14 @@ func _wait_for_player_action() -> ActionSystem.ActionResult?:
 ##
 ## Returns:
 ##   Dictionary with "move" (MoveData) and "target" (BattleParticipant) keys, or null.
-func _get_ai_action(participant: BattleParticipant) -> Dictionary?:
+func _get_ai_action(participant: BattleParticipant) -> Dictionary:
 	assert(participant != null, "BattleFlowService: participant must not be null")
 	assert(participant.team == BattleParticipant.Team.ENEMY,
 			"BattleFlowService: AI action requested for non-enemy participant")
 
 	# Cannot act if no battle state
 	if battle_state == null:
-		return null
+		return {}
 
 	var target: BattleParticipant = _find_weakest_enemy(participant)
 	var move: MoveData = _select_best_move(participant, target)
@@ -219,15 +219,15 @@ func _get_ai_action(participant: BattleParticipant) -> Dictionary?:
 		# Fallback: use first move on first target
 		var enemy_participants: Array[BattleParticipant] = battle_state.get_player_participants()
 		if enemy_participants.is_empty():
-			return null
+			return {}
 
 		target = enemy_participants[0]
 		var move_id: String = participant.character_data.moves[0] if not participant.character_data.moves.is_empty() else ""
 		if move_id.is_empty():
-			return null
+			return {}
 		move = DataRegistry.get_move(move_id)
 		if move == null:
-			return null
+			return {}
 
 	return {"move": move, "target": target}
 
