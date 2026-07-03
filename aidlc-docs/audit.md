@@ -611,3 +611,57 @@ Build and Test. All artifacts in `systems/battle/` and
 `scripts/foundation/battle_scene.gd`.
 
 ---
+
+## Build and Test - Unit 3: Battle System (Complete)
+
+**Timestamp**: 2026-07-03T04:50:00Z **User Input**: "Build and
+Testを開始してください。" **AI Response**: Build and Test for Unit 3: Battle
+System complete. Generated the following instruction files in
+`aidlc-docs/construction/build-and-test/`:
+
+### Instruction Files Created:
+
+1. **`build-instructions-unit3.md`** — Step-by-step build and export
+   instructions for the battle system. Covers Godot editor setup, file
+   verification, run flow (Title → Character Select → Deploy → Battle),
+   HTML5/Desktop export commands, and troubleshooting guide.
+
+2. **`unit-test-instructions-unit3.md`** — 14 unit test scenarios (UT-1 through
+   UT-14) covering: BattleParticipant creation/validation, stat stage modifiers
+   (clamping to [-6,+6], multiplier calculation), physical/arts damage formulas,
+   type effectiveness (super-effective 2.0×, not-very-effective 0.5×), dual-type
+   effectiveness (product clamped to [0.25,4.0]), STAB (1.2×), accuracy checks,
+   recoil damage, healing moves, BattleState win/loss/draw evaluation,
+   BattleManager turn queue (speed-based descending), and skip defeated
+   participants.
+
+3. **`integration-test-instructions-unit3.md`** — 10 integration test scenarios
+   (IT-1 through IT-10) covering: full battle loop, type effectiveness in real
+   combat, STAB integration, stat stage persistence across turns, AI action
+   selection (weakest target + best move scoring), turn order recalculation each
+   round, battle end conditions (victory/defeat/draw at 50 turns), save data
+   integration, UI integration (move selection/targeting/cancel/wait), and
+   battle log display.
+
+4. **`performance-test-instructions-unit3.md`** — 8 performance test scenarios
+   (PT-1 through PT-8) with targets: turn processing <100ms, damage calculation
+   <10ms, battle scene load <500ms, frame rate ≥30 FPS (Web) / ≥60 FPS
+   (Desktop), memory <10MB, animation pacing 0.5–1s per action, turn queue
+   calculation <5ms (O(n log n)), type chart lookup <0.1ms (O(1)).
+
+5. **`build-and-test-summary-unit3.md`** — Quick reference summary of all build
+   and test instructions, including test status table (14 unit tests, 10
+   integration tests, 8 performance tests — all documented and ready for
+   execution), running instructions (manual via Godot editor, automated via
+   headless mode, export testing for Web), and next steps.
+
+### Updated State:
+
+- `aidlc-state.md` updated to mark Build and Test Unit 3 as complete
+- Current stage: CONSTRUCTION - Build and Test Unit 3 (Complete)
+
+**Context**: CONSTRUCTION phase - Build and Test Unit 3 complete. All
+instruction files generated at `aidlc-docs/construction/build-and-test/`. Unit
+3: Battle System is now fully implemented and documented.
+
+---
