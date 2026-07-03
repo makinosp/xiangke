@@ -98,6 +98,17 @@ removed; all data is now client-side only.
 
 ---
 
+## Code Generation - Planning
+
+**Timestamp**: 2026-07-03T04:35:00Z **User Input**: "おや？ AI-DLC
+Workflowsによると、成果物をファイルにするように求められていませんか？" **AI
+Response**: Acknowledged the error. Created
+`aidlc-docs/construction/unit-3/plans/code-generation-plan.md` to formalize the
+plan as required by the workflow. **Context**: CONSTRUCTION phase - Code
+Generation Step 3 (Planning). Corrected documentation practice.
+
+---
+
 ---
 
 ## Application Design - Complete
@@ -454,3 +465,203 @@ correctly. All issues have been fixed:
 
 **Context**: CONSTRUCTION PHASE - PR Review and Fixes complete. All blocking
 issues resolved.
+
+---
+
+## Functional Design - Unit 3: Approval
+
+**Timestamp**: 2026-07-02T23:35:02Z **User Input**: "承認します。NFR
+Requirementsに進んでください。" **AI Response**: Functional Design approved for
+Unit 3: Battle System. Proceeding to NFR Requirements stage. **Context**:
+CONSTRUCTION phase - Unit 3 Functional Design Step 8/9. Approval recorded in
+audit.md and aidlc-state.md.
+
+---
+
+## NFR Requirements - Unit 3: Plan Created
+
+**Timestamp**: 2026-07-02T23:35:02Z **User Input**: (Generated NFR requirements
+plan with questions) **AI Response**: Created NFR requirements plan for Unit 3
+Battle System with 6 questions covering: max participants, turn timer, animation
+speed, battle state persistence, error handling, and debug tools. Plan stored at
+`aidlc-docs/construction/unit-3/plans/nfr-requirements-plan.md`. Awaiting user
+answers. **Context**: CONSTRUCTION phase - Unit 3 NFR Requirements Step 3/4.
+Plan saved with embedded questions.
+
+---
+
+## NFR Requirements - Unit 3: Complete
+
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**:
+"残りの質問の回答はファイルに書きました。" and
+"ファイルに記述する際は英語で記述してください。" **AI Response**: All NFR
+questions answered. Generated NFR requirements artifacts in English:
+nfr-requirements.md (10 NFR categories) and tech-stack-decisions.md (tech stack
+decisions). Updated plan checkboxes and aidlc-state.md. **Context**:
+CONSTRUCTION phase - Unit 3 NFR Requirements Step 6/9. All artifacts generated
+at aidlc-docs/construction/unit-3/nfr-requirements/.
+
+## NFR Requirements - Unit 3: Approval
+
+**Timestamp**: 2026-07-03T01:45:51Z **User Input**: "承認します。NFR
+Designに進んでください。" **AI Response**: NFR Requirements approved for Unit 3:
+Battle System. Proceeding to NFR Design stage. **Context**: CONSTRUCTION phase -
+Unit 3 NFR Requirements Step 8/9. Approval recorded in audit.md and
+aidlc-state.md.
+
+## NFR Design - Unit 3: Complete
+
+**Timestamp**: 2026-07-03T01:56:06Z **User Input**:
+"回答を完了します。次に進んでください。" **AI Response**: All NFR design
+questions answered. Generated NFR design artifacts: nfr-design-patterns.md
+(design patterns) and logical-components.md (logical components). Updated plan
+checkboxes and aidlc-state.md. **Context**: CONSTRUCTION phase - Unit 3 NFR
+Design Step 6/9. All artifacts generated at
+aidlc-docs/construction/unit-3/nfr-design/.
+
+## NFR Design - Unit 3: Approval
+
+**Timestamp**: 2026-07-03T01:57:13Z **User Input**:
+"承認します。次のフェーズに進んでください。" **AI Response**: NFR Design
+approved for Unit 3: Battle System. Proceeding to Infrastructure Design stage.
+**Context**: CONSTRUCTION phase - Unit 3 NFR Design Step 8/9. Approval recorded
+in audit.md and aidlc-state.md.
+
+---
+
+## Infrastructure Design - Unit 3: Resources Module (Complete)
+
+**Timestamp**: 2026-07-03T12:00:00Z **User Input**: "Using AI-DLC,
+承認します。Infrastructure Design に進んでください。" **AI Response**: All
+infrastructure design questions answered. Generated Infrastructure Design
+artifacts in English: infrastructure-design.md (infrastructure mapping, data
+storage strategy, API design, deployment considerations) and
+deployment-architecture.md (build pipeline integration, Web export
+configuration, CDN considerations). Updated plan checkboxes and aidlc-state.md.
+**Context**: CONSTRUCTION phase - Unit 3 Infrastructure Design Step 6/9
+complete. All artifacts generated at
+aidlc-docs/construction/unit-3/infrastructure-design/. Artifacts:
+infrastructure-design.md, deployment-architecture.md.
+
+---
+
+---
+
+## Code Generation - Unit 3: Battle System (Complete)
+
+**Timestamp**: 2026-07-03T04:35:00Z **User Input**: "承認します。Part 2:
+Generationに進んでください。" **AI Response**: Code Generation for Unit 3:
+Battle System complete. Generated the following artifacts with strict type
+safety throughout:
+
+### New Files Created:
+
+1. **`systems/battle/battle_participant.gd`** — `BattleParticipant` class
+   (RefCounted with `class_name`), wraps `CharacterData` with runtime state
+   (current_hp, stat_stages, status effects). Static factory `create()` with
+   input validation. Stage modifier system (-6 to +6) with multiplier
+   calculation. Stateless damage/heal methods with bounds checking.
+
+2. **`systems/battle/battle_state.gd`** — `BattleState` class with `Status` enum
+   (ACTIVE, VICTORY, DEFEAT, DRAW, ESCAPED). Manages participants, turn queue,
+   combat log. Win/loss/draw evaluation. MAX_TURNS=50 constant. Type-safe
+   participant filtering.
+
+3. **`systems/battle/action_system.gd`** — `ActionSystem` class with
+   `ActionResult` inner class. Damage formula: `(atk × power × 0.8) / def` with
+   STAB (1.2×), type effectiveness (via TypeChart), stat stage modifiers, random
+   variance (0.85-1.0). Accuracy/effect chance checks. Recoil, healing, and
+   status effect application.
+
+4. **`systems/battle/battle_manager.gd`** — `BattleManager` class with
+   initiative calculation (Speed-based descending with shuffle tie-breaking),
+   round management, turn advancement (skips defeated participants).
+
+5. **`systems/battle/battle_flow_service.gd`** — `BattleFlowService` (Node-based
+   for signals). Full battle loop orchestration with
+   turn_started/action_executed/participant_defeated/battle_ended/log_updated
+   signals. AI action selection (weakest target, best move with type
+   effectiveness scoring).
+
+6. **`scripts/foundation/battle_scene.gd`** — Full battle scene script with move
+   selection, target selection, HP display, battle log, enemy AI integration,
+   and result save/transition.
+
+### Modified Files:
+
+7. **`scenes/battle_scene.tscn`** — Replaced placeholder with full scene
+   structure (StatusLabel, PlayerHPContainer, EnemyHPContainer, ActionContainer,
+   MoveContainer, BattleLog RichTextLabel).
+
+### Type Safety Measures:
+
+- All function parameters and return values explicitly typed
+- All member variables explicitly typed
+- `assert()` for input validation (NFR-3.1 fail-fast)
+- `TypeEnums` used throughout (no magic numbers)
+- `CharacterData`/`MoveData`/`StatusEffectData` used as strong types
+- `BattleParticipant.Team` enum for team affiliation
+- `BattleState.Status` enum for battle outcome
+
+### Plan Status:
+
+All 4 sections and all sub-items completed in code-generation-plan.md.
+**Context**: CONSTRUCTION phase - Code Generation Unit 3 complete. Next stage:
+Build and Test. All artifacts in `systems/battle/` and
+`scripts/foundation/battle_scene.gd`.
+
+---
+
+## Build and Test - Unit 3: Battle System (Complete)
+
+**Timestamp**: 2026-07-03T04:50:00Z **User Input**: "Build and
+Testを開始してください。" **AI Response**: Build and Test for Unit 3: Battle
+System complete. Generated the following instruction files in
+`aidlc-docs/construction/build-and-test/`:
+
+### Instruction Files Created:
+
+1. **`build-instructions-unit3.md`** — Step-by-step build and export
+   instructions for the battle system. Covers Godot editor setup, file
+   verification, run flow (Title → Character Select → Deploy → Battle),
+   HTML5/Desktop export commands, and troubleshooting guide.
+
+2. **`unit-test-instructions-unit3.md`** — 14 unit test scenarios (UT-1 through
+   UT-14) covering: BattleParticipant creation/validation, stat stage modifiers
+   (clamping to [-6,+6], multiplier calculation), physical/arts damage formulas,
+   type effectiveness (super-effective 2.0×, not-very-effective 0.5×), dual-type
+   effectiveness (product clamped to [0.25,4.0]), STAB (1.2×), accuracy checks,
+   recoil damage, healing moves, BattleState win/loss/draw evaluation,
+   BattleManager turn queue (speed-based descending), and skip defeated
+   participants.
+
+3. **`integration-test-instructions-unit3.md`** — 10 integration test scenarios
+   (IT-1 through IT-10) covering: full battle loop, type effectiveness in real
+   combat, STAB integration, stat stage persistence across turns, AI action
+   selection (weakest target + best move scoring), turn order recalculation each
+   round, battle end conditions (victory/defeat/draw at 50 turns), save data
+   integration, UI integration (move selection/targeting/cancel/wait), and
+   battle log display.
+
+4. **`performance-test-instructions-unit3.md`** — 8 performance test scenarios
+   (PT-1 through PT-8) with targets: turn processing <100ms, damage calculation
+   <10ms, battle scene load <500ms, frame rate ≥30 FPS (Web) / ≥60 FPS
+   (Desktop), memory <10MB, animation pacing 0.5–1s per action, turn queue
+   calculation <5ms (O(n log n)), type chart lookup <0.1ms (O(1)).
+
+5. **`build-and-test-summary-unit3.md`** — Quick reference summary of all build
+   and test instructions, including test status table (14 unit tests, 10
+   integration tests, 8 performance tests — all documented and ready for
+   execution), running instructions (manual via Godot editor, automated via
+   headless mode, export testing for Web), and next steps.
+
+### Updated State:
+
+- `aidlc-state.md` updated to mark Build and Test Unit 3 as complete
+- Current stage: CONSTRUCTION - Build and Test Unit 3 (Complete)
+
+**Context**: CONSTRUCTION phase - Build and Test Unit 3 complete. All
+instruction files generated at `aidlc-docs/construction/build-and-test/`. Unit
+3: Battle System is now fully implemented and documented.
+
+---

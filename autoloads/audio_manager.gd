@@ -124,7 +124,7 @@ func play_bgm(track_id: String, crossfade_duration: float = 1.0) -> void:
 		return
 
 	# Crossfade: fade out current, fade in new
-	var old_player := bgm_player
+	var _old_player := bgm_player
 	if current_bgm.is_empty():
 		# Direct play when no current BGM
 		bgm_player.stream = stream
@@ -230,7 +230,7 @@ func _volume_to_db(value: float) -> float:
 
 
 ## Sets the volume on an AudioStreamPlayer using bus volume as reference.
-func _set_volume_db(player: AudioStreamPlayer, bus_name: String, volume: float) -> void:
+func _set_volume_db(player: AudioStreamPlayer, _bus_name: String, volume: float) -> void:
 	player.volume_db = _volume_to_db(volume)
 
 
