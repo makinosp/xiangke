@@ -22,6 +22,9 @@ var _is_running: bool = false
 ## Whether the battle loop should stop.
 var _should_stop: bool = false
 
+## Holds the most recent player action target (set by UI)
+var _last_player_target: BattleParticipant = null
+
 
 ## Initializes and starts a new battle.
 ##
@@ -109,26 +112,8 @@ func run_battle_loop() -> void:
 			# After waiting, check if battle should stop
 			if _should_stop:
 				return
-
-		if action_result != null and target != null:
-			emit_signal("action_executed", action_result, current_participant, target)
-			emit_signal("log_updated", action_result.log_message)
-			battle_state.add_log(action_result.log_message)
-
-			# Check if target was defeated
-			if target.is_defeated:
-				emit_signal("participant_defeated", target)
-				battle_state.add_log("%s is defeated!" % target.character_data.name)
-
-			# Check win/loss after action
-			if battle_state.evaluate_battle_status():
-				emit_signal("action_executed", action_result, current_participant, target)
-				_end_battle()
-				return
-
-		# Process end-of-turn effects (DoT, status duration)
-		_process_end_of_turn(current_participant)
-
+                        # Retrieve the target that was set by execute_player_action()
+                        target = _pending_target
 		# Advance to next turn
 		var has_next: bool = BattleManager.advance_to_next_turn(battle_state)
 		if not has_next:
@@ -191,10 +176,24 @@ var _pending_target: BattleParticipant = null
 
 
 ## Waits for the player to provide an action via execute_player_action().
-static func _wait_for_player_action() -> ActionResult:
-	# Placeholder — will be yield-based in actual implementation
-	# For now, return null and rely on game loop integration
-	return null
+## This is a non-static method that yields until player input is received.
+func _wait_for_player_action() -> ActionResult:
+	# Yield until player provides an action
+	while not _has_pending_action and not _should_stop:
+		await get_tree().process_frame
+	
+	if _should_stop:
+		return null
+	
+	# Retrieve and clear the pending action
+	var result := _pending_action_result
+	var target := _pending_target
+	
+	_has_pending_action = false
+	_pending_action_result = null
+	_pending_target = null
+	
+	return result
 
 
 ## Gets an AI-controlled action for an enemy participant.

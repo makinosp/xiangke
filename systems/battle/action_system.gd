@@ -118,6 +118,11 @@ static func calculate_damage(
 		if result.is_immune:
 			final_damage = 0
 
+		# --- Critical hit ---
+		if randi() % 100 < 6: # 6% critical hit chance
+			result.critical_hit = true
+			final_damage = int(final_damage * 1.5) # 1.5x damage
+
 		result.damage_dealt = defender.take_damage(final_damage)
 
 		# --- Recoil ---
