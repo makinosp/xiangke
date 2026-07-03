@@ -547,18 +547,67 @@ infrastructure-design.md, deployment-architecture.md.
 
 ---
 
-## Infrastructure Design - Unit 3: Resources Module (Complete)
+## Code Generation - Unit 3: Battle System (Complete)
 
-**Timestamp**: 2026-07-03T02:13:39Z **User Input**: "Using AI-DLC,
-承認します。Infrastructure Design に進んでください。" **AI Response**: All
-infrastructure design questions answered. Generated Infrastructure Design
-artifacts in English: infrastructure-design.md (infrastructure mapping, data
-storage strategy, API design, deployment considerations) and
-deployment-architecture.md (build pipeline integration, Web export
-configuration, CDN considerations). Updated plan checkboxes and aidlc-state.md.
-**Context**: CONSTRUCTION phase - Unit 3 Infrastructure Design Step 6/9
-complete. All artifacts generated at
-aidlc-docs/construction/unit-3/infrastructure-design/. Artifacts:
-infrastructure-design.md, deployment-architecture.md.
+**Timestamp**: 2026-07-03T04:35:00Z **User Input**: "承認します。Part 2:
+Generationに進んでください。" **AI Response**: Code Generation for Unit 3:
+Battle System complete. Generated the following artifacts with strict type
+safety throughout:
+
+### New Files Created:
+
+1. **`systems/battle/battle_participant.gd`** — `BattleParticipant` class
+   (RefCounted with `class_name`), wraps `CharacterData` with runtime state
+   (current_hp, stat_stages, status effects). Static factory `create()` with
+   input validation. Stage modifier system (-6 to +6) with multiplier
+   calculation. Stateless damage/heal methods with bounds checking.
+
+2. **`systems/battle/battle_state.gd`** — `BattleState` class with `Status` enum
+   (ACTIVE, VICTORY, DEFEAT, DRAW, ESCAPED). Manages participants, turn queue,
+   combat log. Win/loss/draw evaluation. MAX_TURNS=50 constant. Type-safe
+   participant filtering.
+
+3. **`systems/battle/action_system.gd`** — `ActionSystem` class with
+   `ActionResult` inner class. Damage formula: `(atk × power × 0.8) / def` with
+   STAB (1.2×), type effectiveness (via TypeChart), stat stage modifiers, random
+   variance (0.85-1.0). Accuracy/effect chance checks. Recoil, healing, and
+   status effect application.
+
+4. **`systems/battle/battle_manager.gd`** — `BattleManager` class with
+   initiative calculation (Speed-based descending with shuffle tie-breaking),
+   round management, turn advancement (skips defeated participants).
+
+5. **`systems/battle/battle_flow_service.gd`** — `BattleFlowService` (Node-based
+   for signals). Full battle loop orchestration with
+   turn_started/action_executed/participant_defeated/battle_ended/log_updated
+   signals. AI action selection (weakest target, best move with type
+   effectiveness scoring).
+
+6. **`scripts/foundation/battle_scene.gd`** — Full battle scene script with move
+   selection, target selection, HP display, battle log, enemy AI integration,
+   and result save/transition.
+
+### Modified Files:
+
+7. **`scenes/battle_scene.tscn`** — Replaced placeholder with full scene
+   structure (StatusLabel, PlayerHPContainer, EnemyHPContainer, ActionContainer,
+   MoveContainer, BattleLog RichTextLabel).
+
+### Type Safety Measures:
+
+- All function parameters and return values explicitly typed
+- All member variables explicitly typed
+- `assert()` for input validation (NFR-3.1 fail-fast)
+- `TypeEnums` used throughout (no magic numbers)
+- `CharacterData`/`MoveData`/`StatusEffectData` used as strong types
+- `BattleParticipant.Team` enum for team affiliation
+- `BattleState.Status` enum for battle outcome
+
+### Plan Status:
+
+All 4 sections and all sub-items completed in code-generation-plan.md.
+**Context**: CONSTRUCTION phase - Code Generation Unit 3 complete. Next stage:
+Build and Test. All artifacts in `systems/battle/` and
+`scripts/foundation/battle_scene.gd`.
 
 ---
