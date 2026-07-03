@@ -98,6 +98,17 @@ removed; all data is now client-side only.
 
 ---
 
+## Code Generation - Planning
+
+**Timestamp**: 2026-07-03T04:35:00Z **User Input**: "おや？ AI-DLC
+Workflowsによると、成果物をファイルにするように求められていませんか？" **AI
+Response**: Acknowledged the error. Created
+`aidlc-docs/construction/unit-3/plans/code-generation-plan.md` to formalize the
+plan as required by the workflow. **Context**: CONSTRUCTION phase - Code
+Generation Step 3 (Planning). Corrected documentation practice.
+
+---
+
 ---
 
 ## Application Design - Complete
@@ -481,46 +492,73 @@ Plan saved with embedded questions.
 
 ## NFR Requirements - Unit 3: Complete
 
-**Timestamp**: 2026-07-03T00:00:00Z
-**User Input**: "残りの質問の回答はファイルに書きました。" and "ファイルに記述する際は英語で記述してください。"
-**AI Response**: All NFR questions answered. Generated NFR requirements artifacts in English: nfr-requirements.md (10 NFR categories) and tech-stack-decisions.md (tech stack decisions). Updated plan checkboxes and aidlc-state.md.
-**Context**: CONSTRUCTION phase - Unit 3 NFR Requirements Step 6/9. All artifacts generated at aidlc-docs/construction/unit-3/nfr-requirements/.
-
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**:
+"残りの質問の回答はファイルに書きました。" and
+"ファイルに記述する際は英語で記述してください。" **AI Response**: All NFR
+questions answered. Generated NFR requirements artifacts in English:
+nfr-requirements.md (10 NFR categories) and tech-stack-decisions.md (tech stack
+decisions). Updated plan checkboxes and aidlc-state.md. **Context**:
+CONSTRUCTION phase - Unit 3 NFR Requirements Step 6/9. All artifacts generated
+at aidlc-docs/construction/unit-3/nfr-requirements/.
 
 ## NFR Requirements - Unit 3: Approval
-**Timestamp**: 2026-07-03T01:45:51Z
-**User Input**: "承認します。NFR Designに進んでください。"
-**AI Response**: NFR Requirements approved for Unit 3: Battle System. Proceeding to NFR Design stage.
-**Context**: CONSTRUCTION phase - Unit 3 NFR Requirements Step 8/9. Approval recorded in audit.md and aidlc-state.md.
 
+**Timestamp**: 2026-07-03T01:45:51Z **User Input**: "承認します。NFR
+Designに進んでください。" **AI Response**: NFR Requirements approved for Unit 3:
+Battle System. Proceeding to NFR Design stage. **Context**: CONSTRUCTION phase -
+Unit 3 NFR Requirements Step 8/9. Approval recorded in audit.md and
+aidlc-state.md.
 
 ## NFR Design - Unit 3: Complete
 
-**Timestamp**: 2026-07-03T01:56:06Z
-**User Input**: "回答を完了します。次に進んでください。"
-**AI Response**: All NFR design questions answered. Generated NFR design artifacts: nfr-design-patterns.md (design patterns) and logical-components.md (logical components). Updated plan checkboxes and aidlc-state.md.
-**Context**: CONSTRUCTION phase - Unit 3 NFR Design Step 6/9. All artifacts generated at aidlc-docs/construction/unit-3/nfr-design/.
-
+**Timestamp**: 2026-07-03T01:56:06Z **User Input**:
+"回答を完了します。次に進んでください。" **AI Response**: All NFR design
+questions answered. Generated NFR design artifacts: nfr-design-patterns.md
+(design patterns) and logical-components.md (logical components). Updated plan
+checkboxes and aidlc-state.md. **Context**: CONSTRUCTION phase - Unit 3 NFR
+Design Step 6/9. All artifacts generated at
+aidlc-docs/construction/unit-3/nfr-design/.
 
 ## NFR Design - Unit 3: Approval
-**Timestamp**: 2026-07-03T01:57:13Z
-**User Input**: "承認します。次のフェーズに進んでください。"
-**AI Response**: NFR Design approved for Unit 3: Battle System. Proceeding to Infrastructure Design stage.
-**Context**: CONSTRUCTION phase - Unit 3 NFR Design Step 8/9. Approval recorded in audit.md and aidlc-state.md.
 
-
----
-
-## Infrastructure Design - Unit 3: Resources Module (Complete)
-
-**Timestamp**: 2026-07-03T12:00:00Z **User Input**: "Using AI-DLC, 承認します。Infrastructure Design に進んでください。" **AI Response**: All infrastructure design questions answered. Generated Infrastructure Design artifacts in English: infrastructure-design.md (infrastructure mapping, data storage strategy, API design, deployment considerations) and deployment-architecture.md (build pipeline integration, Web export configuration, CDN considerations). Updated plan checkboxes and aidlc-state.md. **Context**: CONSTRUCTION phase - Unit 3 Infrastructure Design Step 6/9 complete. All artifacts generated at aidlc-docs/construction/unit-3/infrastructure-design/. Artifacts: infrastructure-design.md, deployment-architecture.md.
-
----
+**Timestamp**: 2026-07-03T01:57:13Z **User Input**:
+"承認します。次のフェーズに進んでください。" **AI Response**: NFR Design
+approved for Unit 3: Battle System. Proceeding to Infrastructure Design stage.
+**Context**: CONSTRUCTION phase - Unit 3 NFR Design Step 8/9. Approval recorded
+in audit.md and aidlc-state.md.
 
 ---
 
 ## Infrastructure Design - Unit 3: Resources Module (Complete)
 
-**Timestamp**: 2026-07-03T02:13:39Z **User Input**: "Using AI-DLC, 承認します。Infrastructure Design に進んでください。" **AI Response**: All infrastructure design questions answered. Generated Infrastructure Design artifacts in English: infrastructure-design.md (infrastructure mapping, data storage strategy, API design, deployment considerations) and deployment-architecture.md (build pipeline integration, Web export configuration, CDN considerations). Updated plan checkboxes and aidlc-state.md. **Context**: CONSTRUCTION phase - Unit 3 Infrastructure Design Step 6/9 complete. All artifacts generated at aidlc-docs/construction/unit-3/infrastructure-design/. Artifacts: infrastructure-design.md, deployment-architecture.md.
+**Timestamp**: 2026-07-03T12:00:00Z **User Input**: "Using AI-DLC,
+承認します。Infrastructure Design に進んでください。" **AI Response**: All
+infrastructure design questions answered. Generated Infrastructure Design
+artifacts in English: infrastructure-design.md (infrastructure mapping, data
+storage strategy, API design, deployment considerations) and
+deployment-architecture.md (build pipeline integration, Web export
+configuration, CDN considerations). Updated plan checkboxes and aidlc-state.md.
+**Context**: CONSTRUCTION phase - Unit 3 Infrastructure Design Step 6/9
+complete. All artifacts generated at
+aidlc-docs/construction/unit-3/infrastructure-design/. Artifacts:
+infrastructure-design.md, deployment-architecture.md.
+
+---
+
+---
+
+## Infrastructure Design - Unit 3: Resources Module (Complete)
+
+**Timestamp**: 2026-07-03T02:13:39Z **User Input**: "Using AI-DLC,
+承認します。Infrastructure Design に進んでください。" **AI Response**: All
+infrastructure design questions answered. Generated Infrastructure Design
+artifacts in English: infrastructure-design.md (infrastructure mapping, data
+storage strategy, API design, deployment considerations) and
+deployment-architecture.md (build pipeline integration, Web export
+configuration, CDN considerations). Updated plan checkboxes and aidlc-state.md.
+**Context**: CONSTRUCTION phase - Unit 3 Infrastructure Design Step 6/9
+complete. All artifacts generated at
+aidlc-docs/construction/unit-3/infrastructure-design/. Artifacts:
+infrastructure-design.md, deployment-architecture.md.
 
 ---
