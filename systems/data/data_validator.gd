@@ -137,8 +137,8 @@ func validate_type_chart() -> Array[ValidationError]:
 
 func _validate_character(
 		character: CharacterData,
-		characters: Dictionary,
-		moves: Dictionary) -> Array[ValidationError]:
+		_characters: Dictionary,
+		_moves: Dictionary) -> Array[ValidationError]:
 	var errors: Array[ValidationError] = []
 
 	# CR-1: Character Identity
@@ -193,12 +193,12 @@ func _validate_character(
 				character.id))
 	var has_damaging_move = false
 	for move_id in character.moves:
-		if not moves.has(move_id):
+		if not _moves.has(move_id):
 			errors.append(ValidationError.new(
 					"CR-4", "Move '%s' does not exist in move registry" % move_id,
 					character.id))
 		else:
-			var move: MoveData = moves[move_id]
+			var move: MoveData = _moves[move_id]
 			if move.power > 0:
 				has_damaging_move = true
 	if not has_damaging_move:
@@ -209,7 +209,7 @@ func _validate_character(
 	return errors
 
 
-func _validate_move(move: MoveData, moves: Dictionary) -> Array[ValidationError]:
+func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError]:
 	var errors: Array[ValidationError] = []
 
 	# MR-1: Move Identity

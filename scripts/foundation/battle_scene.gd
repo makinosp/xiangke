@@ -234,7 +234,7 @@ func _on_turn_started(participant: BattleParticipant) -> void:
 
 
 ## Called when an action is executed.
-func _on_action_executed(result: ActionResult, source: BattleParticipant, target: BattleParticipant) -> void:
+func _on_action_executed(result: ActionSystem.ActionResult, source: BattleParticipant, target: BattleParticipant) -> void:
 	_update_hp_displays()
 	_update_log_display()
 	if not result.log_message.is_empty():

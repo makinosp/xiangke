@@ -50,7 +50,7 @@ func transition_to(scene_path: String, config: TransitionConfig = null) -> void:
 
 	# Show overlay and play fade-out
 	show()
-	_play_fade_out(duration)
+	_play_fade_out(duration, color)
 
 	# Wait for fade-out to complete
 	await get_tree().create_timer(duration * 0.4).timeout
@@ -67,7 +67,7 @@ func transition_to(scene_path: String, config: TransitionConfig = null) -> void:
 	await get_tree().process_frame
 
 	# Play fade-in
-	_play_fade_in(duration)
+	_play_fade_in(duration, color)
 
 	# Wait for fade-in to complete
 	await get_tree().create_timer(duration * 0.4).timeout
@@ -86,21 +86,23 @@ func configure(config: TransitionConfig) -> void:
 
 
 ## Plays a fade-out animation (screen to solid color).
-func _play_fade_out(duration: float) -> void:
+func _play_fade_out(duration: float, color: Color) -> void:
 	if animation_player and animation_player.has_animation("fade_out"):
 		animation_player.play("fade_out")
 	else:
 		# Fallback: manual tween
+		_get_color_rect().color = color
 		var tween := create_tween()
 		tween.tween_property(_get_color_rect(), "color:a", 1.0, duration * 0.5)
 
 
 ## Plays a fade-in animation (solid color to screen).
-func _play_fade_in(duration: float) -> void:
+func _play_fade_in(duration: float, color: Color) -> void:
 	if animation_player and animation_player.has_animation("fade_in"):
 		animation_player.play("fade_in")
 	else:
 		# Fallback: manual tween
+		_get_color_rect().color = color
 		var tween := create_tween()
 		tween.tween_property(_get_color_rect(), "color:a", 0.0, duration * 0.5)
 

@@ -7,7 +7,7 @@ extends Node
 ## Emitted when a participant's turn begins.
 signal turn_started(participant: BattleParticipant)
 ## Emitted when an action has been executed and resolved.
-signal action_executed(result: ActionResult, source: BattleParticipant, target: BattleParticipant)
+signal action_executed(result: ActionSystem.ActionResult, source: BattleParticipant, target: BattleParticipant)
 ## Emitted when a participant is defeated.
 signal participant_defeated(participant: BattleParticipant)
 ## Emitted when the battle ends with a final status.
@@ -93,14 +93,14 @@ func run_battle_loop() -> void:
 		await get_tree().process_frame
 
 		# Request action: AI for enemies, signal for player
-		var action_result: ActionResult = null
+		var action_result: ActionSystem.ActionResult? = null
 		var target: BattleParticipant = null
 
 		if current_participant.team == BattleParticipant.Team.ENEMY:
-			var action := _get_ai_action(current_participant)
+			var action: Dictionary? = _get_ai_action(current_participant)
 			if action == null:
 				# AI skipped turn (e.g., confused and hit self)
-				action_result = ActionResult.new()
+				action_result = ActionSystem.ActionResult.new()
 				action_result.log_message = "%s is confused and can't move!" % current_participant.character_data.name
 			else:
 				target = action["target"] as BattleParticipant
@@ -110,10 +110,10 @@ func run_battle_loop() -> void:
 			# Player action: must be provided externally via execute_player_action()
 			action_result = await _wait_for_player_action()
 			# After waiting, check if battle should stop
-			if _should_stop:
+			if _should_stop or action_result == null:
 				return
-                        # Retrieve the target that was set by execute_player_action()
-                        target = _pending_target
+		# Retrieve the target that was set by execute_player_action()
+		target = _pending_target
 		# Advance to next turn
 		var has_next: bool = BattleManager.advance_to_next_turn(battle_state)
 		if not has_next:
@@ -134,8 +134,8 @@ func run_battle_loop() -> void:
 ##   target: The target BattleParticipant.
 ##
 ## Returns:
-##   The ActionResult from the executed move.
-func execute_player_action(move: MoveData, target: BattleParticipant) -> ActionResult:
+##   The ActionSystem.ActionResult from the executed move.
+func execute_player_action(move: MoveData, target: BattleParticipant) -> ActionSystem.ActionResult:
 	assert(move != null, "BattleFlowService: move must not be null")
 	assert(target != null, "BattleFlowService: target must not be null")
 
@@ -171,13 +171,13 @@ func get_enemy_participants() -> Array[BattleParticipant]:
 # --- Private members ---
 
 var _has_pending_action: bool = false
-var _pending_action_result: ActionResult = null
+var _pending_action_result: ActionSystem.ActionResult? = null
 var _pending_target: BattleParticipant = null
 
 
 ## Waits for the player to provide an action via execute_player_action().
 ## This is a non-static method that yields until player input is received.
-func _wait_for_player_action() -> ActionResult:
+func _wait_for_player_action() -> ActionSystem.ActionResult?:
 	# Yield until player provides an action
 	while not _has_pending_action and not _should_stop:
 		await get_tree().process_frame
@@ -203,7 +203,7 @@ func _wait_for_player_action() -> ActionResult:
 ##
 ## Returns:
 ##   Dictionary with "move" (MoveData) and "target" (BattleParticipant) keys, or null.
-func _get_ai_action(participant: BattleParticipant) -> Dictionary:
+func _get_ai_action(participant: BattleParticipant) -> Dictionary?:
 	assert(participant != null, "BattleFlowService: participant must not be null")
 	assert(participant.team == BattleParticipant.Team.ENEMY,
 			"BattleFlowService: AI action requested for non-enemy participant")

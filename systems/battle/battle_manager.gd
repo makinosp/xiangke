@@ -24,8 +24,8 @@ static func calculate_turn_queue(state: BattleState) -> Array[int]:
 		return []
 
 	# Build list of (index, speed) pairs
-	typealiasSpeedEntry = Dictionary # {index: int, speed: float}
-	var entries: Array[SpeedEntry] = []
+	# Entry: {index: int, speed: float}
+	var entries: Array[Dictionary] = []
 
 	for i in state.participants.size():
 		var p: BattleParticipant = state.participants[i]
@@ -39,7 +39,7 @@ static func calculate_turn_queue(state: BattleState) -> Array[int]:
 	entries.sort_cu(_compare_speed_descending)
 
 	var queue: Array[int] = []
-	for entry: SpeedEntry in entries:
+	for entry: Dictionary in entries:
 		queue.append(entry["index"])
 
 	return queue
