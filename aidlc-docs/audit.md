@@ -665,3 +665,36 @@ instruction files generated at `aidlc-docs/construction/build-and-test/`. Unit
 3: Battle System is now fully implemented and documented.
 
 ---
+
+## Tech Stack Migration Request — GDScript to Rust
+
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**: "Using AI-DLC,
+GDScriptからRustに乗り換えたいです。" **AI Response**: Migration request
+received. Currently on `main` branch (switched from `feature/battle-system`).
+Existing codebase is a Godot Engine 4.x turn-based battle game entirely in
+GDScript. User wants to migrate the entire tech stack to Rust. Starting AI-DLC
+workflow for this request. **Context**: INCEPTION phase - New request. Existing
+project now considered Brownfield for the migration. Proceeding with Workspace
+Detection and Requirements Analysis.
+
+---
+
+## Requirements Analysis — Migration Questions Answered
+
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**: "回答しました。" **AI
+Response**: All 9 migration questions answered by user. Summary:
+
+- Q1: B (Type safety — primary motivation)
+- Q2: F (Godot Rust bindings / gdext — target engine)
+- Q3: B (Incremental — keep Godot scenes/UI, migrate battle system)
+- Q4: A (Web/WASM — primary target)
+- Q5: B (Short-term — days/weeks)
+- Q6: B (Battle system + core data types — initial scope)
+- Q7-Q9: B, B, C (All extensions opted out) Generated
+  `requirements-migration.md` with intent analysis, 5 migration phases
+  (Toolchain → Data Types → Battle System → Integration → Cleanup), revised
+  FR/NFR for Rust migration, and constraints/assumptions. Updated
+  `aidlc-migration-state.md`. **Context**: INCEPTION phase - Requirements
+  Analysis Step 7 complete. Awaiting user approval.
+
+---
