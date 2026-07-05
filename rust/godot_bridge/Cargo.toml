@@ -1,0 +1,15 @@
+[package]
+name = "xiangke-godot-bridge"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+godot = "0.5"
+xiangke-core = { path = "../core" }
+xiangke-battle = { path = "../battle" }
+serde.workspace = true

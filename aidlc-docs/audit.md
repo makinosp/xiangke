@@ -736,3 +736,38 @@ CONSTRUCTION phase.
 Updated `aidlc-migration-state.md`.
 **Context**: CONSTRUCTION phase - Infrastructure Design complete. Awaiting user approval.
 ---
+
+## Code Generation — Phase 1: Toolchain Setup (Planning)
+
+**Timestamp**: 2026-07-05T00:00:00Z **User Input**: "承認します。Code
+Generationに進んでください。" **AI Response**: Infrastructure Design approved.
+Created Code Generation Plan at
+`aidlc-docs/construction/plans/unit1-toolchain-code-generation-plan.md` with 10
+steps covering: Cargo workspace, Rust toolchain config, GDExtension config,
+Justfile updates, CI workflow, and crate skeletons. **Context**: CONSTRUCTION
+phase - Code Generation Part 1 (Planning) complete. Executing Part 2
+(Generation).
+
+---
+
+## Code Generation — Phase 1: Toolchain Setup (Part 2 Complete)
+
+**Timestamp**: 2026-07-05T00:00:00Z **User Input**: (Plan approved, Generation
+executed) **AI Response**: Code Generation Part 2 complete. Generated all 10
+steps:
+
+- Cargo workspace with 3 member crates (core, battle, godot_bridge)
+- Rust toolchain config (stable, 2024 edition, WASM target)
+- GDExtension entry point (addons/gdext/xiangke.gdextension)
+- Justfile with Rust commands (build-rust, test-rust, check-rust, run)
+- GitHub Actions CI workflow (fmt, clippy, build native+WASM, test)
+- Core crate: TypeElement, TypeChart, CharacterData, MoveData, StatusEffectData
+  (6 unit tests)
+- Battle crate: 5 module stubs
+- Godot bridge: #[gdextension] entry point
+- Verified: cargo check + cargo test (6/6 passed)
+- Summary at aidlc-docs/construction/unit1/code/toolchain-summary.md
+  **Context**: CONSTRUCTION phase - Code Generation Phase 1 complete. Proceeding
+  to Phase 2: Core Data Types.
+
+---
