@@ -1,3 +1,7 @@
 [submodule ".vendor/aidlc-workflows"]
 	path = .vendor/aidlc-workflows
 	url = https://github.com/awslabs/aidlc-workflows.git
+[submodule ".vendor/rust-reference"]
+	path = .vendor/rust-reference
+	url = https://github.com/rust-lang/reference.git
+	branch = master
