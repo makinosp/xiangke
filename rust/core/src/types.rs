@@ -1,11 +1,6 @@
-//! Type system for the Xianke battle game.
-//!
-//! Defines element types and the type effectiveness chart.
-
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, FromRepr};
 
-/// The seven element types used in the Xianke battle system.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
 #[repr(u8)]
 pub enum TypeElement {
@@ -19,7 +14,6 @@ pub enum TypeElement {
 }
 
 impl TypeElement {
-    /// All element types in order.
     pub const ALL: [TypeElement; 7] = [
         TypeElement::Wood,
         TypeElement::Fire,
@@ -30,85 +24,121 @@ impl TypeElement {
         TypeElement::Yin,
     ];
 
-    /// The number of element types.
     pub const COUNT: usize = 7;
-
-    /// Get the index of this type (0-6).
-    pub fn index(self) -> usize {
-        self as usize
-    }
 }
 
-/// A 7×7 type effectiveness lookup table.
-///
-/// Row = attacking type, Column = defending type.
-/// Values: 0.0 (immune), 0.5 (not very effective), 1.0 (neutral), 2.0 (super effective).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[repr(u8)]
+pub enum EffectType {
+    None = 0,
+    Burn = 1,
+    Poison = 2,
+    Confusion = 3,
+    Chain = 4,
+    Charm = 5,
+}
+
+impl EffectType {
+    pub const ALL: [EffectType; 6] = [
+        EffectType::None,
+        EffectType::Burn,
+        EffectType::Poison,
+        EffectType::Confusion,
+        EffectType::Chain,
+        EffectType::Charm,
+    ];
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[repr(u8)]
+pub enum DamageCategory {
+    Physical = 0,
+    Arts = 1,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[repr(u8)]
+pub enum Stat {
+    Attack = 0,
+    Defense = 1,
+    Speed = 2,
+    Intelligence = 3,
+    Spirit = 4,
+}
+
+impl Stat {
+    pub const ALL: [Stat; 5] = [
+        Stat::Attack,
+        Stat::Defense,
+        Stat::Speed,
+        Stat::Intelligence,
+        Stat::Spirit,
+    ];
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TypeChart([[f64; TypeElement::COUNT]; TypeElement::COUNT]);
 
 impl Default for TypeChart {
     fn default() -> Self {
         use TypeElement::*;
-        // Build the chart using the same 7×7 matrix as the GDScript version.
         let mut chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
+        // Row = defender, Column = attacker — matching GDScript layout
         // Wood
-        chart[Wood.index()][Wood.index()] = 1.0;
-        chart[Wood.index()][Fire.index()] = 0.5;
-        chart[Wood.index()][Earth.index()] = 2.0;
-        chart[Wood.index()][Metal.index()] = 0.5;
-        chart[Wood.index()][Water.index()] = 1.0;
-        chart[Wood.index()][Yang.index()] = 1.0;
-        chart[Wood.index()][Yin.index()] = 1.0;
+        chart[Wood as usize][Wood as usize] = 1.0;
+        chart[Wood as usize][Fire as usize] = 0.5;
+        chart[Wood as usize][Earth as usize] = 2.0;
+        chart[Wood as usize][Metal as usize] = 1.0;
+        chart[Wood as usize][Water as usize] = 1.25;
+        chart[Wood as usize][Yang as usize] = 1.0;
+        chart[Wood as usize][Yin as usize] = 1.0;
         // Fire
-        chart[Fire.index()][Wood.index()] = 2.0;
-        chart[Fire.index()][Fire.index()] = 0.5;
-        chart[Fire.index()][Earth.index()] = 0.5;
-        chart[Fire.index()][Metal.index()] = 2.0;
-        chart[Fire.index()][Water.index()] = 0.5;
-        chart[Fire.index()][Yang.index()] = 1.0;
-        chart[Fire.index()][Yin.index()] = 1.0;
+        chart[Fire as usize][Wood as usize] = 1.25;
+        chart[Fire as usize][Fire as usize] = 1.0;
+        chart[Fire as usize][Earth as usize] = 0.5;
+        chart[Fire as usize][Metal as usize] = 2.0;
+        chart[Fire as usize][Water as usize] = 1.0;
+        chart[Fire as usize][Yang as usize] = 1.0;
+        chart[Fire as usize][Yin as usize] = 1.0;
         // Earth
-        chart[Earth.index()][Wood.index()] = 0.5;
-        chart[Earth.index()][Fire.index()] = 2.0;
-        chart[Earth.index()][Earth.index()] = 1.0;
-        chart[Earth.index()][Metal.index()] = 2.0;
-        chart[Earth.index()][Water.index()] = 1.0;
-        chart[Earth.index()][Yang.index()] = 1.0;
-        chart[Earth.index()][Yin.index()] = 1.0;
+        chart[Earth as usize][Wood as usize] = 1.0;
+        chart[Earth as usize][Fire as usize] = 1.25;
+        chart[Earth as usize][Earth as usize] = 1.0;
+        chart[Earth as usize][Metal as usize] = 0.5;
+        chart[Earth as usize][Water as usize] = 2.0;
+        chart[Earth as usize][Yang as usize] = 1.0;
+        chart[Earth as usize][Yin as usize] = 1.0;
         // Metal
-        chart[Metal.index()][Wood.index()] = 2.0;
-        chart[Metal.index()][Fire.index()] = 0.5;
-        chart[Metal.index()][Earth.index()] = 0.5;
-        chart[Metal.index()][Metal.index()] = 0.5;
-        chart[Metal.index()][Water.index()] = 2.0;
-        chart[Metal.index()][Yang.index()] = 1.0;
-        chart[Metal.index()][Yin.index()] = 1.0;
+        chart[Metal as usize][Wood as usize] = 2.0;
+        chart[Metal as usize][Fire as usize] = 1.0;
+        chart[Metal as usize][Earth as usize] = 1.25;
+        chart[Metal as usize][Metal as usize] = 1.0;
+        chart[Metal as usize][Water as usize] = 0.5;
+        chart[Metal as usize][Yang as usize] = 1.0;
+        chart[Metal as usize][Yin as usize] = 1.0;
         // Water
-        chart[Water.index()][Wood.index()] = 1.0;
-        chart[Water.index()][Fire.index()] = 2.0;
-        chart[Water.index()][Earth.index()] = 2.0;
-        chart[Water.index()][Metal.index()] = 0.5;
-        chart[Water.index()][Water.index()] = 0.5;
-        chart[Water.index()][Yang.index()] = 1.0;
-        chart[Water.index()][Yin.index()] = 1.0;
+        chart[Water as usize][Wood as usize] = 0.5;
+        chart[Water as usize][Fire as usize] = 2.0;
+        chart[Water as usize][Earth as usize] = 1.0;
+        chart[Water as usize][Metal as usize] = 1.25;
+        chart[Water as usize][Water as usize] = 1.0;
+        chart[Water as usize][Yang as usize] = 1.0;
+        chart[Water as usize][Yin as usize] = 1.0;
         // Yang
-        chart[Yang.index()][Yang.index()] = 2.0;
-        chart[Yang.index()][Yin.index()] = 2.0;
+        chart[Yang as usize][Yang as usize] = 1.0;
+        chart[Yang as usize][Yin as usize] = 2.0;
         // Yin
-        chart[Yin.index()][Yang.index()] = 2.0;
-        chart[Yin.index()][Yin.index()] = 2.0;
+        chart[Yin as usize][Yang as usize] = 2.0;
+        chart[Yin as usize][Yin as usize] = 1.0;
         Self(chart)
     }
 }
 
 impl TypeChart {
-    /// Get the effectiveness multiplier for a single attacking type vs a single defending type.
     pub fn effectiveness(&self, attack: TypeElement, defense: TypeElement) -> f64 {
-        self.0[attack.index()][defense.index()]
+        self.0[defense as usize][attack as usize]
     }
 
-    /// Get the combined effectiveness for dual-type defenders.
-    /// Returns the product of both effectiveness values, clamped to [0.25, 4.0].
     pub fn effectiveness_dual(
         &self,
         attack: TypeElement,
@@ -126,20 +156,105 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_fire_vs_wood() {
-        let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Fire, TypeElement::Wood) - 2.0).abs() < f64::EPSILON);
+    fn test_type_element_roundtrip() {
+        let wood = TypeElement::Wood;
+        assert_eq!(wood as u8, 0);
+        assert_eq!(TypeElement::from_repr(0), Some(TypeElement::Wood));
+    }
+
+    #[test]
+    fn test_effect_type_roundtrip() {
+        assert_eq!(EffectType::None as u8, 0);
+        assert_eq!(EffectType::from_repr(5), Some(EffectType::Charm));
+        assert_eq!(EffectType::from_repr(99), None);
+    }
+
+    #[test]
+    fn test_damage_category_roundtrip() {
+        assert_eq!(DamageCategory::Physical as u8, 0);
+        assert_eq!(DamageCategory::Arts as u8, 1);
+    }
+
+    #[test]
+    fn test_stat_roundtrip() {
+        assert_eq!(Stat::Intelligence as u8, 3);
+        assert_eq!(Stat::from_repr(3), Some(Stat::Intelligence));
     }
 
     #[test]
     fn test_water_vs_fire() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Water, TypeElement::Fire) - 2.0).abs() < f64::EPSILON);
+        assert!((chart.effectiveness(TypeElement::Water, TypeElement::Fire) - 1.0).abs() < f64::EPSILON);
     }
 
     #[test]
     fn test_fire_vs_water() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Fire, TypeElement::Water) - 0.5).abs() < f64::EPSILON);
+        assert!((chart.effectiveness(TypeElement::Fire, TypeElement::Water) - 2.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_wood_vs_fire() {
+        let chart = TypeChart::default();
+        assert!((chart.effectiveness(TypeElement::Wood, TypeElement::Fire) - 1.25).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_fire_vs_wood() {
+        let chart = TypeChart::default();
+        assert!((chart.effectiveness(TypeElement::Fire, TypeElement::Wood) - 0.5).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_earth_vs_wood() {
+        let chart = TypeChart::default();
+        assert!((chart.effectiveness(TypeElement::Earth, TypeElement::Wood) - 2.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_metal_vs_wood() {
+        let chart = TypeChart::default();
+        assert!((chart.effectiveness(TypeElement::Metal, TypeElement::Wood) - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_wood_vs_earth() {
+        let chart = TypeChart::default();
+        assert!((chart.effectiveness(TypeElement::Wood, TypeElement::Earth) - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_yang_vs_yin() {
+        let chart = TypeChart::default();
+        assert!((chart.effectiveness(TypeElement::Yang, TypeElement::Yin) - 2.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_yin_vs_yang() {
+        let chart = TypeChart::default();
+        assert!((chart.effectiveness(TypeElement::Yin, TypeElement::Yang) - 2.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_effectiveness_dual_clamping() {
+        let chart = TypeChart::default();
+        let result = chart.effectiveness_dual(
+            TypeElement::Wood,
+            TypeElement::Wood,
+            TypeElement::Metal,
+        );
+        assert!(result >= 0.25);
+        assert!(result <= 4.0);
+    }
+
+    #[test]
+    fn test_effectiveness_dual_compound() {
+        let chart = TypeChart::default();
+        let result = chart.effectiveness_dual(
+            TypeElement::Water,
+            TypeElement::Fire,
+            TypeElement::Earth,
+        );
+        assert!((result - 2.0).abs() < f64::EPSILON);
     }
 }

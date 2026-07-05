@@ -4,7 +4,7 @@
 
 - **Project Type**: Brownfield (GDScript → Rust Migration)
 - **Start Date**: 2026-07-03T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Phase 1: Toolchain Setup — Code Generation
+- **Current Stage**: CONSTRUCTION - Phase 2: Core Data Types — Code Generation
   Complete
 
 ## Workspace State
@@ -35,3 +35,8 @@
 
 - [x] Infrastructure Design (2026-07-05)
 - [x] Code Generation (2026-07-05)
+
+#### Phase 2: Core Data Types
+
+- [x] Functional Design (2026-07-06)
+- [x] Code Generation (2026-07-06)

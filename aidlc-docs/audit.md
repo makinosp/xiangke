@@ -790,3 +790,30 @@ steps:
   to Phase 2: Core Data Types.
 
 ---
+
+## Functional Design — Phase 2: Core Data Types (Approval)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "承認します。Code Generationに進んでください。"
+**AI Response**: Functional Design for Phase 2: Core Data Types approved by user. Proceeding to Code Generation Part 1 (Planning). Creating code generation plan at aidlc-docs/construction/plans/phase2-core-code-generation-plan.md.
+**Context**: CONSTRUCTION phase - Phase 2 Functional Design Step 6/9. Approval recorded. Next: Code Generation Planning.
+
+---
+
+## Code Generation — Phase 2: Core Data Types (Complete)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "承認します。Part 2: Generationに進んでください。" (via plan approval)
+**AI Response**: Code Generation Part 2 complete. Executed all 8 steps:
+1. types.rs — Added EffectType/DamageCategory/Stat enums, fixed TypeChart matrix layout (row=defender, col=attacker) with correct 1.25 generating values
+2. character.rs — Changed id: u32→String, added intelligence/spirit to Stats, added moves vec, added has_secondary_type()/get_stat_sum()
+3. moves.rs — Changed id: u32→String, replaced MoveCategory→DamageCategory, added 8 missing fields
+4. status.rs — Replaced StatusType→EffectType, added 5 business fields
+5. calc.rs (new) — stat_stage_multiplier + calculate_raw_damage helpers
+6. validator.rs (new) — Full CR/MR/TR validation rules (migrated from GDScript)
+7. lib.rs — Added validator and calc module exports
+8. Verification — cargo check: no warnings, cargo test: 55/55 passed
+Summary at aidlc-docs/construction/unit1/code/phase2-core-summary.md
+**Context**: CONSTRUCTION phase - Phase 2 Code Generation complete. Next stage: Phase 3: Battle System.
+
+---
