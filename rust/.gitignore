@@ -1,0 +1,25 @@
+# Rust/Cargo ignores
+/target/
+Cargo.lock
+Cargo.toml.bak
+Cargo.lock.bak
+*.rs.bk
+*.pdb
+*.suo
+*.user
+*.sln.docstates
+rust-toolchain.toml.bak
+
+# WASM-specific ignores
+*.wasm
+*.wat
+*.js
+*.wasm.map
+
+# IDE ignores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
