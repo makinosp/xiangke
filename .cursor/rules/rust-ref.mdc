@@ -1,0 +1,9 @@
+---
+description: "Rust Reference for Rust implementation tasks"
+globs: "**/*.rs"
+---
+
+# Rust Reference
+
+Follow the guidelines in `.ai-rules/rust-reference-guide.md` when writing or
+modifying Rust code.
