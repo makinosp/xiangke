@@ -1,5 +1,24 @@
 # AI-DLC Audit Log
 
+## Functional Design — Phase 2: Core Data Types
+
+**Timestamp**: 2026-07-06T00:00:00Z **User Input**: "承認します。Phase 2: Core
+Data Types (Functional Design)に進んでください。" **AI Response**: Completed
+Functional Design for Phase 2 (Rust Core Data Types). Created 3 documents in
+aidlc-docs/construction/unit-1/functional-design/phase2-rust-core/:
+
+- domain-entities.md: Full entity definitions for TypeElement, EffectType,
+  DamageCategory, Stat, TypeChart, CharacterData, MoveData, StatusEffectData
+  (aligned with GDScript sources)
+- business-logic-model.md: Type effectiveness resolution, stat stage
+  calculation, raw damage calculation, stat stage application
+- business-rules.md: Character rules (CR-1~4), Move rules (MR-1~7), Status rules
+  (SR-1~3), validation architecture **Context**: CONSTRUCTION phase - Unit 1
+  (Resources/Rust Core). Functional Design completed. Awaiting user approval to
+  proceed to Code Generation.
+
+---
+
 ## Workspace Detection
 
 **Timestamp**: 2026-06-28T00:00:00Z **User Input**: "Using AI-DLC,
