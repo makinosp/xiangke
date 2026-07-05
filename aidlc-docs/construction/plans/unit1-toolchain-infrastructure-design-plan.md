@@ -29,7 +29,7 @@ C) Whatever is latest stable (use `rustup` default)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ### Question 2
 
@@ -43,7 +43,8 @@ C) Whatever the project.godot currently specifies (check first)
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: X — Godot 4.7 is installed on this system. godot-rust (gdext) v0.5.4
+supports Godot 4.x. Target Godot 4.7.
 
 ### Question 3
 
@@ -59,7 +60,7 @@ crate, core logic as a separate library crate for testability
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ### Question 4
 
@@ -78,7 +79,7 @@ locally
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ### Question 5
 
@@ -97,7 +98,7 @@ D) Hybrid: Use unit tests for core logic, Godot for integration tests only
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: D
 
 ### Question 6
 
@@ -113,7 +114,7 @@ D) Full CI/CD — same as C plus deploy to GitHub Pages for Web (WASM) target
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
+[Answer]: B
 
 ### Question 7
 
@@ -130,6 +131,4 @@ handling + `strum` for enum utilities
 
 X) Other (please describe after [Answer]: tag below)
 
-[Answer]:
-
-[Answer]:
+[Answer]: C
