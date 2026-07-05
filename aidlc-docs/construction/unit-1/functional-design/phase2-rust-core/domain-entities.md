@@ -182,19 +182,8 @@ business methods.
 **Target design** — align with `scripts/status_effect_data.gd`:
 
 ```rust
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
-#[repr(u8)]
-pub enum StatusType {
-    None       = 0,  // was missing!
-    Burn       = 1,
-    Poison     = 2,
-    Confusion  = 3,
-    Chain      = 4,
-    Charm      = 5,
-}
-
 pub struct StatusEffectData {
-    pub status_type: StatusType,
+    pub status_type: EffectType,  // reuses EffectType from types.rs (matching GDScript's pattern)
     pub name: String,                      // display name
     pub description: String,
     pub damage_per_turn: f64,              // 0.0-1.0 (fraction of max HP)
@@ -331,7 +320,7 @@ pub fn validate_move(data: &MoveData) -> Result<(), Vec<ValidationError>> {
 ### Types tests (`rust/core/src/types.rs`)
 
 - Enum serialization/deserialization round-trips
-- TypeChart effectiveness for key matchups (Fire→Wood=2.0, Water→Fire=2.0, etc.)
+- TypeChart effectiveness for key matchups (Wood→Fire=1.25, Water→Fire=2.0, Wood→Metal=2.0, etc.)
 - TypeChart effectiveness_dual clamping
 
 ### Character tests (`rust/core/src/character.rs`)

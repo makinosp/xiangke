@@ -38,15 +38,15 @@ accounting for single-type and dual-type defenders.
 
 ### Key Values (Single-Type)
 
-| Attacker | Defender | Multiplier | Cycle             |
-| -------- | -------- | ---------- | ----------------- |
-| Wood     | Fire     | 1.25       | 相生 (generate)   |
-| Wood     | Earth    | 2.0        | 相克 (overcome)   |
-| Fire     | Metal    | 2.0        | 相克              |
-| Fire     | Water    | 0.5        | 被相克 (overcome) |
-| Wood     | Metal    | 0.5        | 被相克            |
-| Yang     | Yin      | 2.0        | 陰陽              |
-| Yin      | Yang     | 2.0        | 陰陽              |
+| Attacker | Defender | Multiplier | Cycle                    |
+| -------- | -------- | ---------- | ------------------------ |
+| Wood     | Fire     | 1.25       | 相生 (generate)          |
+| Wood     | Metal    | 2.0        | 相克 (overcome)          |
+| Wood     | Water    | 0.5        | 被相克 (overcome-by)     |
+| Fire     | Earth    | 1.25       | 相生                    |
+| Fire     | Water    | 2.0        | 相克                    |
+| Yang     | Yin      | 2.0        | 陰陽                    |
+| Yin      | Yang     | 2.0        | 陰陽                    |
 
 ---
 
