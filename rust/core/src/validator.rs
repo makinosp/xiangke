@@ -79,7 +79,10 @@ impl ValidationResult {
     pub fn get_summary(&self) -> String {
         let mut result = String::from("=== Data Validation Summary ===\n");
         result.push_str(&format!("Files scanned: {}\n", self.total_files_scanned));
-        result.push_str(&format!("Valid: {} | Invalid: {}\n", self.valid_files, self.invalid_files));
+        result.push_str(&format!(
+            "Valid: {} | Invalid: {}\n",
+            self.valid_files, self.invalid_files
+        ));
         if !self.errors.is_empty() {
             result.push_str(&format!("\n--- Errors ({}) ---\n", self.errors.len()));
             for err in &self.errors {
@@ -309,7 +312,10 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
     if !is_in_range(data.effect_chance, 0, 100) {
         errors.push(ValidationError {
             code: "MR-3".into(),
-            message: format!("Effect chance must be in range [0, 100], got {}", data.effect_chance),
+            message: format!(
+                "Effect chance must be in range [0, 100], got {}",
+                data.effect_chance
+            ),
             context: data.id.clone(),
         });
     }
@@ -428,14 +434,20 @@ pub fn validate_character(
         if !is_in_range(stat_values[i], 1, 999) {
             errors.push(ValidationError {
                 code: "CR-2".into(),
-                message: format!("{} must be in range [1, 999], got {}", stat_names[i], stat_values[i]),
+                message: format!(
+                    "{} must be in range [1, 999], got {}",
+                    stat_names[i], stat_values[i]
+                ),
                 context: data.id.clone(),
             });
         }
         if stat_values[i] > 500 {
             errors.push(ValidationError {
                 code: "CR-2".into(),
-                message: format!("{} exceeds maximum of 500, got {}", stat_names[i], stat_values[i]),
+                message: format!(
+                    "{} exceeds maximum of 500, got {}",
+                    stat_names[i], stat_values[i]
+                ),
                 context: data.id.clone(),
             });
         }
@@ -481,9 +493,10 @@ pub fn validate_character(
             context: data.id.clone(),
         });
     }
-    let has_damaging_move = data.moves.iter().any(|move_id| {
-        moves.iter().any(|m| m.id == *move_id && m.is_damaging())
-    });
+    let has_damaging_move = data
+        .moves
+        .iter()
+        .any(|move_id| moves.iter().any(|m| m.id == *move_id && m.is_damaging()));
     if !has_damaging_move && data.moves.len() == 4 {
         errors.push(ValidationError {
             code: "CR-4".into(),

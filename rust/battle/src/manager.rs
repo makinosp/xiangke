@@ -118,13 +118,11 @@ mod tests {
             },
             team,
             0,
-        ).unwrap()
+        )
+        .unwrap()
     }
 
-    fn make_state(
-        players: usize,
-        enemies: usize,
-    ) -> BattleState {
+    fn make_state(players: usize, enemies: usize) -> BattleState {
         let mut participants = Vec::new();
         for i in 0..players {
             participants.push(make_participant(Team::Player, 100, 70 - i as u32 * 10));

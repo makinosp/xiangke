@@ -1,5 +1,8 @@
 pub fn stat_stage_multiplier(stage: i32) -> f64 {
-    assert!(stage >= -6 && stage <= 6, "stat stage must be in [-6, 6], got {stage}");
+    assert!(
+        stage >= -6 && stage <= 6,
+        "stat stage must be in [-6, 6], got {stage}"
+    );
     match stage.cmp(&0) {
         std::cmp::Ordering::Equal => 1.0,
         std::cmp::Ordering::Greater => (2.0 + stage as f64) / 2.0,

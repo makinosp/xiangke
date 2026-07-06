@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, FromRepr};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr,
+)]
 #[repr(u8)]
 pub enum TypeElement {
     Wood = 0,
@@ -27,7 +29,9 @@ impl TypeElement {
     pub const COUNT: usize = 7;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Display, EnumString, FromRepr,
+)]
 #[repr(u8)]
 pub enum EffectType {
     None = 0,
@@ -49,14 +53,18 @@ impl EffectType {
     ];
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr,
+)]
 #[repr(u8)]
 pub enum DamageCategory {
     Physical = 0,
     Arts = 1,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr,
+)]
 #[repr(u8)]
 pub enum Stat {
     Attack = 0,
@@ -188,65 +196,80 @@ mod tests {
     #[test]
     fn test_water_vs_fire() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Water, TypeElement::Fire) - 1.0).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Water, TypeElement::Fire) - 1.0).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_fire_vs_water() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Fire, TypeElement::Water) - 2.0).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Fire, TypeElement::Water) - 2.0).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_wood_vs_fire() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Wood, TypeElement::Fire) - 1.25).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Wood, TypeElement::Fire) - 1.25).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_fire_vs_wood() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Fire, TypeElement::Wood) - 0.5).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Fire, TypeElement::Wood) - 0.5).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_earth_vs_wood() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Earth, TypeElement::Wood) - 2.0).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Earth, TypeElement::Wood) - 2.0).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_metal_vs_wood() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Metal, TypeElement::Wood) - 1.0).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Metal, TypeElement::Wood) - 1.0).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_wood_vs_earth() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Wood, TypeElement::Earth) - 1.0).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Wood, TypeElement::Earth) - 1.0).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_yang_vs_yin() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Yang, TypeElement::Yin) - 2.0).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Yang, TypeElement::Yin) - 2.0).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_yin_vs_yang() {
         let chart = TypeChart::default();
-        assert!((chart.effectiveness(TypeElement::Yin, TypeElement::Yang) - 2.0).abs() < f64::EPSILON);
+        assert!(
+            (chart.effectiveness(TypeElement::Yin, TypeElement::Yang) - 2.0).abs() < f64::EPSILON
+        );
     }
 
     #[test]
     fn test_effectiveness_dual_clamping() {
         let chart = TypeChart::default();
-        let result = chart.effectiveness_dual(
-            TypeElement::Wood,
-            TypeElement::Wood,
-            TypeElement::Metal,
-        );
+        let result =
+            chart.effectiveness_dual(TypeElement::Wood, TypeElement::Wood, TypeElement::Metal);
         assert!(result >= 0.25);
         assert!(result <= 4.0);
     }
@@ -254,11 +277,8 @@ mod tests {
     #[test]
     fn test_effectiveness_dual_compound() {
         let chart = TypeChart::default();
-        let result = chart.effectiveness_dual(
-            TypeElement::Water,
-            TypeElement::Fire,
-            TypeElement::Earth,
-        );
+        let result =
+            chart.effectiveness_dual(TypeElement::Water, TypeElement::Fire, TypeElement::Earth);
         assert!((result - 2.0).abs() < f64::EPSILON);
     }
 }

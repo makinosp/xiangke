@@ -4,8 +4,8 @@ use godot::builtin::{VarArray, VarDictionary};
 use godot::classes::Node;
 use godot::obj::Base;
 use godot::prelude::*;
-use rand::rngs::StdRng;
 use rand::SeedableRng;
+use rand::rngs::StdRng;
 use xiangke_battle::action;
 use xiangke_battle::flow;
 use xiangke_battle::manager;
@@ -32,7 +32,10 @@ fn dict_char(d: &Dict) -> Option<CharacterData> {
     let intel = d.get("intelligence").map(|v| v.to::<i64>()).unwrap_or(0) as u32;
     let spr = d.get("spirit").map(|v| v.to::<i64>()).unwrap_or(0) as u32;
     let moves_arr = d.get("moves")?.to::<Arr>();
-    let desc = d.get("description").map(|v| v.to::<String>()).unwrap_or_default();
+    let desc = d
+        .get("description")
+        .map(|v| v.to::<String>())
+        .unwrap_or_default();
     let element = TypeElement::from_repr(type_val as u8).unwrap_or(TypeElement::Wood);
     let secondary_element = if secondary >= 0 {
         TypeElement::from_repr(secondary as u8)
@@ -50,7 +53,14 @@ fn dict_char(d: &Dict) -> Option<CharacterData> {
         name,
         element,
         secondary_element,
-        base_stats: Stats { hp, attack: atk, defense: def, speed: spd, intelligence: intel, spirit: spr },
+        base_stats: Stats {
+            hp,
+            attack: atk,
+            defense: def,
+            speed: spd,
+            intelligence: intel,
+            spirit: spr,
+        },
         moves,
         description: desc,
     })
@@ -70,19 +80,40 @@ fn dict_move(d: &Dict) -> Option<MoveData> {
     let recoil = d.get("recoil").map(|v| v.to::<i64>()).unwrap_or(0) as u32;
     let healing = d.get("healing").map(|v| v.to::<i64>()).unwrap_or(0) as u32;
     let damage_cat = d.get("damage_category").map(|v| v.to::<i64>()).unwrap_or(0);
-    let desc = d.get("description").map(|v| v.to::<String>()).unwrap_or_default();
+    let desc = d
+        .get("description")
+        .map(|v| v.to::<String>())
+        .unwrap_or_default();
     let element = TypeElement::from_repr(type_val as u8).unwrap_or(TypeElement::Wood);
     let effect = EffectType::from_repr(effect_val as u8).unwrap_or(EffectType::None);
     let stat_mod = if stat_mod_stat >= 0 {
-        Some(xiangke_core::types::Stat::from_repr(stat_mod_stat as u8).unwrap_or(xiangke_core::types::Stat::Attack))
+        Some(
+            xiangke_core::types::Stat::from_repr(stat_mod_stat as u8)
+                .unwrap_or(xiangke_core::types::Stat::Attack),
+        )
     } else {
         None
     };
-    let dmg_cat = if damage_cat == 1 { DamageCategory::Arts } else { DamageCategory::Physical };
+    let dmg_cat = if damage_cat == 1 {
+        DamageCategory::Arts
+    } else {
+        DamageCategory::Physical
+    };
     Some(MoveData {
-        id, name, element, power, accuracy: acc, effect, effect_chance: eff_chance,
-        stat_mod_stat: stat_mod, stat_mod_stage, hit_count, recoil, healing,
-        damage_category: dmg_cat, description: desc,
+        id,
+        name,
+        element,
+        power,
+        accuracy: acc,
+        effect,
+        effect_chance: eff_chance,
+        stat_mod_stat: stat_mod,
+        stat_mod_stage,
+        hit_count,
+        recoil,
+        healing,
+        damage_category: dmg_cat,
+        description: desc,
     })
 }
 
@@ -96,7 +127,9 @@ fn part_dict(p: &BattleParticipant) -> Dict {
     d.set("slot_index", p.slot_index);
     d.set("is_defeated", p.is_defeated);
     let mut stages = Arr::new();
-    for s in &p.stat_stages { stages.push(*s as i64); }
+    for s in &p.stat_stages {
+        stages.push(*s as i64);
+    }
     d.set("stat_stages", &stages);
     let mut effects = Arr::new();
     for e in EffectType::ALL {
@@ -118,7 +151,10 @@ fn result_dict(r: &action::ActionResult) -> Dict {
     d.set("is_super_effective", r.is_super_effective);
     d.set("is_not_very_effective", r.is_not_very_effective);
     d.set("is_immune", r.is_immune);
-    d.set("status_applied", r.status_applied.map(|e| e as i64).unwrap_or(0));
+    d.set(
+        "status_applied",
+        r.status_applied.map(|e| e as i64).unwrap_or(0),
+    );
     d.set("status_resisted", r.status_resisted);
     d.set("recoil_damage", r.recoil_damage as i64);
     d.set("log_message", r.log_message.clone());
@@ -205,7 +241,11 @@ impl RustBattleSystem {
     #[func]
     fn execute_player_action(&mut self, move_data: Dict, target_index: i64) -> Dict {
         let default = Dict::new();
-        let attacker_idx = match self.battle_state.as_ref().and_then(|s| s.active_participant) {
+        let attacker_idx = match self
+            .battle_state
+            .as_ref()
+            .and_then(|s| s.active_participant)
+        {
             Some(i) => i,
             None => return default,
         };
@@ -261,7 +301,11 @@ impl RustBattleSystem {
     /// Returns empty Dictionary if no battle state or no active participant.
     #[func]
     fn get_active_participant(&self) -> Dict {
-        match self.battle_state.as_ref().and_then(|s| s.active_participant) {
+        match self
+            .battle_state
+            .as_ref()
+            .and_then(|s| s.active_participant)
+        {
             Some(idx) => part_dict(&self.battle_state.as_ref().unwrap().participants[idx]),
             None => Dict::new(),
         }
@@ -401,7 +445,11 @@ impl RustBattleSystem {
             Some(r) => r,
             None => return logs,
         };
-        for msg in flow::process_start_of_turn(&mut state.participants[idx], &state.status_effect_configs, rng) {
+        for msg in flow::process_start_of_turn(
+            &mut state.participants[idx],
+            &state.status_effect_configs,
+            rng,
+        ) {
             logs.push(msg.clone());
             state.add_log(msg);
         }
@@ -427,7 +475,11 @@ impl RustBattleSystem {
             Some(r) => r,
             None => return logs,
         };
-        for msg in flow::process_end_of_turn(&mut state.participants[idx], &state.status_effect_configs, rng) {
+        for msg in flow::process_end_of_turn(
+            &mut state.participants[idx],
+            &state.status_effect_configs,
+            rng,
+        ) {
             logs.push(msg.clone());
             state.add_log(msg);
         }

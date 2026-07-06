@@ -78,16 +78,19 @@ impl BattleState {
         }
         let mut status_effect_configs = HashMap::new();
         for &effect in &[EffectType::Burn, EffectType::Poison, EffectType::Confusion] {
-            status_effect_configs.insert(effect, StatusEffectData {
-                status_type: effect,
-                damage_per_turn: match effect {
-                    EffectType::Poison => 1.0 / 8.0,
-                    EffectType::Burn => 1.0 / 16.0,
-                    EffectType::Confusion => 0.0,
-                    _ => 0.0,
+            status_effect_configs.insert(
+                effect,
+                StatusEffectData {
+                    status_type: effect,
+                    damage_per_turn: match effect {
+                        EffectType::Poison => 1.0 / 8.0,
+                        EffectType::Burn => 1.0 / 16.0,
+                        EffectType::Confusion => 0.0,
+                        _ => 0.0,
+                    },
+                    ..Default::default()
                 },
-                ..Default::default()
-            });
+            );
         }
 
         Ok(Self {
@@ -154,13 +157,18 @@ impl BattleState {
     }
 
     pub fn add_log(&mut self, message: String) {
-        self.battle_log
-            .push(format!("[T{}/R{}] {}", self.turn_count, self.round_count, message));
+        self.battle_log.push(format!(
+            "[T{}/R{}] {}",
+            self.turn_count, self.round_count, message
+        ));
     }
 
     pub fn recent_log(&self, n: usize) -> Vec<&str> {
         let start = self.battle_log.len().saturating_sub(n);
-        self.battle_log[start..].iter().map(|s| s.as_str()).collect()
+        self.battle_log[start..]
+            .iter()
+            .map(|s| s.as_str())
+            .collect()
     }
 
     pub fn reset(&mut self) {
@@ -208,7 +216,8 @@ mod tests {
             },
             team,
             0,
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     fn empty_move_lookup() -> HashMap<String, Box<MoveData>> {
@@ -239,29 +248,29 @@ mod tests {
         assert!(result.is_err());
     }
 
-#[test]
-fn test_evaluate_victory() {
-    let mut participants = vec![
-        make_participant(Team::Player, 100),
-        make_participant(Team::Enemy, 100),
-    ];
-    participants[1].take_damage(100);
-    let state = BattleState::new(participants, empty_move_lookup()).unwrap();
-    let status = state.evaluate_status();
-    assert_eq!(status, Status::Victory);
-}
+    #[test]
+    fn test_evaluate_victory() {
+        let mut participants = vec![
+            make_participant(Team::Player, 100),
+            make_participant(Team::Enemy, 100),
+        ];
+        participants[1].take_damage(100);
+        let state = BattleState::new(participants, empty_move_lookup()).unwrap();
+        let status = state.evaluate_status();
+        assert_eq!(status, Status::Victory);
+    }
 
-#[test]
-fn test_evaluate_defeat() {
-    let mut participants = vec![
-        make_participant(Team::Player, 100),
-        make_participant(Team::Enemy, 100),
-    ];
-    participants[0].take_damage(100);
-    let state = BattleState::new(participants, empty_move_lookup()).unwrap();
-    let status = state.evaluate_status();
-    assert_eq!(status, Status::Defeat);
-}
+    #[test]
+    fn test_evaluate_defeat() {
+        let mut participants = vec![
+            make_participant(Team::Player, 100),
+            make_participant(Team::Enemy, 100),
+        ];
+        participants[0].take_damage(100);
+        let state = BattleState::new(participants, empty_move_lookup()).unwrap();
+        let status = state.evaluate_status();
+        assert_eq!(status, Status::Defeat);
+    }
 
     #[test]
     fn test_evaluate_draw() {
@@ -286,20 +295,20 @@ fn test_evaluate_defeat() {
         assert_eq!(status, Status::Active);
     }
 
-#[test]
-fn test_participant_filtering() {
-    let mut participants = vec![
-        make_participant(Team::Player, 100),
-        make_participant(Team::Player, 100),
-        make_participant(Team::Enemy, 100),
-        make_participant(Team::Enemy, 100),
-    ];
-    participants[3].take_damage(100);
-    let state = BattleState::new(participants, empty_move_lookup()).unwrap();
-    assert_eq!(state.player_participants().count(), 2);
-    assert_eq!(state.enemy_participants().count(), 2);
-    assert_eq!(state.active_participants().count(), 3);
-}
+    #[test]
+    fn test_participant_filtering() {
+        let mut participants = vec![
+            make_participant(Team::Player, 100),
+            make_participant(Team::Player, 100),
+            make_participant(Team::Enemy, 100),
+            make_participant(Team::Enemy, 100),
+        ];
+        participants[3].take_damage(100);
+        let state = BattleState::new(participants, empty_move_lookup()).unwrap();
+        assert_eq!(state.player_participants().count(), 2);
+        assert_eq!(state.enemy_participants().count(), 2);
+        assert_eq!(state.active_participants().count(), 3);
+    }
 
     #[test]
     fn test_add_log() {
@@ -347,9 +356,15 @@ fn test_participant_filtering() {
         assert_eq!(state.turn_count, 0);
         assert_eq!(state.battle_status, Status::Active);
         assert!(!state.participants[0].is_defeated);
-        assert_eq!(state.participants[0].current_hp, state.participants[0].max_hp);
+        assert_eq!(
+            state.participants[0].current_hp,
+            state.participants[0].max_hp
+        );
         assert_eq!(state.participants[0].active_status_effects, 0);
-        assert_eq!(state.participants[0].stat_stage(xiangke_core::types::Stat::Attack), 0);
+        assert_eq!(
+            state.participants[0].stat_stage(xiangke_core::types::Stat::Attack),
+            0
+        );
     }
 
     #[test]

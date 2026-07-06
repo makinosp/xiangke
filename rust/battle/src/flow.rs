@@ -17,11 +17,7 @@ pub struct AIAction {
 }
 
 pub trait AiStrategy {
-    fn select_action(
-        &self,
-        state: &BattleState,
-        participant_index: usize,
-    ) -> Option<AIAction>;
+    fn select_action(&self, state: &BattleState, participant_index: usize) -> Option<AIAction>;
 }
 
 pub struct BasicAi;
@@ -37,13 +33,13 @@ impl BasicAi {
             .participants
             .iter()
             .enumerate()
-            .filter(|(_, p)| {
-                !p.is_defeated && self_team.map_or(true, |t| p.team != t)
-            })
+            .filter(|(_, p)| !p.is_defeated && self_team.map_or(true, |t| p.team != t))
             .min_by(|(_, a), (_, b)| {
                 let ratio_a = a.current_hp as f64 / a.max_hp as f64;
                 let ratio_b = b.current_hp as f64 / b.max_hp as f64;
-                ratio_a.partial_cmp(&ratio_b).unwrap_or(std::cmp::Ordering::Equal)
+                ratio_a
+                    .partial_cmp(&ratio_b)
+                    .unwrap_or(std::cmp::Ordering::Equal)
             })
             .map(|(i, _)| i)
     }
@@ -63,7 +59,9 @@ impl BasicAi {
         }
         let defender = &state.participants[target_index];
         let type_chart = TypeChart::default();
-        let def_secondary = defender.character_data.secondary_element
+        let def_secondary = defender
+            .character_data
+            .secondary_element
             .unwrap_or(defender.character_data.element);
         let effectiveness = type_chart.effectiveness_dual(
             mv.element,
@@ -75,11 +73,7 @@ impl BasicAi {
 }
 
 impl AiStrategy for BasicAi {
-    fn select_action(
-        &self,
-        state: &BattleState,
-        participant_index: usize,
-    ) -> Option<AIAction> {
+    fn select_action(&self, state: &BattleState, participant_index: usize) -> Option<AIAction> {
         let attacker = &state.participants[participant_index];
         if attacker.is_defeated {
             return None;
@@ -89,16 +83,12 @@ impl AiStrategy for BasicAi {
         let self_team = state.participants.get(participant_index).map(|p| p.team);
         let target_index = match target {
             Some(idx) => idx,
-            None => {
-                state
-                    .participants
-                    .iter()
-                    .enumerate()
-                    .find(|(_, p)| {
-                        !p.is_defeated && self_team.map_or(true, |t| p.team != t)
-                    })
-                    .map(|(i, _)| i)?
-            }
+            None => state
+                .participants
+                .iter()
+                .enumerate()
+                .find(|(_, p)| !p.is_defeated && self_team.map_or(true, |t| p.team != t))
+                .map(|(i, _)| i)?,
         };
 
         let mut best_move: Option<(String, f64)> = None;
@@ -140,12 +130,14 @@ pub fn process_start_of_turn(
 ) -> Vec<String> {
     let mut logs = Vec::new();
     if participant.has_status(EffectType::Confusion) {
-        let cfg = configs.get(&EffectType::Confusion).cloned().unwrap_or_default();
+        let cfg = configs
+            .get(&EffectType::Confusion)
+            .cloned()
+            .unwrap_or_default();
         let self_dmg_frac = cfg.damage_per_turn.max(0.01);
         if rng.r#gen::<f64>() < 0.5 {
-            let dmg = participant.take_damage(
-                (participant.max_hp as f64 * self_dmg_frac).ceil().max(1.0) as u32,
-            );
+            let dmg = participant
+                .take_damage((participant.max_hp as f64 * self_dmg_frac).ceil().max(1.0) as u32);
             logs.push(format!(
                 "{} is confused and hit itself for {} damage!",
                 participant.character_data.name, dmg
@@ -166,7 +158,9 @@ pub fn process_end_of_turn(
     for &effect in &DOT_EFFECTS {
         if participant.has_status(effect) {
             let cfg = configs.get(&effect).cloned().unwrap_or_default();
-            let dmg = (participant.max_hp as f64 * cfg.damage_per_turn).ceil().max(1.0) as u32;
+            let dmg = (participant.max_hp as f64 * cfg.damage_per_turn)
+                .ceil()
+                .max(1.0) as u32;
             let actual = participant.take_damage(dmg);
             logs.push(format!(
                 "{} takes {} damage from {:?}!",
@@ -191,9 +185,30 @@ mod tests {
 
     fn default_configs() -> HashMap<EffectType, StatusEffectData> {
         let mut m = HashMap::new();
-        m.insert(EffectType::Burn, StatusEffectData { status_type: EffectType::Burn, damage_per_turn: 1.0 / 16.0, ..Default::default() });
-        m.insert(EffectType::Poison, StatusEffectData { status_type: EffectType::Poison, damage_per_turn: 1.0 / 8.0, ..Default::default() });
-        m.insert(EffectType::Confusion, StatusEffectData { status_type: EffectType::Confusion, damage_per_turn: 1.0 / 16.0, ..Default::default() });
+        m.insert(
+            EffectType::Burn,
+            StatusEffectData {
+                status_type: EffectType::Burn,
+                damage_per_turn: 1.0 / 16.0,
+                ..Default::default()
+            },
+        );
+        m.insert(
+            EffectType::Poison,
+            StatusEffectData {
+                status_type: EffectType::Poison,
+                damage_per_turn: 1.0 / 8.0,
+                ..Default::default()
+            },
+        );
+        m.insert(
+            EffectType::Confusion,
+            StatusEffectData {
+                status_type: EffectType::Confusion,
+                damage_per_turn: 1.0 / 16.0,
+                ..Default::default()
+            },
+        );
         m
     }
 
@@ -217,7 +232,8 @@ mod tests {
             },
             team,
             0,
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     fn make_state() -> BattleState {
@@ -325,7 +341,9 @@ mod tests {
         let mv = state.move_lookup.get("fire_strike").unwrap();
         let mut healing_move = mv.as_ref().clone();
         healing_move.healing = 50;
-        state.move_lookup.insert("heal".into(), Box::new(healing_move));
+        state
+            .move_lookup
+            .insert("heal".into(), Box::new(healing_move));
         state.participants[1].character_data.moves = vec!["heal".into(), "fire_strike".into()];
         let ai = BasicAi::new();
         let action = ai.select_action(&state, 1).unwrap();

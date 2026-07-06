@@ -1,8 +1,8 @@
 use rand::Rng;
 
 use xiangke_core::moves::MoveData;
-use xiangke_core::types::{DamageCategory, EffectType};
 use xiangke_core::types::TypeChart;
+use xiangke_core::types::{DamageCategory, EffectType};
 
 use crate::participant::BattleParticipant;
 use crate::state::BattleError;
@@ -82,7 +82,10 @@ fn build_damage_log(
         parts.push("A critical hit!".into());
     }
     if result.recoil_damage > 0 {
-        parts.push(format!("{attacker_name} took {} recoil damage!", result.recoil_damage));
+        parts.push(format!(
+            "{attacker_name} took {} recoil damage!",
+            result.recoil_damage
+        ));
     }
     parts.join(" ")
 }
@@ -117,12 +120,11 @@ pub fn calculate_damage(
 
     if mv.power > 0 {
         let (effective_atk, effective_def) = match mv.damage_category {
-            DamageCategory::Physical => {
-                (attacker.effective_attack(), defender.effective_defense())
-            }
-            DamageCategory::Arts => {
-                (attacker.effective_intelligence(), defender.effective_spirit())
-            }
+            DamageCategory::Physical => (attacker.effective_attack(), defender.effective_defense()),
+            DamageCategory::Arts => (
+                attacker.effective_intelligence(),
+                defender.effective_spirit(),
+            ),
         };
         let effective_def = effective_def.max(1.0);
         result.raw_damage = ((effective_atk * mv.power as f64 * 0.8) / effective_def)
@@ -130,7 +132,9 @@ pub fn calculate_damage(
             .max(1.0) as u32;
 
         let type_chart = TypeChart::default();
-        let def_secondary = defender.character_data.secondary_element
+        let def_secondary = defender
+            .character_data
+            .secondary_element
             .unwrap_or(defender.character_data.element);
         result.type_effectiveness = type_chart.effectiveness_dual(
             mv.element,
@@ -138,8 +142,8 @@ pub fn calculate_damage(
             def_secondary,
         );
         result.is_super_effective = result.type_effectiveness > 1.0;
-        result.is_not_very_effective = result.type_effectiveness > 0.0
-            && result.type_effectiveness < 1.0;
+        result.is_not_very_effective =
+            result.type_effectiveness > 0.0 && result.type_effectiveness < 1.0;
         result.is_immune = result.type_effectiveness == 0.0;
 
         let stab_multiplier = if has_stab(attacker, mv) {
@@ -150,11 +154,9 @@ pub fn calculate_damage(
 
         let variance: f64 = rng.gen_range(MIN_VARIANCE..MAX_VARIANCE);
 
-        let mut final_damage = (result.raw_damage as f64
-            * result.type_effectiveness
-            * stab_multiplier
-            * variance)
-            .max(1.0) as u32;
+        let mut final_damage =
+            (result.raw_damage as f64 * result.type_effectiveness * stab_multiplier * variance)
+                .max(1.0) as u32;
 
         if result.is_immune {
             final_damage = 0;
@@ -190,16 +192,12 @@ pub fn calculate_damage(
         if result.log_message.is_empty() {
             result.log_message = format!(
                 "{} used {} and restored {} HP!",
-                attacker.character_data.name,
-                mv.name,
-                result.heal_amount,
+                attacker.character_data.name, mv.name, result.heal_amount,
             );
         } else {
             result.log_message = format!(
                 "{}\n{} restored {} HP!",
-                result.log_message,
-                attacker.character_data.name,
-                result.heal_amount,
+                result.log_message, attacker.character_data.name, result.heal_amount,
             );
         }
     }
@@ -267,7 +265,8 @@ mod tests {
             },
             Team::Player,
             0,
-        ).unwrap();
+        )
+        .unwrap();
         let defender = BattleParticipant::new(
             CharacterData {
                 id: "defender".into(),
@@ -287,7 +286,8 @@ mod tests {
             },
             Team::Enemy,
             1,
-        ).unwrap();
+        )
+        .unwrap();
         (attacker, defender)
     }
 
