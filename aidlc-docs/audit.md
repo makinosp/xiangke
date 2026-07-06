@@ -817,3 +817,19 @@ Summary at aidlc-docs/construction/unit1/code/phase2-core-summary.md
 **Context**: CONSTRUCTION phase - Phase 2 Code Generation complete. Next stage: Phase 3: Battle System.
 
 ---
+
+## Phase 3: Battle System — Functional Design (Start)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "はい、Phase 3に進んでください。"
+**AI Response**: User confirmed proceeding to Phase 3: Battle System. Starting Functional Design per migration-execution-plan.md. Creating functional design plan with context-appropriate questions for Rust battle system migration.
+**Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 1-2. Plan creation in progress.
+
+## Phase 3: Battle System — Functional Design (Questions Created)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: (plan file generated with 7 questions)
+**AI Response**: Created functional design plan at `aidlc-docs/construction/plans/phase3-battle-functional-design-plan.md` with 7 design questions covering: BattleFlowService architecture, AI placement, error handling, move data resolution, RNG strategy, status effect depth, and test strategy. Awaiting user answers.
+**Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 3-4. Plan stored. Awaiting user input via [Answer]: tags.
+
+---
