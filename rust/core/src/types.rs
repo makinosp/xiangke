@@ -27,7 +27,7 @@ impl TypeElement {
     pub const COUNT: usize = 7;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Display, EnumString, FromRepr)]
 #[repr(u8)]
 pub enum EffectType {
     None = 0,

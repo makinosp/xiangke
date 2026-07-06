@@ -40,7 +40,7 @@
 |---|---|
 | **Choice** | `rand::thread_rng()` (Q5-A) |
 | **Rationale** | Simplest approach, adequate for an internal game. Thread-local ChaCha12 RNG seeded from OS entropy. No special WASM handling until Phase 5 (Q3-C). |
-| **Impact** | RNG owned by `BattleState` as `ThreadRng`. Tests use non-deterministic randomness unless wrapped with seedable Rng. |
+| **Impact** | RNG owned by `RustBattleSystem` (gdext bridge) as `StdRng`. Tests use `StdRng::seed_from_u64()` for deterministic results. |
 
 ### D-6: Status Effect System
 

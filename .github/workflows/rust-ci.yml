@@ -26,7 +26,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: wasm32-unknown-emscripten
+          targets: wasm32-unknown-unknown
           components: clippy, rustfmt
 
       - name: Check formatting
@@ -42,7 +42,7 @@ jobs:
         working-directory: rust
 
       - name: Build (WASM)
-        run: cargo build --target wasm32-unknown-emscripten
+        run: cargo build --target wasm32-unknown-unknown
         working-directory: rust
 
       - name: Run tests

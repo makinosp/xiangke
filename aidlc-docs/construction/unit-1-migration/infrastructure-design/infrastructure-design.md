@@ -9,7 +9,7 @@ setup to actual services and configurations.
 
 | Component                 | Technology    | Version    | Configuration                                              |
 | ------------------------- | ------------- | ---------- | ---------------------------------------------------------- |
-| **Rust Compiler**         | `rustc`       | 1.94.0     | Installed via `rustup`, target `wasm32-unknown-emscripten` |
+| **Rust Compiler**         | `rustc`       | 1.94.0     | Installed via `rustup`, target `wasm32-unknown-unknown` |
 | **Cargo Package Manager** | `cargo`       | 1.94.0     | Default configuration, uses `Cargo.toml`                   |
 | **Godot Engine**          | Godot         | 4.7.stable | Installed locally, uses `project.godot`                    |
 | **Godot-Rust Bindings**   | `godot` crate | 0.5.4      | `edition = "2024"`, `features = ["gdextension"]`           |
@@ -43,7 +43,7 @@ setup to actual services and configurations.
 ## 3. Deployment Considerations
 
 - **GDExtension Binary**: The compiled `.gdextension` file will be built for
-  `wasm32-unknown-emscripten` target.
+  `wasm32-unknown-unknown` target.
 - **WASM Size**: Optimize for <5MB additional size using `wasm-opt`.
 - **Web Autoplay**: The Rust GDExtension must respect Web browser autoplay
   policies.

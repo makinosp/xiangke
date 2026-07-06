@@ -7,6 +7,7 @@ use godot::prelude::*;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 use xiangke_battle::action;
+use xiangke_battle::flow;
 use xiangke_battle::manager;
 use xiangke_battle::participant::{BattleParticipant, Team};
 use xiangke_battle::state::{BattleState, Status};
@@ -17,7 +18,7 @@ use xiangke_core::types::{DamageCategory, EffectType, TypeElement};
 type Dict = VarDictionary;
 type Arr = VarArray;
 
-struct XiankeExtension;
+struct XiangkeExtension;
 
 fn dict_char(d: &Dict) -> Option<CharacterData> {
     let id = d.get("id")?.to::<String>();
@@ -135,6 +136,9 @@ struct RustBattleSystem {
 
 #[godot_api]
 impl RustBattleSystem {
+    /// Initializes a new battle with player and enemy character data.
+    /// Builds participant list from Dictionaries, seeds RNG, and starts first round.
+    /// Returns true on success, false if participants are empty or initialization fails.
     #[func]
     fn start_battle(&mut self, player_chars: Arr, enemy_chars: Arr, move_lookup: Dict) -> bool {
         let mut participants = Vec::new();
@@ -156,7 +160,7 @@ impl RustBattleSystem {
             if let Some(v) = player_chars.get(i) {
                 let d: Dict = v.to::<Dict>();
                 if let Some(cd) = dict_char(&d) {
-                    if let Ok(p) = BattleParticipant::new(Box::new(cd), Team::Player, i as u32) {
+                    if let Ok(p) = BattleParticipant::new(cd, Team::Player, i as u32) {
                         participants.push(p);
                     }
                 }
@@ -167,7 +171,7 @@ impl RustBattleSystem {
             if let Some(v) = enemy_chars.get(i) {
                 let d: Dict = v.to::<Dict>();
                 if let Some(cd) = dict_char(&d) {
-                    if let Ok(p) = BattleParticipant::new(Box::new(cd), Team::Enemy, i as u32) {
+                    if let Ok(p) = BattleParticipant::new(cd, Team::Enemy, i as u32) {
                         participants.push(p);
                     }
                 }
@@ -193,6 +197,11 @@ impl RustBattleSystem {
         }
     }
 
+    /// Executes a player's chosen move against a target participant.
+    /// Takes `move_data` as a Dictionary matching MoveData fields and `target_index` as
+    /// the global participant index. Returns an ActionResult Dictionary with damage,
+    /// healing, hit/miss, type effectiveness, and log message fields.
+    /// Returns empty Dictionary on error (invalid index, missing state, move parse failure).
     #[func]
     fn execute_player_action(&mut self, move_data: Dict, target_index: i64) -> Dict {
         let default = Dict::new();
@@ -237,6 +246,8 @@ impl RustBattleSystem {
         result_dict(&result)
     }
 
+    /// Advances the turn queue to the next active participant.
+    /// Returns true if a next participant exists, false if no valid participants remain.
     #[func]
     fn advance_turn(&mut self) -> bool {
         match (self.battle_state.as_mut(), self.rng.as_mut()) {
@@ -245,6 +256,9 @@ impl RustBattleSystem {
         }
     }
 
+    /// Returns a Dictionary of the current active participant's data.
+    /// Keys: id, name, current_hp, max_hp, team, slot_index, is_defeated, stat_stages, active_status_effects.
+    /// Returns empty Dictionary if no battle state or no active participant.
     #[func]
     fn get_active_participant(&self) -> Dict {
         match self.battle_state.as_ref().and_then(|s| s.active_participant) {
@@ -253,6 +267,7 @@ impl RustBattleSystem {
         }
     }
 
+    /// Returns an Array of participant Dictionaries for the player's team.
     #[func]
     fn get_player_participants(&self) -> Arr {
         let mut arr = Arr::new();
@@ -266,6 +281,7 @@ impl RustBattleSystem {
         arr
     }
 
+    /// Returns an Array of participant Dictionaries for the enemy's team.
     #[func]
     fn get_enemy_participants(&self) -> Arr {
         let mut arr = Arr::new();
@@ -279,6 +295,8 @@ impl RustBattleSystem {
         arr
     }
 
+    /// Returns the last `count` log entries as an Array of formatted strings.
+    /// Each entry follows the format "[T{N}/R{M}] message".
     #[func]
     fn get_recent_log(&self, count: i64) -> Arr {
         let mut arr = Arr::new();
@@ -292,6 +310,8 @@ impl RustBattleSystem {
         arr
     }
 
+    /// Returns the current battle status as an integer.
+    /// Values: 0=Active, 1=Victory, 2=Defeat, 3=Draw, 4=Escaped. Returns 5 if no battle.
     #[func]
     fn get_battle_status(&self) -> i64 {
         match self.battle_state.as_ref() {
@@ -300,6 +320,9 @@ impl RustBattleSystem {
         }
     }
 
+    /// Checks and updates win/loss/draw conditions based on current state.
+    /// Returns the new status: 0=Active (ongoing), 1=Victory, 2=Defeat, 3=Draw.
+    /// If status changed from Active, applies the end-of-battle status and logs.
     #[func]
     fn evaluate_battle_status(&mut self) -> i64 {
         let state = match self.battle_state.as_mut() {
@@ -313,6 +336,7 @@ impl RustBattleSystem {
         status as i64
     }
 
+    /// Returns the total number of participants in the battle (both teams).
     #[func]
     fn get_participant_count(&self) -> i64 {
         match self.battle_state.as_ref() {
@@ -321,6 +345,8 @@ impl RustBattleSystem {
         }
     }
 
+    /// Returns a participant Dictionary at the given global index.
+    /// Returns empty Dictionary if index is out of range or no battle state.
     #[func]
     fn get_participant(&self, index: i64) -> Dict {
         let state = match self.battle_state.as_ref() {
@@ -335,6 +361,7 @@ impl RustBattleSystem {
         }
     }
 
+    /// Returns the global index of the current active participant, or -1 if none.
     #[func]
     fn get_active_participant_index(&self) -> i64 {
         match self.battle_state.as_ref() {
@@ -343,6 +370,8 @@ impl RustBattleSystem {
         }
     }
 
+    /// Returns whether the participant at the given global index is defeated.
+    /// Returns true if no battle state exists.
     #[func]
     fn is_participant_defeated(&self, index: i64) -> bool {
         match self.battle_state.as_ref() {
@@ -354,6 +383,9 @@ impl RustBattleSystem {
         }
     }
 
+    /// Processes start-of-turn effects for the participant at the given index.
+    /// Handles confusion (self-damage with 50% chance). Delegates to flow.rs.
+    /// Returns an Array of log message strings generated during processing.
     #[func]
     fn process_start_of_turn(&mut self, participant_index: i64) -> Arr {
         let mut logs = Arr::new();
@@ -365,36 +397,44 @@ impl RustBattleSystem {
         if idx >= state.participants.len() {
             return logs;
         };
-        let has_confusion = state.participants[idx].has_status(EffectType::Confusion);
-        let has_burn = state.participants[idx].has_status(EffectType::Burn);
-        let has_poison = state.participants[idx].has_status(EffectType::Poison);
-
-        if has_confusion {
-            let msg = format!("{} is confused!", state.participants[idx].character_data.name);
-            logs.push(msg.clone());
-            state.add_log(msg);
-        }
-        if has_burn {
-            let name = state.participants[idx].character_data.name.clone();
-            let max_hp = state.participants[idx].max_hp;
-            let dmg = (max_hp as f64 * 0.0625).ceil().max(1.0) as u32;
-            let actual = state.participants[idx].take_damage(dmg);
-            let msg = format!("{name} took {actual} burn damage!");
-            logs.push(msg.clone());
-            state.add_log(msg);
-        }
-        if has_poison {
-            let name = state.participants[idx].character_data.name.clone();
-            let max_hp = state.participants[idx].max_hp;
-            let dmg = (max_hp as f64 * 0.125).ceil().max(1.0) as u32;
-            let actual = state.participants[idx].take_damage(dmg);
-            let msg = format!("{name} took {actual} poison damage!");
+        let rng = match self.rng.as_mut() {
+            Some(r) => r,
+            None => return logs,
+        };
+        for msg in flow::process_start_of_turn(&mut state.participants[idx], &state.status_effect_configs, rng) {
             logs.push(msg.clone());
             state.add_log(msg);
         }
         logs
     }
 
+    /// Processes end-of-turn effects for the participant at the given index.
+    /// Handles damage-over-time effects (Burn, Poison). Delegates to flow.rs.
+    /// Damage values are configurable via StatusEffectData in BattleState.
+    /// Returns an Array of log message strings generated during processing.
+    #[func]
+    fn process_end_of_turn(&mut self, participant_index: i64) -> Arr {
+        let mut logs = Arr::new();
+        let state = match self.battle_state.as_mut() {
+            Some(s) => s,
+            None => return logs,
+        };
+        let idx = participant_index as usize;
+        if idx >= state.participants.len() {
+            return logs;
+        };
+        let rng = match self.rng.as_mut() {
+            Some(r) => r,
+            None => return logs,
+        };
+        for msg in flow::process_end_of_turn(&mut state.participants[idx], &state.status_effect_configs, rng) {
+            logs.push(msg.clone());
+            state.add_log(msg);
+        }
+        logs
+    }
+
+    /// Adds a custom log message to the battle log with current turn/round prefix.
     #[func]
     fn add_log_message(&mut self, message: String) {
         if let Some(ref mut state) = self.battle_state {
@@ -402,6 +442,8 @@ impl RustBattleSystem {
         }
     }
 
+    /// Returns the display name of the participant at the given global index.
+    /// Returns empty string if index is out of range or no battle state.
     #[func]
     fn get_participant_name(&self, index: i64) -> String {
         match self.battle_state.as_ref() {
@@ -419,4 +461,4 @@ impl RustBattleSystem {
 }
 
 #[gdextension]
-unsafe impl ExtensionLibrary for XiankeExtension {}
+unsafe impl ExtensionLibrary for XiangkeExtension {}

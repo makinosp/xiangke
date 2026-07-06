@@ -99,23 +99,26 @@ mod tests {
     use xiangke_core::types::TypeElement;
 
     fn make_participant(team: Team, hp: u32, speed: u32) -> BattleParticipant {
-        let data = Box::new(CharacterData {
-            id: "test".into(),
-            name: "Test".into(),
-            element: TypeElement::Wood,
-            secondary_element: None,
-            base_stats: Stats {
-                hp,
-                attack: 50,
-                defense: 50,
-                speed,
-                intelligence: 50,
-                spirit: 50,
+        BattleParticipant::new(
+            CharacterData {
+                id: "test".into(),
+                name: "Test".into(),
+                element: TypeElement::Wood,
+                secondary_element: None,
+                base_stats: Stats {
+                    hp,
+                    attack: 50,
+                    defense: 50,
+                    speed,
+                    intelligence: 50,
+                    spirit: 50,
+                },
+                moves: vec![],
+                description: "".into(),
             },
-            moves: vec![],
-            description: "".into(),
-        });
-        BattleParticipant::new(data, team, 0).unwrap()
+            team,
+            0,
+        ).unwrap()
     }
 
     fn make_state(

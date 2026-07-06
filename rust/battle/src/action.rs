@@ -248,40 +248,46 @@ mod tests {
     use xiangke_core::types::TypeElement;
 
     fn make_attacker() -> (BattleParticipant, BattleParticipant) {
-        let atk_data = Box::new(CharacterData {
-            id: "attacker".into(),
-            name: "Attacker".into(),
-            element: TypeElement::Fire,
-            secondary_element: None,
-            base_stats: Stats {
-                hp: 200,
-                attack: 100,
-                defense: 50,
-                speed: 60,
-                intelligence: 80,
-                spirit: 40,
+        let attacker = BattleParticipant::new(
+            CharacterData {
+                id: "attacker".into(),
+                name: "Attacker".into(),
+                element: TypeElement::Fire,
+                secondary_element: None,
+                base_stats: Stats {
+                    hp: 200,
+                    attack: 100,
+                    defense: 50,
+                    speed: 60,
+                    intelligence: 80,
+                    spirit: 40,
+                },
+                moves: vec![],
+                description: "".into(),
             },
-            moves: vec![],
-            description: "".into(),
-        });
-        let def_data = Box::new(CharacterData {
-            id: "defender".into(),
-            name: "Defender".into(),
-            element: TypeElement::Wood,
-            secondary_element: None,
-            base_stats: Stats {
-                hp: 150,
-                attack: 60,
-                defense: 50,
-                speed: 40,
-                intelligence: 50,
-                spirit: 50,
+            Team::Player,
+            0,
+        ).unwrap();
+        let defender = BattleParticipant::new(
+            CharacterData {
+                id: "defender".into(),
+                name: "Defender".into(),
+                element: TypeElement::Wood,
+                secondary_element: None,
+                base_stats: Stats {
+                    hp: 150,
+                    attack: 60,
+                    defense: 50,
+                    speed: 40,
+                    intelligence: 50,
+                    spirit: 50,
+                },
+                moves: vec![],
+                description: "".into(),
             },
-            moves: vec![],
-            description: "".into(),
-        });
-        let attacker = BattleParticipant::new(atk_data, Team::Player, 0).unwrap();
-        let defender = BattleParticipant::new(def_data, Team::Enemy, 1).unwrap();
+            Team::Enemy,
+            1,
+        ).unwrap();
         (attacker, defender)
     }
 

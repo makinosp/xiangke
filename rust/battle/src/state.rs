@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use xiangke_core::moves::MoveData;
+use xiangke_core::status::StatusEffectData;
+use xiangke_core::types::EffectType;
 
 use crate::participant::{BattleParticipant, Team};
 
@@ -53,6 +55,7 @@ pub struct BattleState {
     pub turn_queue_index: usize,
     pub active_participant: Option<usize>,
     pub move_lookup: HashMap<String, Box<MoveData>>,
+    pub status_effect_configs: HashMap<EffectType, StatusEffectData>,
     pub battle_log: Vec<String>,
 }
 
@@ -73,6 +76,20 @@ impl BattleState {
                 "Must have at least 1 enemy participant".into(),
             ));
         }
+        let mut status_effect_configs = HashMap::new();
+        for &effect in &[EffectType::Burn, EffectType::Poison, EffectType::Confusion] {
+            status_effect_configs.insert(effect, StatusEffectData {
+                status_type: effect,
+                damage_per_turn: match effect {
+                    EffectType::Poison => 1.0 / 8.0,
+                    EffectType::Burn => 1.0 / 16.0,
+                    EffectType::Confusion => 0.0,
+                    _ => 0.0,
+                },
+                ..Default::default()
+            });
+        }
+
         Ok(Self {
             battle_id: String::new(),
             participants,
@@ -83,6 +100,7 @@ impl BattleState {
             turn_queue_index: 0,
             active_participant: None,
             move_lookup,
+            status_effect_configs,
             battle_log: Vec::new(),
         })
     }
@@ -171,23 +189,26 @@ mod tests {
     use xiangke_core::types::{EffectType, TypeElement};
 
     fn make_participant(team: Team, hp: u32) -> BattleParticipant {
-        let data = Box::new(CharacterData {
-            id: "test".into(),
-            name: "Test".into(),
-            element: TypeElement::Wood,
-            secondary_element: None,
-            base_stats: Stats {
-                hp,
-                attack: 50,
-                defense: 50,
-                speed: 50,
-                intelligence: 50,
-                spirit: 50,
+        BattleParticipant::new(
+            CharacterData {
+                id: "test".into(),
+                name: "Test".into(),
+                element: TypeElement::Wood,
+                secondary_element: None,
+                base_stats: Stats {
+                    hp,
+                    attack: 50,
+                    defense: 50,
+                    speed: 50,
+                    intelligence: 50,
+                    spirit: 50,
+                },
+                moves: vec![],
+                description: "".into(),
             },
-            moves: vec![],
-            description: "".into(),
-        });
-        BattleParticipant::new(data, team, 0).unwrap()
+            team,
+            0,
+        ).unwrap()
     }
 
     fn empty_move_lookup() -> HashMap<String, Box<MoveData>> {

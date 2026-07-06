@@ -17,7 +17,7 @@
 | ID | Requirement | Source |
 |---|---|---|
 | NFR-C-1 | Rust battle system must compile for `x86_64-apple-darwin` (dev) | Existing toolchain |
-| NFR-C-2 | Rust battle system must compile for `wasm32-unknown-emscripten` (deploy target) | MS-1 |
+| NFR-C-2 | Rust battle system must compile for `wasm32-unknown-unknown` (deploy target) | MS-1 |
 | NFR-C-3 | WASM compatibility deferred to Phase 5 (Build & Test) for verification | Q3-C |
 | NFR-C-4 | Must link with Godot 4.x GDExtension ABI | Phase 1 toolchain |
 | NFR-C-5 | Must not introduce GDScript-level dependencies (DataRegistry called at init only) | Q4-C, IR-1.x |
@@ -63,7 +63,7 @@
 | NFR-P-2 | Integration | Full battle loop timing | <1ms per turn |
 | NFR-P-3 | Unit | Turn queue with 6 participants | <5μs |
 | NFR-C-1 | Build | cargo build | Compiles |
-| NFR-C-2 | Build | cargo build --target wasm32-unknown-emscripten | Compiles |
+| NFR-C-2 | Build | cargo build --target wasm32-unknown-unknown | Compiles |
 | NFR-R-1 | Unit | Invalid input → panic | Expected panic |
 | NFR-R-4 | Test | cargo test | All 55+ tests pass |
 | NFR-B-1 | Build | release build with LTO | No warnings |

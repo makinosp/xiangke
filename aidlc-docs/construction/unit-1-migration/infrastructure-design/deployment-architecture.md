@@ -17,20 +17,20 @@ flowchart LR
 
 1. Developer runs `just build`
 2. `justfile` executes:
-   - `cargo build --target wasm32-unknown-emscripten`
-   - Copies `target/wasm32-unknown-emscripten/debug/librust_toolchain.dylib` to
-     `addons/gdext/librust_toolchain.wasm`
-   - Updates `addons/gdext/rust_toolchain.gdextension` with new binary path
+   - `cargo build --target wasm32-unknown-unknown`
+   - Copies `target/wasm32-unknown-unknown/debug/libxiangke_godot_bridge.dylib` to
+     `addons/gdext/libxiangke_godot_bridge.wasm`
+   - Updates `addons/gdext/xiangke_godot_bridge.gdextension` with new binary path
 3. Developer opens Godot editor to test
 
 ### 1.2 CI Build
 
 1. GitHub Actions workflow triggers on `push`
 2. Runs:
-   - `rustup target add wasm32-unknown-emscripten`
-   - `cargo build --target wasm32-unknown-emscripten --release`
+   - `rustup target add wasm32-unknown-unknown`
+   - `cargo build --target wasm32-unknown-unknown --release`
    - `cargo test`
-3. Artifacts: `librust_toolchain.wasm`, test results
+3. Artifacts: `libxiangke_godot_bridge.wasm`, test results
 
 ## 2. Release Process
 

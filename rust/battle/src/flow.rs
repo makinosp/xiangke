@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 use rand::Rng;
 
+use xiangke_core::status::StatusEffectData;
 use xiangke_core::types::EffectType;
 use xiangke_core::types::TypeChart;
 
@@ -132,13 +135,16 @@ impl AiStrategy for BasicAi {
 
 pub fn process_start_of_turn(
     participant: &mut BattleParticipant,
+    configs: &HashMap<EffectType, StatusEffectData>,
     rng: &mut impl Rng,
 ) -> Vec<String> {
     let mut logs = Vec::new();
     if participant.has_status(EffectType::Confusion) {
+        let cfg = configs.get(&EffectType::Confusion).cloned().unwrap_or_default();
+        let self_dmg_frac = cfg.damage_per_turn.max(0.01);
         if rng.r#gen::<f64>() < 0.5 {
             let dmg = participant.take_damage(
-                (participant.max_hp as f64 / 16.0).ceil().max(1.0) as u32,
+                (participant.max_hp as f64 * self_dmg_frac).ceil().max(1.0) as u32,
             );
             logs.push(format!(
                 "{} is confused and hit itself for {} damage!",
@@ -153,12 +159,14 @@ const DOT_EFFECTS: [EffectType; 2] = [EffectType::Burn, EffectType::Poison];
 
 pub fn process_end_of_turn(
     participant: &mut BattleParticipant,
+    configs: &HashMap<EffectType, StatusEffectData>,
     _rng: &mut impl Rng,
 ) -> Vec<String> {
     let mut logs = Vec::new();
     for &effect in &DOT_EFFECTS {
         if participant.has_status(effect) {
-            let dmg = (participant.max_hp as f64 / 16.0).ceil().max(1.0) as u32;
+            let cfg = configs.get(&effect).cloned().unwrap_or_default();
+            let dmg = (participant.max_hp as f64 * cfg.damage_per_turn).ceil().max(1.0) as u32;
             let actual = participant.take_damage(dmg);
             logs.push(format!(
                 "{} takes {} damage from {:?}!",
@@ -178,26 +186,38 @@ mod tests {
     use std::collections::HashMap;
     use xiangke_core::character::{CharacterData, Stats};
     use xiangke_core::moves::MoveData;
+    use xiangke_core::status::StatusEffectData;
     use xiangke_core::types::{DamageCategory, TypeElement};
 
+    fn default_configs() -> HashMap<EffectType, StatusEffectData> {
+        let mut m = HashMap::new();
+        m.insert(EffectType::Burn, StatusEffectData { status_type: EffectType::Burn, damage_per_turn: 1.0 / 16.0, ..Default::default() });
+        m.insert(EffectType::Poison, StatusEffectData { status_type: EffectType::Poison, damage_per_turn: 1.0 / 8.0, ..Default::default() });
+        m.insert(EffectType::Confusion, StatusEffectData { status_type: EffectType::Confusion, damage_per_turn: 1.0 / 16.0, ..Default::default() });
+        m
+    }
+
     fn make_participant(team: Team, hp: u32) -> BattleParticipant {
-        let data = Box::new(CharacterData {
-            id: "test".into(),
-            name: "Test".into(),
-            element: TypeElement::Wood,
-            secondary_element: None,
-            base_stats: Stats {
-                hp,
-                attack: 50,
-                defense: 50,
-                speed: 50,
-                intelligence: 50,
-                spirit: 50,
+        BattleParticipant::new(
+            CharacterData {
+                id: "test".into(),
+                name: "Test".into(),
+                element: TypeElement::Wood,
+                secondary_element: None,
+                base_stats: Stats {
+                    hp,
+                    attack: 50,
+                    defense: 50,
+                    speed: 50,
+                    intelligence: 50,
+                    spirit: 50,
+                },
+                moves: vec!["fire_strike".into()],
+                description: "".into(),
             },
-            moves: vec!["fire_strike".into()],
-            description: "".into(),
-        });
-        BattleParticipant::new(data, team, 0).unwrap()
+            team,
+            0,
+        ).unwrap()
     }
 
     fn make_state() -> BattleState {
@@ -232,8 +252,9 @@ mod tests {
     fn test_confusion_damage() {
         let mut p = make_participant(Team::Player, 100);
         p.apply_status(EffectType::Confusion);
+        let configs = default_configs();
         let mut rng = StdRng::seed_from_u64(42);
-        let logs = process_start_of_turn(&mut p, &mut rng);
+        let logs = process_start_of_turn(&mut p, &configs, &mut rng);
         if !logs.is_empty() {
             assert!(logs[0].contains("confused"));
             assert!(p.current_hp < 100);
@@ -244,8 +265,9 @@ mod tests {
     fn test_dot_damage() {
         let mut p = make_participant(Team::Player, 100);
         p.apply_status(EffectType::Burn);
+        let configs = default_configs();
         let mut rng = StdRng::seed_from_u64(42);
-        let logs = process_end_of_turn(&mut p, &mut rng);
+        let logs = process_end_of_turn(&mut p, &configs, &mut rng);
         assert!(!logs.is_empty());
         assert!(p.current_hp < 100);
     }

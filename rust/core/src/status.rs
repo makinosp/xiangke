@@ -14,6 +14,21 @@ pub struct StatusEffectData {
     pub stat_mod_multiplier: f64,
 }
 
+impl Default for StatusEffectData {
+    fn default() -> Self {
+        Self {
+            status_type: EffectType::None,
+            name: String::new(),
+            description: String::new(),
+            damage_per_turn: 1.0 / 16.0,
+            escalating: false,
+            max_damage_cap: 0.25,
+            stat_mod_stat: None,
+            stat_mod_multiplier: 1.0,
+        }
+    }
+}
+
 impl StatusEffectData {
     pub fn has_damage_over_time(&self) -> bool {
         self.damage_per_turn > 0.0

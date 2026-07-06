@@ -1,5 +1,8 @@
 ## Data validator implementing batch validation with summary reporting.
 ## Validates all character, move, and type chart data against business rules.
+##
+## @deprecated Use Rust validator (core/src/validator.rs) instead.
+## Both validators exist during migration; Rust version is authoritative.
 extends Node
 
 class_name DataValidator

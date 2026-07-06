@@ -1,6 +1,6 @@
 # Rust build commands
 build-rust:
-    cd rust && cargo build --target wasm32-unknown-emscripten
+    cd rust && cargo build --target wasm32-unknown-unknown
 
 test-rust:
     cd rust && cargo test

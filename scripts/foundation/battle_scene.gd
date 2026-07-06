@@ -187,6 +187,19 @@ func _on_cancel_target_selection() -> void:
 
 
 func _advance_turn() -> void:
+	var current_idx := _flow_service.get_active_participant_index()
+	if current_idx >= 0:
+		var logs := _flow_service.process_end_of_turn(current_idx)
+		for msg in logs:
+			_on_log_updated(msg)
+		_update_hp_displays()
+		_update_log_display()
+
+		var status := _flow_service.evaluate_battle_status()
+		if status != BattleState.Status.ACTIVE:
+			_on_battle_ended(status)
+			return
+
 	var has_next := _flow_service.advance_turn()
 	if not has_next:
 		_on_battle_ended(_flow_service.get_battle_status())

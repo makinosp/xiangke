@@ -18,7 +18,7 @@ fn effect_bit(effect: EffectType) -> u8 {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BattleParticipant {
-    pub character_data: Box<CharacterData>,
+    pub character_data: CharacterData,
     pub current_hp: u32,
     pub max_hp: u32,
     pub team: Team,
@@ -29,7 +29,7 @@ pub struct BattleParticipant {
 }
 
 impl BattleParticipant {
-    pub fn new(data: Box<CharacterData>, team: Team, slot: u32) -> Result<Self, BattleError> {
+    pub fn new(data: CharacterData, team: Team, slot: u32) -> Result<Self, BattleError> {
         if data.base_stats.hp == 0 {
             return Err(BattleError::InvalidParticipant(
                 "CharacterData must have hp > 0".into(),
@@ -123,8 +123,8 @@ mod tests {
     use xiangke_core::character::Stats;
     use xiangke_core::types::TypeElement;
 
-    fn dummy_character() -> Box<CharacterData> {
-        Box::new(CharacterData {
+    fn dummy_character() -> CharacterData {
+        CharacterData {
             id: "test_char".into(),
             name: "Test".into(),
             element: TypeElement::Wood,
@@ -139,7 +139,7 @@ mod tests {
             },
             moves: vec![],
             description: "".into(),
-        })
+        }
     }
 
     #[test]
