@@ -4,4 +4,7 @@
 [submodule ".vendor/rust-reference"]
 	path = .vendor/rust-reference
 	url = https://github.com/rust-lang/reference.git
+[submodule ".vendor/godot-docs"]
+	path = .vendor/godot-docs
+	url = https://github.com/godotengine/godot-docs.git
 	branch = master
