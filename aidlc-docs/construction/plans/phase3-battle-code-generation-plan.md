@@ -47,6 +47,9 @@ Define `AiStrategy` trait with `select_action()` method. Implement `BasicAi` as 
 
 ### Step 1: Implement `participant.rs` — BattleParticipant + Team
 
+- [x] Implement BattleParticipant struct, Team enum, all methods per domain-entities.md
+- [x] 11 unit tests (factory valid/invalid, stat stages, effective stats, damage/heal, defeat, status effects)
+
 **Design reference**: domain-entities.md §BattleParticipant, business-rules.md BR-1.x
 
 **Implementation**:
@@ -89,6 +92,9 @@ Define `AiStrategy` trait with `select_action()` method. Implement `BasicAi` as 
 ---
 
 ### Step 2: Implement `state.rs` — BattleState + Status + BattleError
+
+- [x] Implement BattleState struct, Status enum, BattleError enum with thiserror
+- [x] 12 unit tests (creation valid/invalid, evaluate_status victory/defeat/draw/active, filtering, log, reset, error display)
 
 **Design reference**: domain-entities.md §BattleState, business-rules.md BR-2.x, BR-3.x
 
@@ -145,6 +151,9 @@ Define `AiStrategy` trait with `select_action()` method. Implement `BasicAi` as 
 
 ### Step 3: Implement `action.rs` — ActionSystem + ActionResult
 
+- [x] Implement ActionResult struct, calculate_damage with Result-based error handling
+- [x] 12 unit tests (damage physical/arts, miss, STAB, critical, recoil, healing, status, error cases)
+
 **Design reference**: domain-entities.md §ActionResult, business-logic-model.md §2, business-rules.md AR-1.x, AR-2.x, AR-3.x
 
 **Implementation**:
@@ -199,6 +208,9 @@ Define `AiStrategy` trait with `select_action()` method. Implement `BasicAi` as 
 
 ### Step 4: Implement `manager.rs` — BattleManager
 
+- [x] Implement BattleManager free functions (calculate_turn_queue, start_battle, advance_to_next_turn, start_new_round)
+- [x] 7 unit tests (turn queue order, exclude defeated, start_battle, advance, new round, empty queue error)
+
 **Design reference**: business-logic-model.md §3, business-rules.md BR-2.x
 
 **Implementation**:
@@ -243,6 +255,9 @@ Define `AiStrategy` trait with `select_action()` method. Implement `BasicAi` as 
 
 ### Step 5: Implement `flow.rs` — Battle Flow + AI Trait
 
+- [x] Implement AiStrategy trait + BasicAi struct + process_start_of_turn + process_end_of_turn
+- [x] 6 unit tests (confusion, DoT, AI selection, trait object dispatch)
+
 **Design reference**: business-logic-model.md §4, §5, §6, business-rules.md AR-4.x
 
 **Implementation**:
@@ -282,16 +297,16 @@ Define `AiStrategy` trait with `select_action()` method. Implement `BasicAi` as 
 
 ### Step 6: Run full verification
 
-- `cargo check -p xiangke-battle` — no warnings
-- `cargo test -p xiangke-battle` — all tests pass
-- `cargo test` (all crates) — verify no regressions in core crate (55 tests + new battle tests)
-- Verify no use of `assert!` for game-logic errors (only Result-based error handling)
+- [x] `cargo check -p xiangke-battle` — no warnings
+- [x] `cargo test -p xiangke-battle` — 45/45 tests pass
+- [x] `cargo test` (all crates) — 100/100 pass (55 core + 45 battle, no regressions)
+- [x] Verify no use of `assert!` for game-logic errors (only Result-based error handling)
 
 ---
 
 ### Step 7: Generate Code Summary
 
-- Create `aidlc-docs/construction/unit-1-migration/code/phase3-battle-summary.md` with overview of generated artifacts, module structure, test counts, and type safety measures
+- [x] Create `aidlc-docs/construction/unit-1-migration/code/phase3-battle-summary.md` with overview of generated artifacts, module structure, test counts, and type safety measures
 
 ---
 

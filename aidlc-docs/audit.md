@@ -1,5 +1,44 @@
 # AI-DLC Audit Log
 
+## Build and Test Stage
+**Timestamp**: 2026-07-06T20:20:00Z
+**Build Status**: Success
+**Test Status**: Pass (103/103)
+**Files Generated**:
+- build-instructions.md
+- unit-test-instructions.md
+- integration-test-instructions.md
+- build-and-test-summary.md
+
+---
+
+## Phase 4 — Integration Code Generation — Completed
+**Timestamp**: 2026-07-06T20:15:00Z
+**User Input**: "Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed."
+**AI Response**: Completed Phase 4 Integration Code Generation.
+
+**Implementation Summary**:
+- Step 1 (Rust Bridge): `godot_bridge/src/lib.rs` — `RustBattleSystem` Node with 20+ `#[func]` methods, Dictionary ↔ Rust type conversion helpers (`dict_char`, `dict_move`, `part_dict`, `result_dict`)
+- Step 2 (Type helpers): Same as above — all Rust-side Dictionary↔Rust type conversion implemented
+- Step 3 (battle_participant.gd): Simplified — removed all battle logic methods, added `from_dict(data: Dictionary)` constructor, kept as data holder
+- Step 4 (battle_state.gd): Reduced to only `Status` enum (state now in Rust)
+- Step 5 (battle_flow_service.gd): Rewritten as thin wrapper — delegates to `RustBattleSystem`, converts GDScript types ↔ Dictionaries, manages RustBattleSystem lifecycle
+- Step 6 (battle_scene.gd): Updated — replaced direct `_flow_service.battle_state` accesses with wrapper methods, AI logic moved to scene, uses `execute_player_action(move, target_index)` signature
+
+**Files removed**: `systems/battle/action_system.gd`, `systems/battle/battle_manager.gd`
+
+**Verification**: `cargo build` — 0 warnings; `cargo test` — 103/103 tests passed (48 battle + 55 core)
+**Context**: CONSTRUCTION phase - Unit 1 (Integration). Code Generation complete.
+
+---
+## Phase 4 — Integration Code Generation Start
+**Timestamp**: 2026-07-06T20:00:00Z
+**User Input**: "Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed."
+**AI Response**: Proceeding to Phase 4: Integration Code Generation. Creating code generation plan.
+**Context**: CONSTRUCTION phase - Unit 1 (Migration), Phase 3 complete (48 tests, 0 failures). Moving to Phase 4 (GDScript↔Rust bridge layer).
+
+---
+
 ## Functional Design — Phase 2: Core Data Types
 
 **Timestamp**: 2026-07-06T00:00:00Z **User Input**: "承認します。Phase 2: Core
@@ -899,6 +938,53 @@ Summary at aidlc-docs/construction/unit-1-migration/code/phase2-core-summary.md
 **User Input**: "Using AI-DLC, Unit-1-migrationのCode Generationを開始してください。"
 **AI Response**: Created Code Generation Plan at `aidlc-docs/construction/plans/phase3-battle-code-generation-plan.md` with 7 steps covering: participant.rs, state.rs, action.rs, manager.rs, flow.rs, verification, and summary. Plan implements BattleParticipant, BattleState, ActionSystem, ActionResult, BattleManager, AI logic (select_ai_action, score_move, find_weakest_enemy), and battle flow functions (process_start_of_turn, process_end_of_turn). Story mapping: BR-1.x through BR-3.x, AR-1.x through AR-4.x, IR-1.x, VR-1.x. Awaiting user approval.
 **Context**: CONSTRUCTION phase - Code Generation Part 1 (Planning) for Phase 3: Battle System. Plan created with 7 numbered steps.
+
+---
+
+## Code Generation — Phase 3: Battle System (Plan Review + Update)
+
+**Timestamp**: 2026-07-06T12:30:00Z
+**User Input**: "変更をリクエスト" followed by detailed Rust review analysis covering 4 areas: RNG ownership, error handling (Result vs assert), stat stage index safety, AI trait pattern.
+**AI Response**: Reviewed and validated all 4 points against Rust language specifications. Updated the code generation plan:
+- D-1: Removed `ThreadRng` from `BattleState`, pass `&mut ThreadRng` as parameter
+- D-2: Replaced `assert!` with `Result<T, BattleError>` for recoverable errors; defined `BattleError` enum in state.rs
+- D-3: Added `Stat::to_index()` method for type-safe array indexing
+- D-4: Introduced `AiStrategy` trait + `BasicAi` struct with `Box<dyn AiStrategy>` dynamic dispatch
+Plan updated at `aidlc-docs/construction/plans/phase3-battle-code-generation-plan.md`.
+**Context**: CONSTRUCTION phase - Code Generation Part 1 (Planning) - Plan revised per user review.
+
+---
+
+## Code Generation — Phase 3: Battle System (Part 2 Generation Complete)
+
+**Timestamp**: 2026-07-06T13:00:00Z
+**User Input**: "承認してGenerationに進む" (via plan approval)
+**AI Response**: Code Generation Part 2 complete. Executed all 7 steps:
+
+1. **participant.rs** — BattleParticipant + Team enum, Result-based factory, stat stage management using `Stat::to_index()`, damage/heal/status methods
+2. **state.rs** — BattleState + Status enum + BattleError (thiserror), evaluate_status (Victory/Defeat/Draw/Active), participant filtering, log management, reset
+3. **action.rs** — ActionResult struct, calculate_damage with full formula (type effectiveness, STAB 1.2×, variance 0.85-1.0, critical 6%→1.5×, recoil, healing, status effects), Result-based error handling
+4. **manager.rs** — BattleManager free functions: calculate_turn_queue (speed descending with tie-breaking), start_battle, advance_to_next_turn, start_new_round
+5. **flow.rs** — AiStrategy trait + BasicAi struct (weakest target, best move scoring), process_start_of_turn (confusion), process_end_of_turn (DoT)
+6. **Verification** — cargo check: no warnings, cargo test: 45/45 battle + 55/55 core = 100/100 passed
+7. **Summary** — Created at `aidlc-docs/construction/unit-1-migration/code/phase3-battle-summary.md`
+
+**Design decisions applied**:
+- D-1: No ThreadRng in BattleState (Serialize/Clone compatible)
+- D-2: Result<T, BattleError> for recoverable errors, no assert for game-logic
+- D-3: Stat::to_index() for type-safe array indexing
+- D-4: AiStrategy trait + Box<dyn AiStrategy> for extensible AI
+
+**Context**: CONSTRUCTION phase - Code Generation Part 2 (Generation) for Phase 3: Battle System complete. Next stage: Phase 4 (Integration) per migration-execution-plan.md.
+
+---
+
+## Code Generation — Phase 3: Battle System (Approval)
+
+**Timestamp**: 2026-07-06T12:35:00Z
+**User Input**: "承認してGenerationに進む"
+**AI Response**: Plan approved. Beginning Code Generation Part 2 (Generation) for Phase 3: Battle System. Executing 7 steps: participant.rs, state.rs, action.rs, manager.rs, flow.rs, verification, summary.
+**Context**: CONSTRUCTION phase - Code Generation Part 1 (Planning) approved. Transitioning to Part 2 (Generation).
 
 ---
 

@@ -74,6 +74,10 @@ impl Stat {
         Stat::Intelligence,
         Stat::Spirit,
     ];
+
+    pub fn to_index(&self) -> usize {
+        *self as usize
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

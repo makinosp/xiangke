@@ -1,132 +1,56 @@
 # Integration Test Instructions
 
 ## Purpose
-
-Test interactions between the data layer (Unit 1) and future game systems to
-ensure the data contracts are correctly implemented and accessible.
-
-## Current Scope
-
-Since only Unit 1 (Resources) is implemented, integration tests focus on
-verifying that the `DataRegistry` autoload provides correct data access patterns
-that future units (Game Foundation, Battle System, AI System) will use.
+Test the GDScript ↔ Rust integration layer to ensure `BattleFlowService` correctly delegates to `RustBattleSystem` and battle results flow back to GDScript correctly.
 
 ## Test Scenarios
 
-### Scenario 1: DataRegistry → Character Lookup
+### Scenario 1: Rust Battle System Initialization
+- **Description**: Verify that `RustBattleSystem` compiles and its `#[func]` methods are registered correctly
+- **Setup**: `cargo build` succeeds
+- **Test Steps**: Verify `.dylib`/`.so`/`.dll` is produced in `target/debug/`
 
-**Description**: Verify that character data can be retrieved by ID with all
-properties intact.
+### Scenario 2: GDScript ↔ Rust Bridge (Manual - Godot Runtime Required)
+- **Description**: In the Godot editor, verify that `BattleFlowService` instantiates `RustBattleSystem` without errors
+- **Setup**: Open project in Godot 4.x with gdext extension enabled
+- **Test Steps**: 
+  1. Ensure the compiled library is in the Godot project's extension path
+  2. Open a scene that uses `BattleFlowService` (e.g., battle scene)
+  3. Check the Godot Output panel for any gdext/extension errors
+- **Expected Results**: No extension-related errors; `RustBattleSystem` node appears in the scene tree
 
-**Setup**: Project loaded with sample data (3 characters).
-
-**Test Steps**:
-
-1. Open Godot Editor, press F5 to run
-2. In the Debugger → Monitors, check `DataRegistry.get_character("zhuge_liang")`
-3. Verify returned object has expected properties:
-   - `id` == `"zhuge_liang"`
-   - `name` == `"諸葛亮"`
-   - `type` == `TypeEnums.Type.WOOD` (0)
-   - `secondary_type` == `TypeEnums.Type.WATER` (4)
-   - `hp` == `85`
-   - `moves.size()` == `4`
-
-**Expected Results**: All properties match the `.tres` file values.
-
----
-
-### Scenario 2: DataRegistry → Move Lookup
-
-**Description**: Verify that move data can be retrieved by ID.
-
-**Test Steps**:
-
-1. Check `DataRegistry.get_move("fire_strike")`
-2. Verify returned object:
-   - `id` == `"fire_strike"`
-   - `type` == `TypeEnums.Type.FIRE` (1)
-   - `power` == `80`
-   - `effect` == `TypeEnums.EffectType.BURN` (1)
-   - `effect_chance` == `30`
-
-**Expected Results**: All properties match the `.tres` file values.
-
----
-
-### Scenario 3: Type Effectiveness Resolution
-
-**Description**: Verify that `TypeChart.resolve_type_effectiveness()` returns
-correct multipliers for single-type and dual-type defenders.
-
-**Test Steps**:
-
-1. Fire move (type=FIRE) vs Wood defender (single type):
-   ```
-   TypeChart.resolve_type_effectiveness(FIRE, WOOD, -1)
-   ```
-   Expected: `0.5` (Fire is overcome by Wood / 被相克)
-
-2. Fire move vs Wood+Earth defender (dual type):
-   ```
-   TypeChart.resolve_type_effectiveness(FIRE, WOOD, EARTH)
-   ```
-   Expected: `0.5 * 1.25 = 0.625`
-
-3. Yang move vs Yin defender:
-   ```
-   TypeChart.resolve_type_effectiveness(YANG, YIN, -1)
-   ```
-   Expected: `2.0` (super effective)
-
-**Expected Results**: All multipliers match the type chart matrix in
-`scripts/type_chart.gd`.
-
----
-
-### Scenario 4: DataRegistry Convenience Method
-
-**Description**: Verify `get_type_effectiveness_against()` combines move lookup
-with type resolution.
-
-**Test Steps**:
-
-1. Call
-   `DataRegistry.get_type_effectiveness_against("fire_strike", "zhuge_liang")`
-   - Fire strike (FIRE) vs Zhuge Liang (Wood/Water)
-   - Expected: `0.5 * 1.0 = 0.5`
-
-2. Call `DataRegistry.get_type_effectiveness_against("metal_slash", "guan_yu")`
-   - Metal slash (METAL) vs Guan Yu (Metal, single type)
-   - Expected: `1.0` (neutral, same type)
-
-**Expected Results**: Correct combined lookup and resolution.
-
----
-
-### Scenario 5: Batch Validation Integration
-
-**Description**: Verify that `DataValidator.validate_all()` correctly validates
-the entire dataset.
-
-**Test Steps**:
-
-1. Run project in headless mode:
-   ```bash
-   godot --headless --path /path/to/xiangke --quit
-   ```
-2. Check output for validation summary
-
-**Expected Results**: "All data loaded and validated successfully" with 0
-errors.
-
----
+### Scenario 3: Battle Flow Execution
+- **Description**: Start a battle and verify turn progression
+- **Setup**: Godot project with compiled `.dylib`
+- **Test Steps**:
+  1. Run the battle scene
+  2. Select a move and target
+  3. Observe that damage/healing is calculated correctly
+  4. Verify battle log messages appear
+- **Expected Results**: Battle flows through multiple turns without errors
 
 ## Setup Integration Test Environment
 
-No additional services required. All tests run within the Godot editor or via
-Godot CLI in headless mode.
+### 1. Build Rust Library
+```bash
+cargo build --workspace
+```
 
-## Cleanup
+### 2. Configure Godot Extension Path
+Copy `target/debug/libxiangke_godot_bridge.dylib` to the Godot project's extension directory (typically `godot/addons/` or `rust/` directory, configured via `.gdextension` file)
 
-No cleanup needed. Tests are read-only and do not modify data files.
+## Run Integration Tests
+
+### 1. Open Godot Project
+```bash
+# Path to Godot 4.x executable
+/path/to/godot4 --path /Volumes/Data/Projects/xiangke
+```
+
+### 2. Verify Service Interactions
+- Open the battle scene
+- Monitor the Output panel
+- Check the scene tree for `RustBattleSystem` as a child of `BattleFlowService`
+
+### 3. Cleanup
+No cleanup required. Tests are non-destructive.

@@ -4,7 +4,7 @@
 
 - **Project Type**: Brownfield (GDScript → Rust Migration)
 - **Start Date**: 2026-07-03T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Phase 3: Battle System — Code Generation Part 1 (Planning)
+- **Current Stage**: CONSTRUCTION - Phase 3: Battle System — Code Generation Complete
 
 ## Workspace State
 
@@ -45,4 +45,5 @@
 
 - [x] Functional Design (2026-07-06)
 - [x] NFR Requirements (2026-07-06)
-- [ ] Code Generation Part 1: Planning
+- [x] Code Generation Part 1: Planning (2026-07-06)
+- [x] Code Generation Part 2: Generation (2026-07-06) — 45 tests, 5 modules

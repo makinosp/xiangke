@@ -12,4 +12,5 @@ crate-type = ["cdylib"]
 godot = "0.5"
 xiangke-core = { path = "../core" }
 xiangke-battle = { path = "../battle" }
+rand.workspace = true
 serde.workspace = true
