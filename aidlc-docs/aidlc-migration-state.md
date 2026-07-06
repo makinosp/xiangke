@@ -4,7 +4,7 @@
 
 - **Project Type**: Brownfield (GDScript → Rust Migration)
 - **Start Date**: 2026-07-03T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Phase 2: Core Data Types — Code Generation
+- **Current Stage**: CONSTRUCTION - Phase 3: Battle System — Functional Design
   Complete
 
 ## Workspace State
@@ -40,3 +40,7 @@
 
 - [x] Functional Design (2026-07-06)
 - [x] Code Generation (2026-07-06)
+
+#### Phase 3: Battle System
+
+- [x] Functional Design (2026-07-06)

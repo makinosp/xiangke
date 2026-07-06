@@ -832,4 +832,41 @@ Summary at aidlc-docs/construction/unit1/code/phase2-core-summary.md
 **AI Response**: Created functional design plan at `aidlc-docs/construction/plans/phase3-battle-functional-design-plan.md` with 7 design questions covering: BattleFlowService architecture, AI placement, error handling, move data resolution, RNG strategy, status effect depth, and test strategy. Awaiting user answers.
 **Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 3-4. Plan stored. Awaiting user input via [Answer]: tags.
 
+## Phase 3: Battle System — Functional Design (Complete)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "回答完了。続行してください。"
+**AI Response**: User confirmed all answers. Functional Design artifacts generated:
+
+**Domain Entities** — `aidlc-docs/construction/unit1/functional-design/phase3-battle/domain-entities.md`
+- BattleParticipant (with Team enum, stat stages [i32;5], active_status_effects Vec<EffectType>)
+- BattleState (with move_lookup HashMap, ThreadRng, Status enum)
+- ActionResult (13-field pure data struct)
+- AIAction (move_id + target_index + score)
+
+**Business Logic Model** — `aidlc-docs/construction/unit1/functional-design/phase3-battle/business-logic-model.md`
+- Stat Stage Calculation (delegates to core::calc)
+- Damage Calculation (0.8× formula, STAB 1.2×, type chart, variance [0.85,1.0], crit 6%)
+- Turn Queue Management (speed descending with tie-breaking)
+- Battle Flow Orchestration (GDScript wrapper owns loop, Rust provides pure functions)
+- AI Action Selection (hybrid: simple in Rust, complex in GDScript)
+- Status Effect Processing (simple migration — DoT + confusion only)
+- Battle End Conditions (Victory/Defeat/Draw)
+
+**Business Rules** — `aidlc-docs/construction/unit1/functional-design/phase3-battle/business-rules.md`
+- 28 rules across 5 categories: BR (Participant Lifecycle, Turn Management, Battle State), AR (Damage Calculation, Move Execution, Status Effects, AI Logic), IR (GDScript-Rust Bridge), VR (Validation)
+- Panic vs Error vs Invariant severity definitions
+- GDScript-to-Rust module mapping table
+
+**Design decisions with user confirmation:**
+- Q1-A: Pure Rust core + GDScript wrapper
+- Q2-C: Hybrid AI (simple in Rust, complex in GDScript)
+- Q3-A: Panic on invariant violation (fail-fast)
+- Q4-C: Move IDs + HashMap lookup table
+- Q5-A: rand::thread_rng()
+- Q6-A: Simple migration (no duration tracking)
+- Q7-B: Unit + Integration tests
+
+**Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 6-7 complete. Awaiting user approval to proceed to Code Generation.
+
 ---
