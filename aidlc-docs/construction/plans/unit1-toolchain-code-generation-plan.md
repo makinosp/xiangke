@@ -77,5 +77,5 @@ All application code goes to workspace root (never `aidlc-docs/`).
 
 ### Step 10: Generate Code Summary
 
-- [x] Create `aidlc-docs/construction/unit1/code/toolchain-summary.md` with
+- [x] Create `aidlc-docs/construction/unit-1-migration/code/toolchain-summary.md` with
       overview of generated artifacts

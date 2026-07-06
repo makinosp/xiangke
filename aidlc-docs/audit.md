@@ -785,7 +785,7 @@ steps:
 - Battle crate: 5 module stubs
 - Godot bridge: #[gdextension] entry point
 - Verified: cargo check + cargo test (6/6 passed)
-- Summary at aidlc-docs/construction/unit1/code/toolchain-summary.md
+- Summary at aidlc-docs/construction/unit-1-migration/code/toolchain-summary.md
   **Context**: CONSTRUCTION phase - Code Generation Phase 1 complete. Proceeding
   to Phase 2: Core Data Types.
 
@@ -813,7 +813,7 @@ steps:
 6. validator.rs (new) — Full CR/MR/TR validation rules (migrated from GDScript)
 7. lib.rs — Added validator and calc module exports
 8. Verification — cargo check: no warnings, cargo test: 55/55 passed
-Summary at aidlc-docs/construction/unit1/code/phase2-core-summary.md
+Summary at aidlc-docs/construction/unit-1-migration/code/phase2-core-summary.md
 **Context**: CONSTRUCTION phase - Phase 2 Code Generation complete. Next stage: Phase 3: Battle System.
 
 ---
@@ -838,13 +838,13 @@ Summary at aidlc-docs/construction/unit1/code/phase2-core-summary.md
 **User Input**: "回答完了。続行してください。"
 **AI Response**: User confirmed all answers. Functional Design artifacts generated:
 
-**Domain Entities** — `aidlc-docs/construction/unit1/functional-design/phase3-battle/domain-entities.md`
+**Domain Entities** — `aidlc-docs/construction/unit-1-migration/functional-design/phase3-battle/domain-entities.md`
 - BattleParticipant (with Team enum, stat stages [i32;5], active_status_effects Vec<EffectType>)
 - BattleState (with move_lookup HashMap, ThreadRng, Status enum)
 - ActionResult (13-field pure data struct)
 - AIAction (move_id + target_index + score)
 
-**Business Logic Model** — `aidlc-docs/construction/unit1/functional-design/phase3-battle/business-logic-model.md`
+**Business Logic Model** — `aidlc-docs/construction/unit-1-migration/functional-design/phase3-battle/business-logic-model.md`
 - Stat Stage Calculation (delegates to core::calc)
 - Damage Calculation (0.8× formula, STAB 1.2×, type chart, variance [0.85,1.0], crit 6%)
 - Turn Queue Management (speed descending with tie-breaking)
@@ -853,7 +853,7 @@ Summary at aidlc-docs/construction/unit1/code/phase2-core-summary.md
 - Status Effect Processing (simple migration — DoT + confusion only)
 - Battle End Conditions (Victory/Defeat/Draw)
 
-**Business Rules** — `aidlc-docs/construction/unit1/functional-design/phase3-battle/business-rules.md`
+**Business Rules** — `aidlc-docs/construction/unit-1-migration/functional-design/phase3-battle/business-rules.md`
 - 28 rules across 5 categories: BR (Participant Lifecycle, Turn Management, Battle State), AR (Damage Calculation, Move Execution, Status Effects, AI Logic), IR (GDScript-Rust Bridge), VR (Validation)
 - Panic vs Error vs Invariant severity definitions
 - GDScript-to-Rust module mapping table
@@ -868,5 +868,41 @@ Summary at aidlc-docs/construction/unit1/code/phase2-core-summary.md
 - Q7-B: Unit + Integration tests
 
 **Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 6-7 complete. Awaiting user approval to proceed to Code Generation.
+
+## Phase 3: Battle System — NFR Requirements (Planning)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "承認します。NFR Requirementsに進んでください。"
+**AI Response**: Functional Design approved. Starting NFR Requirements for Phase 3: Battle System. Creating NFR requirements plan with context-appropriate questions for the Rust battle module.
+**Context**: CONSTRUCTION phase - Phase 3 NFR Requirements Step 1-2. Plan creation in progress.
+
+## Phase 3: Battle System — NFR Requirements (Complete)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "回答を完了します。続行してください。"
+**AI Response**: NFR requirements assessment completed. Generated 2 artifacts:
+
+**NFR Requirements** (`aidlc-docs/construction/unit-1-migration/nfr-requirements/nfr-requirements.md`):
+- 6 categories: Performance (5), Compatibility (5), Reliability (4), Maintainability (4), Build (4), Verification Matrix (10 entries)
+- Key targets: damage calc <10μs, turn <1ms, binary <2MB, test <500ms
+
+**Tech Stack Decisions** (`aidlc-docs/construction/unit-1-migration/nfr-requirements/tech-stack-decisions.md`):
+- 9 documented decisions (D-1 through D-9)
+- Dependency graph, excluded technologies
+- All 7 NFR questions confirmed with recommended answers
+
+**Context**: CONSTRUCTION phase - Phase 3 NFR Requirements Step 6-7 complete. Awaiting user approval to proceed to NFR Design.
+
+## Directory Restructuring + Deprecation
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "construction/unit-1-migrationにしてみては？" and "では実行してください。"
+**AI Response**: Executed directory restructuring:
+- `construction/unit1/` → `construction/unit-1-migration/` (renamed for clarity)
+- `construction/unit-1/functional-design/phase2-rust-core/` → `construction/unit-1-migration/functional-design/phase2-rust-core/` (moved migration FD out of GDScript dir)
+- `inception/plans/execution-plan.md` → `deprecated/execution-plan.md.old` (superseded by migration-execution-plan.md; was greenfield template inconsistent with brownfield reality)
+- All internal path references updated in audit.md and plan files
+- `construction/unit-1/` now contains only original GDScript FD artifacts (no migration content)
+**Context**: Workspace cleanup. Migration artifacts now centralized in `unit-1-migration/`. Ready to proceed to Code Generation.
 
 ---
