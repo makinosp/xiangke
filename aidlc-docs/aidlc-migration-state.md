@@ -4,7 +4,7 @@
 
 - **Project Type**: Brownfield (GDScript → Rust Migration)
 - **Start Date**: 2026-07-03T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Phase 3: Battle System — NFR Requirements Complete
+- **Current Stage**: CONSTRUCTION - Phase 3: Battle System — Code Generation Part 1 (Planning)
 
 ## Workspace State
 
@@ -44,3 +44,5 @@
 #### Phase 3: Battle System
 
 - [x] Functional Design (2026-07-06)
+- [x] NFR Requirements (2026-07-06)
+- [ ] Code Generation Part 1: Planning

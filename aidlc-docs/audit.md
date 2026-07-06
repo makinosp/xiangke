@@ -893,6 +893,15 @@ Summary at aidlc-docs/construction/unit-1-migration/code/phase2-core-summary.md
 
 **Context**: CONSTRUCTION phase - Phase 3 NFR Requirements Step 6-7 complete. Awaiting user approval to proceed to NFR Design.
 
+## Code Generation — Phase 3: Battle System (Planning)
+
+**Timestamp**: 2026-07-06T12:00:00Z
+**User Input**: "Using AI-DLC, Unit-1-migrationのCode Generationを開始してください。"
+**AI Response**: Created Code Generation Plan at `aidlc-docs/construction/plans/phase3-battle-code-generation-plan.md` with 7 steps covering: participant.rs, state.rs, action.rs, manager.rs, flow.rs, verification, and summary. Plan implements BattleParticipant, BattleState, ActionSystem, ActionResult, BattleManager, AI logic (select_ai_action, score_move, find_weakest_enemy), and battle flow functions (process_start_of_turn, process_end_of_turn). Story mapping: BR-1.x through BR-3.x, AR-1.x through AR-4.x, IR-1.x, VR-1.x. Awaiting user approval.
+**Context**: CONSTRUCTION phase - Code Generation Part 1 (Planning) for Phase 3: Battle System. Plan created with 7 numbered steps.
+
+---
+
 ## Directory Restructuring + Deprecation
 
 **Timestamp**: 2026-07-06T00:00:00Z
