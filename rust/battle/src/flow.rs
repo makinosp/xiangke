@@ -33,7 +33,7 @@ impl BasicAi {
             .participants
             .iter()
             .enumerate()
-            .filter(|(_, p)| !p.is_defeated && self_team.map_or(true, |t| p.team != t))
+            .filter(|(_, p)| !p.is_defeated && (self_team != Some(p.team)))
             .min_by(|(_, a), (_, b)| {
                 let ratio_a = a.current_hp as f64 / a.max_hp as f64;
                 let ratio_b = b.current_hp as f64 / b.max_hp as f64;
@@ -72,6 +72,12 @@ impl BasicAi {
     }
 }
 
+impl Default for BasicAi {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AiStrategy for BasicAi {
     fn select_action(&self, state: &BattleState, participant_index: usize) -> Option<AIAction> {
         let attacker = &state.participants[participant_index];
@@ -87,7 +93,7 @@ impl AiStrategy for BasicAi {
                 .participants
                 .iter()
                 .enumerate()
-                .find(|(_, p)| !p.is_defeated && self_team.map_or(true, |t| p.team != t))
+                .find(|(_, p)| !p.is_defeated && (self_team != Some(p.team)))
                 .map(|(i, _)| i)?,
         };
 

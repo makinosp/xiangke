@@ -44,7 +44,7 @@ fn dict_char(d: &Dict) -> Option<CharacterData> {
     };
     let mut moves = Vec::new();
     for i in 0..moves_arr.len() {
-        if let Some(s) = moves_arr.get(i)?.try_to::<String>().ok() {
+        if let Ok(s) = moves_arr.get(i)?.try_to::<String>() {
             moves.push(s);
         }
     }
@@ -182,12 +182,12 @@ impl RustBattleSystem {
 
         let move_keys = move_lookup.keys_array();
         for i in 0..move_keys.len() {
-            if let Some(key) = move_keys.get(i).and_then(|v| v.try_to::<String>().ok()) {
-                if let Some(val) = move_lookup.get(key.as_str()) {
-                    let val: Dict = val.to::<Dict>();
-                    if let Some(mv) = dict_move(&val) {
-                        move_map.insert(key, Box::new(mv));
-                    }
+            if let Some(key) = move_keys.get(i).and_then(|v| v.try_to::<String>().ok())
+                && let Some(val) = move_lookup.get(key.as_str())
+            {
+                let val: Dict = val.to::<Dict>();
+                if let Some(mv) = dict_move(&val) {
+                    move_map.insert(key, Box::new(mv));
                 }
             }
         }
@@ -195,10 +195,10 @@ impl RustBattleSystem {
         for i in 0..player_chars.len() {
             if let Some(v) = player_chars.get(i) {
                 let d: Dict = v.to::<Dict>();
-                if let Some(cd) = dict_char(&d) {
-                    if let Ok(p) = BattleParticipant::new(cd, Team::Player, i as u32) {
-                        participants.push(p);
-                    }
+                if let Some(cd) = dict_char(&d)
+                    && let Ok(p) = BattleParticipant::new(cd, Team::Player, i as u32)
+                {
+                    participants.push(p);
                 }
             }
         }
@@ -206,10 +206,10 @@ impl RustBattleSystem {
         for i in 0..enemy_chars.len() {
             if let Some(v) = enemy_chars.get(i) {
                 let d: Dict = v.to::<Dict>();
-                if let Some(cd) = dict_char(&d) {
-                    if let Ok(p) = BattleParticipant::new(cd, Team::Enemy, i as u32) {
-                        participants.push(p);
-                    }
+                if let Some(cd) = dict_char(&d)
+                    && let Ok(p) = BattleParticipant::new(cd, Team::Enemy, i as u32)
+                {
+                    participants.push(p);
                 }
             }
         }

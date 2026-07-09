@@ -148,15 +148,15 @@ pub fn validate_type_chart(chart: &[[f64; 7]; 7]) -> Result<(), Vec<ValidationEr
 
     // TR-1: chart must be 7x7 (guaranteed by type system, check remains for completeness)
     // TR-2: Diagonal must not be 2.0 or 0.0
-    for i in 0..7 {
-        if (chart[i][i] - 2.0).abs() < f64::EPSILON {
+    for (i, row) in chart.iter().enumerate() {
+        if (row[i] - 2.0).abs() < f64::EPSILON {
             errors.push(ValidationError {
                 code: "TR-2".into(),
                 message: format!("Type {i} must not be super effective against itself"),
                 context: String::new(),
             });
         }
-        if (chart[i][i] - 0.0).abs() < f64::EPSILON {
+        if (row[i] - 0.0).abs() < f64::EPSILON {
             errors.push(ValidationError {
                 code: "TR-2".into(),
                 message: format!("Type {i} must not be immune to itself"),
@@ -182,29 +182,31 @@ pub fn validate_type_chart(chart: &[[f64; 7]; 7]) -> Result<(), Vec<ValidationEr
     }
 
     // Yang and Yin must have neutral effectiveness against 五行 types (0-4)
-    for i in 0..5 {
-        if (chart[i][5] - 1.0).abs() > f64::EPSILON {
+    for (i, row) in chart.iter().enumerate().take(5) {
+        if (row[5] - 1.0).abs() > f64::EPSILON {
             errors.push(ValidationError {
                 code: "TR-2".into(),
                 message: format!("Yang must have neutral effectiveness against type {i}"),
                 context: String::new(),
             });
         }
-        if (chart[i][6] - 1.0).abs() > f64::EPSILON {
+        if (row[6] - 1.0).abs() > f64::EPSILON {
             errors.push(ValidationError {
                 code: "TR-2".into(),
                 message: format!("Yin must have neutral effectiveness against type {i}"),
                 context: String::new(),
             });
         }
-        if (chart[5][i] - 1.0).abs() > f64::EPSILON {
+    }
+    for (i, (&yang, &yin)) in chart[5].iter().zip(chart[6].iter()).enumerate().take(5) {
+        if (yang - 1.0).abs() > f64::EPSILON {
             errors.push(ValidationError {
                 code: "TR-2".into(),
                 message: format!("Type {i} must have neutral effectiveness against Yang"),
                 context: String::new(),
             });
         }
-        if (chart[6][i] - 1.0).abs() > f64::EPSILON {
+        if (yin - 1.0).abs() > f64::EPSILON {
             errors.push(ValidationError {
                 code: "TR-2".into(),
                 message: format!("Type {i} must have neutral effectiveness against Yin"),
@@ -212,11 +214,10 @@ pub fn validate_type_chart(chart: &[[f64; 7]; 7]) -> Result<(), Vec<ValidationEr
             });
         }
     }
-
-    // TR-3: Five Elements Cycle Compliance
-    for defender in 0..5 {
-        let super_effective_count = (0..5)
-            .filter(|&attacker| (chart[defender][attacker] - 2.0).abs() < f64::EPSILON)
+    for (defender, row) in chart.iter().enumerate().take(5) {
+        let super_effective_count = row[..5]
+            .iter()
+            .filter(|&&v| (v - 2.0).abs() < f64::EPSILON)
             .count();
         if super_effective_count != 1 {
             errors.push(ValidationError {
@@ -229,9 +230,10 @@ pub fn validate_type_chart(chart: &[[f64; 7]; 7]) -> Result<(), Vec<ValidationEr
         }
     }
 
-    for defender in 0..5 {
-        let generating_count = (0..5)
-            .filter(|&attacker| (chart[defender][attacker] - 1.25).abs() < f64::EPSILON)
+    for (defender, row) in chart.iter().enumerate().take(5) {
+        let generating_count = row[..5]
+            .iter()
+            .filter(|&&v| (v - 1.25).abs() < f64::EPSILON)
             .count();
         if generating_count != 1 {
             errors.push(ValidationError {
@@ -244,9 +246,10 @@ pub fn validate_type_chart(chart: &[[f64; 7]; 7]) -> Result<(), Vec<ValidationEr
         }
     }
 
-    for defender in 0..5 {
-        let weak_count = (0..5)
-            .filter(|&attacker| (chart[defender][attacker] - 0.5).abs() < f64::EPSILON)
+    for (defender, row) in chart.iter().enumerate().take(5) {
+        let weak_count = row[..5]
+            .iter()
+            .filter(|&&v| (v - 0.5).abs() < f64::EPSILON)
             .count();
         if weak_count != 1 {
             errors.push(ValidationError {
@@ -336,14 +339,14 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
 
     // MR-4: Move Stat Modification
     if data.has_stat_mod() {
-        if let Some(stat) = data.stat_mod_stat {
-            if !is_valid_stat(stat as u32) {
-                errors.push(ValidationError {
-                    code: "MR-4".into(),
-                    message: format!("Invalid stat for modification: {:?}", stat),
-                    context: data.id.clone(),
-                });
-            }
+        if let Some(stat) = data.stat_mod_stat
+            && !is_valid_stat(stat as u32)
+        {
+            errors.push(ValidationError {
+                code: "MR-4".into(),
+                message: format!("Invalid stat for modification: {:?}", stat),
+                context: data.id.clone(),
+            });
         }
         if data.stat_mod_stage < -3 || data.stat_mod_stage > 3 {
             errors.push(ValidationError {

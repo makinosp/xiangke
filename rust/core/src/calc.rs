@@ -1,6 +1,6 @@
 pub fn stat_stage_multiplier(stage: i32) -> f64 {
     assert!(
-        stage >= -6 && stage <= 6,
+        (-6..=6).contains(&stage),
         "stat stage must be in [-6, 6], got {stage}"
     );
     match stage.cmp(&0) {
