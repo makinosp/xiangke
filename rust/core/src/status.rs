@@ -2,6 +2,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::{EffectType, Stat};
 
+/// Default damage per turn for Burn status (1/16 of max HP).
+pub const BURN_DAMAGE_RATIO: f64 = 1.0 / 16.0;
+/// Default damage per turn for Poison status (2× Burn, since it escalates).
+pub const POISON_DAMAGE_RATIO: f64 = 2.0 * BURN_DAMAGE_RATIO;
+/// Maximum damage cap for escalating status effects (25% of max HP).
+pub const MAX_DOT_CAP: f64 = 0.25;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatusEffectData {
     pub status_type: EffectType,
@@ -20,9 +27,9 @@ impl Default for StatusEffectData {
             status_type: EffectType::None,
             name: String::new(),
             description: String::new(),
-            damage_per_turn: 1.0 / 16.0,
+            damage_per_turn: BURN_DAMAGE_RATIO,
             escalating: false,
-            max_damage_cap: 0.25,
+            max_damage_cap: MAX_DOT_CAP,
             stat_mod_stat: None,
             stat_mod_multiplier: 1.0,
         }

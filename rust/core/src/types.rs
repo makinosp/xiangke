@@ -75,6 +75,7 @@ pub enum Stat {
 }
 
 impl Stat {
+    pub const COUNT: usize = 5;
     pub const ALL: [Stat; 5] = [
         Stat::Attack,
         Stat::Defense,

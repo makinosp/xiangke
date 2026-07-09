@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use xiangke_core::moves::MoveData;
-use xiangke_core::status::StatusEffectData;
+use xiangke_core::status::{BURN_DAMAGE_RATIO, POISON_DAMAGE_RATIO, StatusEffectData};
 use xiangke_core::types::EffectType;
 
 use crate::participant::{BattleParticipant, Team};
@@ -83,8 +83,8 @@ impl BattleState {
                 StatusEffectData {
                     status_type: effect,
                     damage_per_turn: match effect {
-                        EffectType::Poison => 1.0 / 8.0,
-                        EffectType::Burn => 1.0 / 16.0,
+                        EffectType::Poison => POISON_DAMAGE_RATIO,
+                        EffectType::Burn => BURN_DAMAGE_RATIO,
                         EffectType::Confusion => 0.0,
                         _ => 0.0,
                     },

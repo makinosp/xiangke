@@ -1,5 +1,6 @@
 use rand::Rng;
 
+use xiangke_core::calc;
 use xiangke_core::moves::MoveData;
 use xiangke_core::types::TypeChart;
 use xiangke_core::types::{DamageCategory, EffectType};
@@ -127,7 +128,8 @@ pub fn calculate_damage(
             ),
         };
         let effective_def = effective_def.max(1.0);
-        result.raw_damage = ((effective_atk * mv.power as f64 * 0.8) / effective_def)
+        result.raw_damage = ((effective_atk * mv.power as f64 * calc::DAMAGE_MULTIPLIER)
+            / effective_def)
             .ceil()
             .max(1.0) as u32;
 

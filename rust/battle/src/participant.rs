@@ -24,7 +24,7 @@ pub struct BattleParticipant {
     pub team: Team,
     pub slot_index: u32,
     pub is_defeated: bool,
-    pub stat_stages: [i32; 5],
+    pub stat_stages: [i32; Stat::COUNT],
     pub active_status_effects: u8,
 }
 
@@ -42,7 +42,7 @@ impl BattleParticipant {
             team,
             slot_index: slot,
             is_defeated: false,
-            stat_stages: [0; 5],
+            stat_stages: [0; Stat::COUNT],
             active_status_effects: 0,
         })
     }
@@ -54,11 +54,13 @@ impl BattleParticipant {
     pub fn apply_stat_stage(&mut self, stat: Stat, delta: i32) {
         let idx = stat.to_index();
         let current = self.stat_stages[idx];
-        self.stat_stages[idx] = current.saturating_add(delta).clamp(-6, 6);
+        self.stat_stages[idx] = current
+            .saturating_add(delta)
+            .clamp(calc::STAT_STAGE_MIN, calc::STAT_STAGE_MAX);
     }
 
     pub fn reset_stat_stages(&mut self) {
-        self.stat_stages = [0; 5];
+        self.stat_stages = [0; Stat::COUNT];
     }
 
     pub fn effective_stat(&self, stat: Stat) -> f64 {

@@ -1,6 +1,35 @@
 use std::fmt;
 
-use crate::types::EffectType;
+use crate::types::{EffectType, Stat, TypeElement};
+
+/// Maximum length for a move/character ID.
+const MAX_ID_LENGTH: usize = 50;
+/// Maximum length for a move/character name.
+const MAX_NAME_LENGTH: usize = 20;
+/// Maximum power value for a move.
+const MAX_POWER: u32 = 255;
+/// Maximum accuracy value for a move.
+const MAX_ACCURACY: u32 = 100;
+/// Maximum effect chance percentage.
+const MAX_EFFECT_CHANCE: u32 = 100;
+/// Maximum stat modification stage (absolute value).
+const MAX_STAT_MOD_STAGE: i32 = 3;
+/// Maximum hit count for multi-hit moves.
+const MAX_HIT_COUNT: u32 = 5;
+/// Maximum recoil percentage.
+const MAX_RECOIL: u32 = 100;
+/// Maximum healing percentage.
+const MAX_HEALING: u32 = 100;
+/// Maximum length for a character name.
+const MAX_CHAR_NAME_LENGTH: usize = 20;
+/// Maximum value for an individual stat.
+const MAX_INDIVIDUAL_STAT: u32 = 999;
+/// Soft cap for an individual stat (warning threshold).
+const SOFT_STAT_CAP: u32 = 500;
+/// Maximum sum of all stats combined.
+const MAX_STAT_SUM: u32 = 3000;
+/// Required number of moves per character.
+const REQUIRED_MOVE_COUNT: usize = 4;
 
 #[derive(Debug, Clone)]
 pub struct ValidationError {
@@ -111,7 +140,7 @@ impl Default for ValidationResult {
 }
 
 fn is_valid_id_format(id: &str) -> bool {
-    if id.is_empty() || id.len() > 50 {
+    if id.is_empty() || id.len() > MAX_ID_LENGTH {
         return false;
     }
     let mut chars = id.chars();
@@ -132,18 +161,20 @@ fn is_in_range(value: u32, min_val: u32, max_val: u32) -> bool {
 }
 
 fn is_valid_type(value: u32) -> bool {
-    value <= 6
+    value < TypeElement::COUNT as u32
 }
 
 fn is_valid_effect_type(value: u32) -> bool {
-    value <= 5
+    (value as usize) < EffectType::ALL.len()
 }
 
 fn is_valid_stat(value: u32) -> bool {
-    value <= 4
+    (value as usize) < Stat::ALL.len()
 }
 
-pub fn validate_type_chart(chart: &[[f64; 7]; 7]) -> Result<(), Vec<ValidationError>> {
+pub fn validate_type_chart(
+    chart: &[[f64; TypeElement::COUNT]; TypeElement::COUNT],
+) -> Result<(), Vec<ValidationError>> {
     let mut errors = Vec::new();
 
     // TR-1: chart must be 7x7 (guaranteed by type system, check remains for completeness)
@@ -280,26 +311,32 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
             context: data.id.clone(),
         });
     }
-    if data.name.is_empty() || data.name.len() > 20 {
+    if data.name.is_empty() || data.name.len() > MAX_NAME_LENGTH {
         errors.push(ValidationError {
             code: "MR-1".into(),
-            message: "Name must be 1-20 characters".into(),
+            message: format!("Name must be 1-{MAX_NAME_LENGTH} characters"),
             context: data.id.clone(),
         });
     }
 
     // MR-2: Move Power and Accuracy
-    if !is_in_range(data.power, 0, 255) {
+    if !is_in_range(data.power, 0, MAX_POWER) {
         errors.push(ValidationError {
             code: "MR-2".into(),
-            message: format!("Power must be in range [0, 255], got {}", data.power),
+            message: format!(
+                "Power must be in range [0, {MAX_POWER}], got {}",
+                data.power
+            ),
             context: data.id.clone(),
         });
     }
-    if !is_in_range(data.accuracy, 1, 100) {
+    if !is_in_range(data.accuracy, 1, MAX_ACCURACY) {
         errors.push(ValidationError {
             code: "MR-2".into(),
-            message: format!("Accuracy must be in range [1, 100], got {}", data.accuracy),
+            message: format!(
+                "Accuracy must be in range [1, {MAX_ACCURACY}], got {}",
+                data.accuracy
+            ),
             context: data.id.clone(),
         });
     }
@@ -312,11 +349,11 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
             context: data.id.clone(),
         });
     }
-    if !is_in_range(data.effect_chance, 0, 100) {
+    if !is_in_range(data.effect_chance, 0, MAX_EFFECT_CHANCE) {
         errors.push(ValidationError {
             code: "MR-3".into(),
             message: format!(
-                "Effect chance must be in range [0, 100], got {}",
+                "Effect chance must be in range [0, {MAX_EFFECT_CHANCE}], got {}",
                 data.effect_chance
             ),
             context: data.id.clone(),
@@ -348,12 +385,12 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
                 context: data.id.clone(),
             });
         }
-        if data.stat_mod_stage < -3 || data.stat_mod_stage > 3 {
+        if !(-MAX_STAT_MOD_STAGE..=MAX_STAT_MOD_STAGE).contains(&data.stat_mod_stage) {
             errors.push(ValidationError {
                 code: "MR-4".into(),
                 message: format!(
-                    "Stat mod stage must be in range [-3, 3], got {}",
-                    data.stat_mod_stage
+                    "Stat mod stage must be in range [{}, {}], got {}",
+                    -MAX_STAT_MOD_STAGE, MAX_STAT_MOD_STAGE, data.stat_mod_stage
                 ),
                 context: data.id.clone(),
             });
@@ -361,19 +398,25 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
     }
 
     // MR-5: Move Multi-Hit
-    if !is_in_range(data.hit_count, 1, 5) {
+    if !is_in_range(data.hit_count, 1, MAX_HIT_COUNT) {
         errors.push(ValidationError {
             code: "MR-5".into(),
-            message: format!("Hit count must be in range [1, 5], got {}", data.hit_count),
+            message: format!(
+                "Hit count must be in range [1, {MAX_HIT_COUNT}], got {}",
+                data.hit_count
+            ),
             context: data.id.clone(),
         });
     }
 
     // MR-6: Move Recoil
-    if !is_in_range(data.recoil, 0, 100) {
+    if !is_in_range(data.recoil, 0, MAX_RECOIL) {
         errors.push(ValidationError {
             code: "MR-6".into(),
-            message: format!("Recoil must be in range [0, 100], got {}", data.recoil),
+            message: format!(
+                "Recoil must be in range [0, {MAX_RECOIL}], got {}",
+                data.recoil
+            ),
             context: data.id.clone(),
         });
     }
@@ -386,10 +429,13 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
     }
 
     // MR-7: Move Healing
-    if !is_in_range(data.healing, 0, 100) {
+    if !is_in_range(data.healing, 0, MAX_HEALING) {
         errors.push(ValidationError {
             code: "MR-7".into(),
-            message: format!("Healing must be in range [0, 100], got {}", data.healing),
+            message: format!(
+                "Healing must be in range [0, {MAX_HEALING}], got {}",
+                data.healing
+            ),
             context: data.id.clone(),
         });
     }
@@ -415,10 +461,10 @@ pub fn validate_character(
             context: data.id.clone(),
         });
     }
-    if data.name.is_empty() || data.name.len() > 20 {
+    if data.name.is_empty() || data.name.len() > MAX_CHAR_NAME_LENGTH {
         errors.push(ValidationError {
             code: "CR-1".into(),
-            message: "Name must be 1-20 characters".into(),
+            message: format!("Name must be 1-{MAX_CHAR_NAME_LENGTH} characters"),
             context: data.id.clone(),
         });
     }
@@ -434,31 +480,34 @@ pub fn validate_character(
         data.base_stats.spirit,
     ];
     for i in 0..stat_names.len() {
-        if !is_in_range(stat_values[i], 1, 999) {
+        if !is_in_range(stat_values[i], 1, MAX_INDIVIDUAL_STAT) {
             errors.push(ValidationError {
                 code: "CR-2".into(),
                 message: format!(
-                    "{} must be in range [1, 999], got {}",
+                    "{} must be in range [1, {MAX_INDIVIDUAL_STAT}], got {}",
                     stat_names[i], stat_values[i]
                 ),
                 context: data.id.clone(),
             });
         }
-        if stat_values[i] > 500 {
+        if stat_values[i] > SOFT_STAT_CAP {
             errors.push(ValidationError {
                 code: "CR-2".into(),
                 message: format!(
-                    "{} exceeds maximum of 500, got {}",
+                    "{} exceeds maximum of {SOFT_STAT_CAP}, got {}",
                     stat_names[i], stat_values[i]
                 ),
                 context: data.id.clone(),
             });
         }
     }
-    if data.get_stat_sum() > 3000 {
+    if data.get_stat_sum() > MAX_STAT_SUM {
         errors.push(ValidationError {
             code: "CR-2".into(),
-            message: format!("Stat sum {} exceeds maximum 3000", data.get_stat_sum()),
+            message: format!(
+                "Stat sum {} exceeds maximum {MAX_STAT_SUM}",
+                data.get_stat_sum()
+            ),
             context: data.id.clone(),
         });
     }
@@ -489,10 +538,13 @@ pub fn validate_character(
     }
 
     // CR-4: Character Move Assignment
-    if data.moves.len() != 4 {
+    if data.moves.len() != REQUIRED_MOVE_COUNT {
         errors.push(ValidationError {
             code: "CR-4".into(),
-            message: format!("Must have exactly 4 moves, got {}", data.moves.len()),
+            message: format!(
+                "Must have exactly {REQUIRED_MOVE_COUNT} moves, got {}",
+                data.moves.len()
+            ),
             context: data.id.clone(),
         });
     }
@@ -500,7 +552,7 @@ pub fn validate_character(
         .moves
         .iter()
         .any(|move_id| moves.iter().any(|m| m.id == *move_id && m.is_damaging()));
-    if !has_damaging_move && data.moves.len() == 4 {
+    if !has_damaging_move && data.moves.len() == REQUIRED_MOVE_COUNT {
         errors.push(ValidationError {
             code: "CR-4".into(),
             message: "Must have at least one move with power > 0".into(),
@@ -614,7 +666,7 @@ mod tests {
     #[test]
     fn test_validate_type_chart_valid() {
         use TypeElement::*;
-        let mut chart = [[1.0_f64; 7]; 7];
+        let mut chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
         // Row = defender, Col = attacker
         chart[Wood as usize] = [1.0, 0.5, 2.0, 1.0, 1.25, 1.0, 1.0];
         chart[Fire as usize] = [1.25, 1.0, 0.5, 2.0, 1.0, 1.0, 1.0];

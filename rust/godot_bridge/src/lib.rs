@@ -94,7 +94,7 @@ fn dict_move(d: &Dict) -> Option<MoveData> {
     } else {
         None
     };
-    let dmg_cat = if damage_cat == 1 {
+    let dmg_cat = if damage_cat == DamageCategory::Arts as i64 {
         DamageCategory::Arts
     } else {
         DamageCategory::Physical

@@ -1,7 +1,16 @@
+/// Maximum possible stat stage value.
+pub const STAT_STAGE_MAX: i32 = 6;
+/// Minimum possible stat stage value (symmetric negation of MAX).
+pub const STAT_STAGE_MIN: i32 = -STAT_STAGE_MAX;
+/// Base damage multiplier applied before effectiveness/stab/variance.
+pub const DAMAGE_MULTIPLIER: f64 = 0.8;
+
 pub fn stat_stage_multiplier(stage: i32) -> f64 {
     assert!(
-        (-6..=6).contains(&stage),
-        "stat stage must be in [-6, 6], got {stage}"
+        (STAT_STAGE_MIN..=STAT_STAGE_MAX).contains(&stage),
+        "stat stage must be in [{}, {}], got {stage}",
+        STAT_STAGE_MIN,
+        STAT_STAGE_MAX,
     );
     match stage.cmp(&0) {
         std::cmp::Ordering::Equal => 1.0,
@@ -12,7 +21,9 @@ pub fn stat_stage_multiplier(stage: i32) -> f64 {
 
 pub fn calculate_raw_damage(attack: f64, power: u32, defense: f64) -> u32 {
     let def = defense.max(1.0);
-    ((attack * power as f64 * 0.8) / def).ceil().max(1.0) as u32
+    ((attack * power as f64 * DAMAGE_MULTIPLIER) / def)
+        .ceil()
+        .max(1.0) as u32
 }
 
 #[cfg(test)]
@@ -31,7 +42,7 @@ mod tests {
 
     #[test]
     fn test_stage_positive_six() {
-        assert!((stat_stage_multiplier(6) - 4.0).abs() < f64::EPSILON);
+        assert!((stat_stage_multiplier(STAT_STAGE_MAX) - 4.0).abs() < f64::EPSILON);
     }
 
     #[test]
@@ -43,7 +54,7 @@ mod tests {
     #[test]
     fn test_stage_negative_six() {
         let expected = 2.0 / 8.0;
-        assert!((stat_stage_multiplier(-6) - expected).abs() < 1e-10);
+        assert!((stat_stage_multiplier(STAT_STAGE_MIN) - expected).abs() < 1e-10);
     }
 
     #[test]
@@ -60,13 +71,13 @@ mod tests {
     #[test]
     #[should_panic(expected = "stat stage must be in [-6, 6]")]
     fn test_stage_out_of_range_positive() {
-        stat_stage_multiplier(7);
+        stat_stage_multiplier(STAT_STAGE_MAX + 1);
     }
 
     #[test]
     #[should_panic(expected = "stat stage must be in [-6, 6]")]
     fn test_stage_out_of_range_negative() {
-        stat_stage_multiplier(-7);
+        stat_stage_multiplier(STAT_STAGE_MIN - 1);
     }
 
     #[test]
