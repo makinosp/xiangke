@@ -67,14 +67,8 @@ jobs:
         with:
           version: 3.1.74
 
-      # Add upstream/bin to PATH for wasm-opt (bundled with emsdk, not system binaryen).
-      # System binaryen (via apt) may be older and incompatible with WASM features
-      # emitted by the Rust/Emscripten toolchain.
-      - name: Add wasm-opt to PATH (emsdk bundled binaryen)
-        run: |
-          WASM_OPT_DIR="$(dirname "$(which emcc)")/../bin"
-          echo "$WASM_OPT_DIR" >> "$GITHUB_PATH"
-          wasm-opt --version
+      # wasm-opt is bundled with Emscripten SDK in <emsdk>/upstream/bin/.
+      # Do NOT install system binaryen via apt — it may be older and incompatible.
 
       - name: Build WASM (debug)
         run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
@@ -101,13 +95,34 @@ jobs:
         run: |
           WASM=$(find target/wasm32-unknown-emscripten/release -name "*.wasm" -type f | head -1)
           if [ -n "$WASM" ]; then
+            # Locate wasm-opt bundled with Emscripten SDK
+            WASM_OPT=""
+            # Check common emsdk installation directories
+            for dir in "$EMSDK" "$HOME/emsdk" "$HOME/.cache/emsdk" /opt/emsdk /usr/local/share/emsdk; do
+              if [ -n "$dir" ] && [ -d "$dir" ]; then
+                CANDIDATE=$(find "$dir" -name wasm-opt -type f 2>/dev/null | head -1)
+                if [ -n "$CANDIDATE" ]; then
+                  WASM_OPT="$CANDIDATE"
+                  break
+                fi
+              fi
+            done
+            # Last resort: brute-force search
+            if [ -z "$WASM_OPT" ]; then
+              WASM_OPT=$(find /home/runner -name wasm-opt -type f 2>/dev/null | head -1)
+            fi
+            if [ -z "$WASM_OPT" ]; then
+              echo "wasm-opt not found after Emscripten SDK installation!"
+              exit 1
+            fi
+            echo "Using wasm-opt: $WASM_OPT"
             OPT="${WASM%.wasm}.opt.wasm"
             # Enable WASM features emitted by Rust+Emscripten:
             #   bulk-memory:          memory.copy / memory.fill
             #   sign-ext:             i32.extend8_s / i32.extend16_s
             #   saturating-float-to-int: i32.trunc_sat_f64_u
             #   mutable-globals:      Emscripten stack pointer import
-            wasm-opt -Oz \
+            "$WASM_OPT" -Oz \
               --enable-bulk-memory \
               --enable-sign-ext \
               --enable-saturating-float-to-int \
