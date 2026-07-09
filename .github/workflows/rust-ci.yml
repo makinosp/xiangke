@@ -67,8 +67,9 @@ jobs:
         with:
           version: 3.1.74
 
-      - name: Install wasm-opt (binaryen)
-        run: sudo apt-get update && sudo apt-get install -y binaryen
+      # wasm-opt from Emscripten SDK's bundled binaryen is used below.
+      # Do NOT install system binaryen via apt — it may be older and incompatible
+      # with WASM features emitted by the Rust/Emscripten toolchain.
 
       - name: Build WASM (debug)
         run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
@@ -96,7 +97,17 @@ jobs:
           WASM=$(find target/wasm32-unknown-emscripten/release -name "*.wasm" -type f | head -1)
           if [ -n "$WASM" ]; then
             OPT="${WASM%.wasm}.opt.wasm"
-            wasm-opt -Oz "$WASM" -o "$OPT"
+            # Enable WASM features emitted by Rust+Emscripten:
+            #   bulk-memory:          memory.copy / memory.fill
+            #   sign-ext:             i32.extend8_s / i32.extend16_s
+            #   saturating-float-to-int: i32.trunc_sat_f64_u
+            #   mutable-globals:      Emscripten stack pointer import
+            wasm-opt -Oz \
+              --enable-bulk-memory \
+              --enable-sign-ext \
+              --enable-saturating-float-to-int \
+              --enable-mutable-globals \
+              "$WASM" -o "$OPT"
             mv "$OPT" "$WASM"
             SIZE=$(stat --format=%s "$WASM")
             echo "WASM release binary: $WASM"
