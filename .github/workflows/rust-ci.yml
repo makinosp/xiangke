@@ -67,6 +67,9 @@ jobs:
         with:
           version: 3.1.74
 
+      - name: Install wasm-opt (binaryen)
+        run: sudo apt-get update && sudo apt-get install -y binaryen
+
       - name: Build WASM (debug)
         run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
         working-directory: rust
