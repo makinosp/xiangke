@@ -17,7 +17,10 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-and-test:
+  # ──────────────────────────────────────────────
+  # Job 1: Lint + test (stable toolchain)
+  # ──────────────────────────────────────────────
+  lint-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,10 +29,34 @@ jobs:
       - name: Install Rust toolchain (stable)
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: wasm32-unknown-emscripten
           components: clippy, rustfmt
 
-      - name: Install Rust toolchain (nightly) — for WASM build
+      - name: Check formatting
+        run: cargo fmt --check
+        working-directory: rust
+
+      - name: Run clippy
+        run: cargo clippy -- -D warnings
+        working-directory: rust
+
+      - name: Build (native)
+        run: cargo build
+        working-directory: rust
+
+      - name: Run tests
+        run: cargo test
+        working-directory: rust
+
+  # ──────────────────────────────────────────────
+  # Job 2: WASM cross-compile (nightly + Emscripten)
+  # ──────────────────────────────────────────────
+  build-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (nightly)
         uses: dtolnay/rust-toolchain@nightly
         with:
           targets: wasm32-unknown-emscripten
@@ -40,22 +67,40 @@ jobs:
         with:
           version: 3.1.74
 
-      - name: Check formatting
-        run: cargo fmt --check
-        working-directory: rust
-
-      - name: Run clippy
-        run: cargo clippy -- -D warnings
-        working-directory: rust
-
-      - name: Build (native — stable)
-        run: cargo build
-        working-directory: rust
-
-      - name: Build (WASM — nightly + Emscripten)
+      - name: Build WASM (debug)
         run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
         working-directory: rust
 
-      - name: Run tests
-        run: cargo test
+      - name: Check WASM binary size (debug)
+        run: |
+          WASM="target/wasm32-unknown-emscripten/debug/libxiangke_godot_bridge.wasm"
+          if [ -f "$WASM" ]; then
+            SIZE=$(stat --format=%s "$WASM")
+            echo "WASM debug size: $SIZE bytes"
+          else
+            echo "WASM binary not found at $WASM"
+            exit 1
+          fi
+        working-directory: rust
+
+      - name: Build WASM (release)
+        run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten --release
+        working-directory: rust
+
+      - name: Optimize WASM binary with wasm-opt
+        run: |
+          WASM="target/wasm32-unknown-emscripten/release/libxiangke_godot_bridge.wasm"
+          OPT="target/wasm32-unknown-emscripten/release/libxiangke_godot_bridge.opt.wasm"
+          if [ -f "$WASM" ]; then
+            wasm-opt -Oz "$WASM" -o "$OPT"
+            mv "$OPT" "$WASM"
+            SIZE=$(stat --format=%s "$WASM")
+            echo "WASM release size (after -Oz): $SIZE bytes (max 5MB = 5242880)"
+            if [ "$SIZE" -gt 5242880 ]; then
+              echo "::warning::WASM binary size $SIZE exceeds 5MB budget!"
+            fi
+          else
+            echo "WASM release binary not found at $WASM"
+            exit 1
+          fi
         working-directory: rust

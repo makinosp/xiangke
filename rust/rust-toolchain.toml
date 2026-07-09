@@ -1,3 +1,4 @@
 [toolchain]
 channel = "stable"
 targets = ["wasm32-unknown-emscripten"]
+components = ["clippy", "rustfmt", "rust-src"]
