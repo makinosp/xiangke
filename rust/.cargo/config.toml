@@ -7,7 +7,7 @@ rustflags = []
 rustflags = [
     "-C", "link-args=-sSIDE_MODULE=2",
     "-C", "llvm-args=-enable-emscripten-cxx-exceptions=0",
+    "-C", "panic=immediate-abort",
     "-Z", "default-visibility=hidden",
     "-Z", "link-native-libraries=no",
-    "-Z", "emscripten-wasm-eh=false",
 ]
