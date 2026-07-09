@@ -105,7 +105,7 @@
 ### NFR-2: Compatibility (Revised for Rust)
 
 - **NFR-2.1**: The Rust GDExtension shall compile and target **WASM32** via
-  `cargo build --target wasm32-unknown-unknown`.
+  `cargo build --target wasm32-unknown-emscripten`.
 - **NFR-2.2**: The Web export shall function correctly in modern browsers
   (Chrome, Firefox, Safari, Edge).
 - **NFR-2.3**: Input shall remain handled via keyboard and mouse.
@@ -149,8 +149,8 @@
 - **ASM-1**: Godot Rust bindings (gdext) support Godot 4.x and WASM target.
 - **ASM-2**: The existing GDScript battle system can coexist with the Rust
   version during migration.
-- **ASM-3**: Web export with GDExtension is feasible with `wasm32-unknown-unknown`
-  WASM target.
+- **ASM-3**: Web export with GDExtension is feasible with
+  `wasm32-unknown-emscripten` WASM target.
 - **ASM-4**: The migration does not change game mechanics or balance; logic
   parity is the goal.
 

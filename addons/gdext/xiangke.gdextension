@@ -9,6 +9,6 @@ windows.debug.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.windows.debug
 windows.release.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.windows.release.x86_64.dll"
 linux.debug.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.linux.debug.x86_64.so"
 linux.release.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.linux.release.x86_64.so"
-# Web (WASM)
-wasm32.debug = "res://addons/gdext/libxiangke-godot-bridge.wasm32.debug.wasm"
-wasm32.release = "res://addons/gdext/libxiangke-godot-bridge.wasm32.release.wasm"
+# Web (WASM/Emscripten)
+web.debug.wasm32 = "res://rust/target/wasm32-unknown-emscripten/debug/libxiangke_godot_bridge.wasm"
+web.release.wasm32 = "res://rust/target/wasm32-unknown-emscripten/release/libxiangke_godot_bridge.wasm"

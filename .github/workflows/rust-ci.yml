@@ -23,11 +23,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
+      - name: Install Rust toolchain (stable)
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-emscripten
           components: clippy, rustfmt
+
+      - name: Install Rust toolchain (nightly) — for WASM build
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-emscripten
+          components: rust-src
+
+      - name: Install Emscripten SDK
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.74
 
       - name: Check formatting
         run: cargo fmt --check
@@ -37,12 +48,12 @@ jobs:
         run: cargo clippy -- -D warnings
         working-directory: rust
 
-      - name: Build (native)
+      - name: Build (native — stable)
         run: cargo build
         working-directory: rust
 
-      - name: Build (WASM)
-        run: cargo build --target wasm32-unknown-unknown
+      - name: Build (WASM — nightly + Emscripten)
+        run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
         working-directory: rust
 
       - name: Run tests

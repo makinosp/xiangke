@@ -9,7 +9,7 @@ edition.workspace = true
 crate-type = ["cdylib"]
 
 [dependencies]
-godot = "0.5"
+godot = { version = "0.5", features = ["experimental-wasm", "lazy-function-tables"] }
 xiangke-core = { path = "../core" }
 xiangke-battle = { path = "../battle" }
 rand.workspace = true
