@@ -120,12 +120,12 @@ jobs:
             # Enable WASM features emitted by Rust+Emscripten:
             #   bulk-memory:          memory.copy / memory.fill
             #   sign-ext:             i32.extend8_s / i32.extend16_s
-            #   saturating-float-to-int: i32.trunc_sat_f64_u
-            #   mutable-globals:      Emscripten stack pointer import
+            #   nontrapping-float-to-int: i32.trunc_sat_f64_u
+            #   mutable-globals:       Emscripten stack pointer import
             "$WASM_OPT" -Oz \
               --enable-bulk-memory \
               --enable-sign-ext \
-              --enable-saturating-float-to-int \
+              --enable-nontrapping-float-to-int \
               --enable-mutable-globals \
               "$WASM" -o "$OPT"
             mv "$OPT" "$WASM"

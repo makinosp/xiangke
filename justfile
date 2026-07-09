@@ -24,7 +24,7 @@ build-rust-wasm-release:
     wasm-opt -Oz \
       --enable-bulk-memory \
       --enable-sign-ext \
-      --enable-saturating-float-to-int \
+      --enable-nontrapping-float-to-int \
       --enable-mutable-globals \
       target/wasm32-unknown-emscripten/release/xiangke_godot_bridge.wasm \
       -o target/wasm32-unknown-emscripten/release/xiangke_godot_bridge.wasm
