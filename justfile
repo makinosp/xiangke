@@ -21,7 +21,7 @@ build-rust-wasm:
 # Build WASM in release mode with size optimization
 build-rust-wasm-release:
     cd rust && cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten --release
-    wasm-opt -Oz target/wasm32-unknown-emscripten/release/libxiangke_godot_bridge.wasm -o target/wasm32-unknown-emscripten/release/libxiangke_godot_bridge.wasm
+    wasm-opt -Oz target/wasm32-unknown-emscripten/release/xiangke_godot_bridge.wasm -o target/wasm32-unknown-emscripten/release/xiangke_godot_bridge.wasm
 
 # Quick-check WASM compilation without full build
 check-rust-wasm:
