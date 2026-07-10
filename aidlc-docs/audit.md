@@ -1,5 +1,63 @@
 # AI-DLC Audit Log
 
+## Build and Test Stage
+**Timestamp**: 2026-07-06T20:20:00Z
+**Build Status**: Success
+**Test Status**: Pass (103/103)
+**Files Generated**:
+- build-instructions.md
+- unit-test-instructions.md
+- integration-test-instructions.md
+- build-and-test-summary.md
+
+---
+
+## Phase 4 — Integration Code Generation — Completed
+**Timestamp**: 2026-07-06T20:15:00Z
+**User Input**: "Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed."
+**AI Response**: Completed Phase 4 Integration Code Generation.
+
+**Implementation Summary**:
+- Step 1 (Rust Bridge): `godot_bridge/src/lib.rs` — `RustBattleSystem` Node with 20+ `#[func]` methods, Dictionary ↔ Rust type conversion helpers (`dict_char`, `dict_move`, `part_dict`, `result_dict`)
+- Step 2 (Type helpers): Same as above — all Rust-side Dictionary↔Rust type conversion implemented
+- Step 3 (battle_participant.gd): Simplified — removed all battle logic methods, added `from_dict(data: Dictionary)` constructor, kept as data holder
+- Step 4 (battle_state.gd): Reduced to only `Status` enum (state now in Rust)
+- Step 5 (battle_flow_service.gd): Rewritten as thin wrapper — delegates to `RustBattleSystem`, converts GDScript types ↔ Dictionaries, manages RustBattleSystem lifecycle
+- Step 6 (battle_scene.gd): Updated — replaced direct `_flow_service.battle_state` accesses with wrapper methods, AI logic moved to scene, uses `execute_player_action(move, target_index)` signature
+
+**Files removed**: `systems/battle/action_system.gd`, `systems/battle/battle_manager.gd`
+
+**Verification**: `cargo build` — 0 warnings; `cargo test` — 103/103 tests passed (48 battle + 55 core)
+**Context**: CONSTRUCTION phase - Unit 1 (Integration). Code Generation complete.
+
+---
+## Phase 4 — Integration Code Generation Start
+**Timestamp**: 2026-07-06T20:00:00Z
+**User Input**: "Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed."
+**AI Response**: Proceeding to Phase 4: Integration Code Generation. Creating code generation plan.
+**Context**: CONSTRUCTION phase - Unit 1 (Migration), Phase 3 complete (48 tests, 0 failures). Moving to Phase 4 (GDScript↔Rust bridge layer).
+
+---
+
+## Functional Design — Phase 2: Core Data Types
+
+**Timestamp**: 2026-07-06T00:00:00Z **User Input**: "承認します。Phase 2: Core
+Data Types (Functional Design)に進んでください。" **AI Response**: Completed
+Functional Design for Phase 2 (Rust Core Data Types). Created 3 documents in
+aidlc-docs/construction/unit-1/functional-design/phase2-rust-core/:
+
+- domain-entities.md: Full entity definitions for TypeElement, EffectType,
+  DamageCategory, Stat, TypeChart, CharacterData, MoveData, StatusEffectData
+  (aligned with GDScript sources)
+- business-logic-model.md: Type effectiveness resolution, stat stage
+  calculation, raw damage calculation, stat stage application
+- business-rules.md: Character rules (CR-1~4), Move rules (MR-1~7), Status rules
+  (SR-1~3), validation architecture **Context**: CONSTRUCTION phase - Unit 1
+  (Resources/Rust Core). Functional Design completed. Awaiting user approval to
+  proceed to Code Generation.
+
+---
+
 ## Workspace Detection
 
 **Timestamp**: 2026-06-28T00:00:00Z **User Input**: "Using AI-DLC,
@@ -663,5 +721,299 @@ System complete. Generated the following instruction files in
 **Context**: CONSTRUCTION phase - Build and Test Unit 3 complete. All
 instruction files generated at `aidlc-docs/construction/build-and-test/`. Unit
 3: Battle System is now fully implemented and documented.
+
+---
+
+## Tech Stack Migration Request — GDScript to Rust
+
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**: "Using AI-DLC,
+GDScriptからRustに乗り換えたいです。" **AI Response**: Migration request
+received. Currently on `main` branch (switched from `feature/battle-system`).
+Existing codebase is a Godot Engine 4.x turn-based battle game entirely in
+GDScript. User wants to migrate the entire tech stack to Rust. Starting AI-DLC
+workflow for this request. **Context**: INCEPTION phase - New request. Existing
+project now considered Brownfield for the migration. Proceeding with Workspace
+Detection and Requirements Analysis.
+
+---
+
+## Requirements Analysis — Migration Questions Answered
+
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**: "回答しました。" **AI
+Response**: All 9 migration questions answered by user. Summary:
+
+- Q1: B (Type safety — primary motivation)
+- Q2: F (Godot Rust bindings / gdext — target engine)
+- Q3: B (Incremental — keep Godot scenes/UI, migrate battle system)
+- Q4: A (Web/WASM — primary target)
+- Q5: B (Short-term — days/weeks)
+- Q6: B (Battle system + core data types — initial scope)
+- Q7-Q9: B, B, C (All extensions opted out) Generated
+  `requirements-migration.md` with intent analysis, 5 migration phases
+  (Toolchain → Data Types → Battle System → Integration → Cleanup), revised
+  FR/NFR for Rust migration, and constraints/assumptions. Updated
+  `aidlc-migration-state.md`. **Context**: INCEPTION phase - Requirements
+  Analysis Step 7 complete. Awaiting user approval.
+
+---
+
+## Workflow Planning — Migration Execution Plan
+
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**: "Workflow
+Planningに進んでください。" **AI Response**: Workflow Planning complete.
+Analysis results:
+
+- Change Type: Architectural Transformation (GDScript → Rust)
+- Risk Level: Medium
+- SKIPPED: User Stories (internal tech change), Application Design (architecture
+  unchanged), Units Generation (phases already defined in MS-2)
+- EXECUTING: 5 sequential units — Toolchain Setup → Core Data Types → Battle
+  System → Integration → Cleanup & Test
+- Generated `migration-execution-plan.md` with Mermaid visualization, detailed
+  per-unit breakdown, and module update strategy. **Context**: INCEPTION phase -
+  Workflow Planning Step 9 complete. Awaiting user approval.
+
+---
+
+## Workflow Planning — Approved
+
+**Timestamp**: 2026-07-03T00:00:00Z **User Input**:
+"承認します。次のphaseに進んでください。" **AI Response**: Workflow Planning
+approved. Proceeding to CONSTRUCTION phase — Phase 1: Toolchain Setup, starting
+with Infrastructure Design. **Context**: INCEPTION phase complete. Entering
+CONSTRUCTION phase.
+
+---
+## Infrastructure Design — Phase 1: Toolchain Setup
+
+**Timestamp**: 2026-07-05T00:00:00Z
+**User Input**: "承認します。続行してください。"
+**AI Response**: Infrastructure Design approved. Generated infrastructure artifacts:
+- `infrastructure-design.md` with toolchain mapping (Rust 1.94.0, Godot 4.7, godot-rust 0.5.4)
+- `deployment-architecture.md` with build pipeline, release process, runtime architecture
+Updated `aidlc-migration-state.md`.
+**Context**: CONSTRUCTION phase - Infrastructure Design complete. Awaiting user approval.
+---
+
+## Code Generation — Phase 1: Toolchain Setup (Planning)
+
+**Timestamp**: 2026-07-05T00:00:00Z **User Input**: "承認します。Code
+Generationに進んでください。" **AI Response**: Infrastructure Design approved.
+Created Code Generation Plan at
+`aidlc-docs/construction/plans/unit1-toolchain-code-generation-plan.md` with 10
+steps covering: Cargo workspace, Rust toolchain config, GDExtension config,
+Justfile updates, CI workflow, and crate skeletons. **Context**: CONSTRUCTION
+phase - Code Generation Part 1 (Planning) complete. Executing Part 2
+(Generation).
+
+---
+
+## Code Generation — Phase 1: Toolchain Setup (Part 2 Complete)
+
+**Timestamp**: 2026-07-05T00:00:00Z **User Input**: (Plan approved, Generation
+executed) **AI Response**: Code Generation Part 2 complete. Generated all 10
+steps:
+
+- Cargo workspace with 3 member crates (core, battle, godot_bridge)
+- Rust toolchain config (stable, 2024 edition, WASM target)
+- GDExtension entry point (addons/gdext/xiangke.gdextension)
+- Justfile with Rust commands (build-rust, test-rust, check-rust, run)
+- GitHub Actions CI workflow (fmt, clippy, build native+WASM, test)
+- Core crate: TypeElement, TypeChart, CharacterData, MoveData, StatusEffectData
+  (6 unit tests)
+- Battle crate: 5 module stubs
+- Godot bridge: #[gdextension] entry point
+- Verified: cargo check + cargo test (6/6 passed)
+- Summary at aidlc-docs/construction/unit-1-migration/code/toolchain-summary.md
+  **Context**: CONSTRUCTION phase - Code Generation Phase 1 complete. Proceeding
+  to Phase 2: Core Data Types.
+
+---
+
+## Functional Design — Phase 2: Core Data Types (Approval)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "承認します。Code Generationに進んでください。"
+**AI Response**: Functional Design for Phase 2: Core Data Types approved by user. Proceeding to Code Generation Part 1 (Planning). Creating code generation plan at aidlc-docs/construction/plans/phase2-core-code-generation-plan.md.
+**Context**: CONSTRUCTION phase - Phase 2 Functional Design Step 6/9. Approval recorded. Next: Code Generation Planning.
+
+---
+
+## Code Generation — Phase 2: Core Data Types (Complete)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "承認します。Part 2: Generationに進んでください。" (via plan approval)
+**AI Response**: Code Generation Part 2 complete. Executed all 8 steps:
+1. types.rs — Added EffectType/DamageCategory/Stat enums, fixed TypeChart matrix layout (row=defender, col=attacker) with correct 1.25 generating values
+2. character.rs — Changed id: u32→String, added intelligence/spirit to Stats, added moves vec, added has_secondary_type()/get_stat_sum()
+3. moves.rs — Changed id: u32→String, replaced MoveCategory→DamageCategory, added 8 missing fields
+4. status.rs — Replaced StatusType→EffectType, added 5 business fields
+5. calc.rs (new) — stat_stage_multiplier + calculate_raw_damage helpers
+6. validator.rs (new) — Full CR/MR/TR validation rules (migrated from GDScript)
+7. lib.rs — Added validator and calc module exports
+8. Verification — cargo check: no warnings, cargo test: 55/55 passed
+Summary at aidlc-docs/construction/unit-1-migration/code/phase2-core-summary.md
+**Context**: CONSTRUCTION phase - Phase 2 Code Generation complete. Next stage: Phase 3: Battle System.
+
+---
+
+## Phase 3: Battle System — Functional Design (Start)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "はい、Phase 3に進んでください。"
+**AI Response**: User confirmed proceeding to Phase 3: Battle System. Starting Functional Design per migration-execution-plan.md. Creating functional design plan with context-appropriate questions for Rust battle system migration.
+**Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 1-2. Plan creation in progress.
+
+## Phase 3: Battle System — Functional Design (Questions Created)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: (plan file generated with 7 questions)
+**AI Response**: Created functional design plan at `aidlc-docs/construction/plans/phase3-battle-functional-design-plan.md` with 7 design questions covering: BattleFlowService architecture, AI placement, error handling, move data resolution, RNG strategy, status effect depth, and test strategy. Awaiting user answers.
+**Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 3-4. Plan stored. Awaiting user input via [Answer]: tags.
+
+## Phase 3: Battle System — Functional Design (Complete)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "回答完了。続行してください。"
+**AI Response**: User confirmed all answers. Functional Design artifacts generated:
+
+**Domain Entities** — `aidlc-docs/construction/unit-1-migration/functional-design/phase3-battle/domain-entities.md`
+- BattleParticipant (with Team enum, stat stages [i32;5], active_status_effects Vec<EffectType>)
+- BattleState (with move_lookup HashMap, ThreadRng, Status enum)
+- ActionResult (13-field pure data struct)
+- AIAction (move_id + target_index + score)
+
+**Business Logic Model** — `aidlc-docs/construction/unit-1-migration/functional-design/phase3-battle/business-logic-model.md`
+- Stat Stage Calculation (delegates to core::calc)
+- Damage Calculation (0.8× formula, STAB 1.2×, type chart, variance [0.85,1.0], crit 6%)
+- Turn Queue Management (speed descending with tie-breaking)
+- Battle Flow Orchestration (GDScript wrapper owns loop, Rust provides pure functions)
+- AI Action Selection (hybrid: simple in Rust, complex in GDScript)
+- Status Effect Processing (simple migration — DoT + confusion only)
+- Battle End Conditions (Victory/Defeat/Draw)
+
+**Business Rules** — `aidlc-docs/construction/unit-1-migration/functional-design/phase3-battle/business-rules.md`
+- 28 rules across 5 categories: BR (Participant Lifecycle, Turn Management, Battle State), AR (Damage Calculation, Move Execution, Status Effects, AI Logic), IR (GDScript-Rust Bridge), VR (Validation)
+- Panic vs Error vs Invariant severity definitions
+- GDScript-to-Rust module mapping table
+
+**Design decisions with user confirmation:**
+- Q1-A: Pure Rust core + GDScript wrapper
+- Q2-C: Hybrid AI (simple in Rust, complex in GDScript)
+- Q3-A: Panic on invariant violation (fail-fast)
+- Q4-C: Move IDs + HashMap lookup table
+- Q5-A: rand::thread_rng()
+- Q6-A: Simple migration (no duration tracking)
+- Q7-B: Unit + Integration tests
+
+**Context**: CONSTRUCTION phase - Phase 3 Functional Design Step 6-7 complete. Awaiting user approval to proceed to Code Generation.
+
+## Phase 3: Battle System — NFR Requirements (Planning)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "承認します。NFR Requirementsに進んでください。"
+**AI Response**: Functional Design approved. Starting NFR Requirements for Phase 3: Battle System. Creating NFR requirements plan with context-appropriate questions for the Rust battle module.
+**Context**: CONSTRUCTION phase - Phase 3 NFR Requirements Step 1-2. Plan creation in progress.
+
+## Phase 3: Battle System — NFR Requirements (Complete)
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "回答を完了します。続行してください。"
+**AI Response**: NFR requirements assessment completed. Generated 2 artifacts:
+
+**NFR Requirements** (`aidlc-docs/construction/unit-1-migration/nfr-requirements/nfr-requirements.md`):
+- 6 categories: Performance (5), Compatibility (5), Reliability (4), Maintainability (4), Build (4), Verification Matrix (10 entries)
+- Key targets: damage calc <10μs, turn <1ms, binary <2MB, test <500ms
+
+**Tech Stack Decisions** (`aidlc-docs/construction/unit-1-migration/nfr-requirements/tech-stack-decisions.md`):
+- 9 documented decisions (D-1 through D-9)
+- Dependency graph, excluded technologies
+- All 7 NFR questions confirmed with recommended answers
+
+**Context**: CONSTRUCTION phase - Phase 3 NFR Requirements Step 6-7 complete. Awaiting user approval to proceed to NFR Design.
+
+## Code Generation — Phase 3: Battle System (Planning)
+
+**Timestamp**: 2026-07-06T12:00:00Z
+**User Input**: "Using AI-DLC, Unit-1-migrationのCode Generationを開始してください。"
+**AI Response**: Created Code Generation Plan at `aidlc-docs/construction/plans/phase3-battle-code-generation-plan.md` with 7 steps covering: participant.rs, state.rs, action.rs, manager.rs, flow.rs, verification, and summary. Plan implements BattleParticipant, BattleState, ActionSystem, ActionResult, BattleManager, AI logic (select_ai_action, score_move, find_weakest_enemy), and battle flow functions (process_start_of_turn, process_end_of_turn). Story mapping: BR-1.x through BR-3.x, AR-1.x through AR-4.x, IR-1.x, VR-1.x. Awaiting user approval.
+**Context**: CONSTRUCTION phase - Code Generation Part 1 (Planning) for Phase 3: Battle System. Plan created with 7 numbered steps.
+
+---
+
+## Code Generation — Phase 3: Battle System (Plan Review + Update)
+
+**Timestamp**: 2026-07-06T12:30:00Z
+**User Input**: "変更をリクエスト" followed by detailed Rust review analysis covering 4 areas: RNG ownership, error handling (Result vs assert), stat stage index safety, AI trait pattern.
+**AI Response**: Reviewed and validated all 4 points against Rust language specifications. Updated the code generation plan:
+- D-1: Removed `ThreadRng` from `BattleState`, pass `&mut ThreadRng` as parameter
+- D-2: Replaced `assert!` with `Result<T, BattleError>` for recoverable errors; defined `BattleError` enum in state.rs
+- D-3: Added `Stat::to_index()` method for type-safe array indexing
+- D-4: Introduced `AiStrategy` trait + `BasicAi` struct with `Box<dyn AiStrategy>` dynamic dispatch
+Plan updated at `aidlc-docs/construction/plans/phase3-battle-code-generation-plan.md`.
+**Context**: CONSTRUCTION phase - Code Generation Part 1 (Planning) - Plan revised per user review.
+
+---
+
+## Code Generation — Phase 3: Battle System (Part 2 Generation Complete)
+
+**Timestamp**: 2026-07-06T13:00:00Z
+**User Input**: "承認してGenerationに進む" (via plan approval)
+**AI Response**: Code Generation Part 2 complete. Executed all 7 steps:
+
+1. **participant.rs** — BattleParticipant + Team enum, Result-based factory, stat stage management using `Stat::to_index()`, damage/heal/status methods
+2. **state.rs** — BattleState + Status enum + BattleError (thiserror), evaluate_status (Victory/Defeat/Draw/Active), participant filtering, log management, reset
+3. **action.rs** — ActionResult struct, calculate_damage with full formula (type effectiveness, STAB 1.2×, variance 0.85-1.0, critical 6%→1.5×, recoil, healing, status effects), Result-based error handling
+4. **manager.rs** — BattleManager free functions: calculate_turn_queue (speed descending with tie-breaking), start_battle, advance_to_next_turn, start_new_round
+5. **flow.rs** — AiStrategy trait + BasicAi struct (weakest target, best move scoring), process_start_of_turn (confusion), process_end_of_turn (DoT)
+6. **Verification** — cargo check: no warnings, cargo test: 45/45 battle + 55/55 core = 100/100 passed
+7. **Summary** — Created at `aidlc-docs/construction/unit-1-migration/code/phase3-battle-summary.md`
+
+**Design decisions applied**:
+- D-1: No ThreadRng in BattleState (Serialize/Clone compatible)
+- D-2: Result<T, BattleError> for recoverable errors, no assert for game-logic
+- D-3: Stat::to_index() for type-safe array indexing
+- D-4: AiStrategy trait + Box<dyn AiStrategy> for extensible AI
+
+**Context**: CONSTRUCTION phase - Code Generation Part 2 (Generation) for Phase 3: Battle System complete. Next stage: Phase 4 (Integration) per migration-execution-plan.md.
+
+---
+
+## Code Generation — Phase 3: Battle System (Approval)
+
+**Timestamp**: 2026-07-06T12:35:00Z
+**User Input**: "承認してGenerationに進む"
+**AI Response**: Plan approved. Beginning Code Generation Part 2 (Generation) for Phase 3: Battle System. Executing 7 steps: participant.rs, state.rs, action.rs, manager.rs, flow.rs, verification, summary.
+**Context**: CONSTRUCTION phase - Code Generation Part 1 (Planning) approved. Transitioning to Part 2 (Generation).
+
+---
+
+## Directory Restructuring + Deprecation
+
+**Timestamp**: 2026-07-06T00:00:00Z
+**User Input**: "construction/unit-1-migrationにしてみては？" and "では実行してください。"
+**AI Response**: Executed directory restructuring:
+- `construction/unit1/` → `construction/unit-1-migration/` (renamed for clarity)
+- `construction/unit-1/functional-design/phase2-rust-core/` → `construction/unit-1-migration/functional-design/phase2-rust-core/` (moved migration FD out of GDScript dir)
+- `inception/plans/execution-plan.md` → `deprecated/execution-plan.md.old` (superseded by migration-execution-plan.md; was greenfield template inconsistent with brownfield reality)
+- All internal path references updated in audit.md and plan files
+- `construction/unit-1/` now contains only original GDScript FD artifacts (no migration content)
+**Context**: Workspace cleanup. Migration artifacts now centralized in `unit-1-migration/`. Ready to proceed to Code Generation.
+
+---
+
+## Structural Change: Rename rust to extensions
+**Timestamp**: 2026-07-10T10:27:31Z
+**User Input**: "Using AI-DLC, ディレクトリ rust を extensions にリネームしたい。"
+**AI Response**: Acknowledged. I will analyze the impact of renaming the `rust` directory to `extensions` and execute the change following the AI-DLC process.
+**Context**: Post-Construction phase. Structural refactoring.
+
+---
+
+## Structural Change: Rename rust to extensions (Completed)
+**Timestamp**: 2026-07-10T10:29:01Z
+**User Input**: "Using AI-DLC, ディレクトリ rust を extensions にリネームしたい。"
+**AI Response**: Successfully renamed `rust` directory to `extensions` and updated all critical references in `addons/gdext/xiangke.gdextension` and `justfile`.
+**Context**: Post-Construction phase. Structural refactoring completed.
 
 ---

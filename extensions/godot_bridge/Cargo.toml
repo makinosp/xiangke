@@ -1,0 +1,16 @@
+[package]
+name = "xiangke-godot-bridge"
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+godot = { version = "0.5", features = ["experimental-wasm", "lazy-function-tables"] }
+xiangke-core = { path = "../core" }
+xiangke-battle = { path = "../battle" }
+rand.workspace = true
+serde.workspace = true

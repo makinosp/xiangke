@@ -1,0 +1,143 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [main, feature/**]
+    paths:
+      - "extensions/**"
+      - "Cargo.toml"
+      - "justfile"
+  pull_request:
+    branches: [main]
+    paths:
+      - "extensions/**"
+      - "Cargo.toml"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Job 1: Lint + test (stable toolchain)
+  # ──────────────────────────────────────────────
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --check
+        working-directory: extensions
+
+      - name: Run clippy
+        run: cargo clippy -- -D warnings
+        working-directory: extensions
+
+      - name: Build (native)
+        run: cargo build
+        working-directory: extensions
+
+      - name: Run tests
+        run: cargo test
+        working-directory: extensions
+
+  # ──────────────────────────────────────────────
+  # Job 2: WASM cross-compile (nightly + Emscripten)
+  # ──────────────────────────────────────────────
+  build-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (nightly)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-emscripten
+          components: rust-src
+
+      - name: Install Emscripten SDK
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.74
+
+      # wasm-opt is bundled with Emscripten SDK in <emsdk>/upstream/bin/.
+      # Do NOT install system binaryen via apt — it may be older and incompatible.
+
+      - name: Build WASM (debug)
+        run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
+        working-directory: extensions
+
+      - name: Check WASM binary size (debug)
+        run: |
+          WASM=$(find target/wasm32-unknown-emscripten/debug -name "*.wasm" -type f | head -1)
+          if [ -n "$WASM" ]; then
+            SIZE=$(stat --format=%s "$WASM")
+            echo "WASM debug binary: $WASM ($SIZE bytes)"
+          else
+            echo "No .wasm file found in target/wasm32-unknown-emscripten/debug/"
+            ls -la target/wasm32-unknown-emscripten/debug/ 2>/dev/null || echo "Directory not found"
+            exit 1
+          fi
+        working-directory: extensions
+
+      - name: Build WASM (release)
+        run: cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten --release
+        working-directory: extensions
+
+      - name: Optimize WASM binary with wasm-opt
+        run: |
+          WASM=$(find target/wasm32-unknown-emscripten/release -name "*.wasm" -type f | head -1)
+          if [ -n "$WASM" ]; then
+            # Locate wasm-opt bundled with Emscripten SDK
+            WASM_OPT=""
+            # Check common emsdk installation directories
+            for dir in "$EMSDK" "$HOME/emsdk" "$HOME/.cache/emsdk" /opt/emsdk /usr/local/share/emsdk; do
+              if [ -n "$dir" ] && [ -d "$dir" ]; then
+                CANDIDATE=$(find "$dir" -name wasm-opt -type f 2>/dev/null | head -1)
+                if [ -n "$CANDIDATE" ]; then
+                  WASM_OPT="$CANDIDATE"
+                  break
+                fi
+              fi
+            done
+            # Last resort: brute-force search
+            if [ -z "$WASM_OPT" ]; then
+              WASM_OPT=$(find /home/runner -name wasm-opt -type f 2>/dev/null | head -1)
+            fi
+            if [ -z "$WASM_OPT" ]; then
+              echo "wasm-opt not found after Emscripten SDK installation!"
+              exit 1
+            fi
+            echo "Using wasm-opt: $WASM_OPT"
+            OPT="${WASM%.wasm}.opt.wasm"
+            # Enable WASM features emitted by Rust+Emscripten:
+            #   bulk-memory:          memory.copy / memory.fill
+            #   sign-ext:             i32.extend8_s / i32.extend16_s
+            #   nontrapping-float-to-int: i32.trunc_sat_f64_u
+            #   mutable-globals:       Emscripten stack pointer import
+            "$WASM_OPT" -Oz \
+              --enable-bulk-memory \
+              --enable-sign-ext \
+              --enable-nontrapping-float-to-int \
+              --enable-mutable-globals \
+              "$WASM" -o "$OPT"
+            mv "$OPT" "$WASM"
+            SIZE=$(stat --format=%s "$WASM")
+            echo "WASM release binary: $WASM"
+            echo "WASM release size (after -Oz): $SIZE bytes (max 5MB = 5242880)"
+            if [ "$SIZE" -gt 5242880 ]; then
+              echo "::warning::WASM binary size $SIZE exceeds 5MB budget!"
+            fi
+          else
+            echo "No .wasm file found in target/wasm32-unknown-emscripten/release/"
+            ls -la target/wasm32-unknown-emscripten/release/ 2>/dev/null || echo "Directory not found"
+            exit 1
+          fi
+        working-directory: extensions

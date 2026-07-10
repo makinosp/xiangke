@@ -1,0 +1,14 @@
+[configuration]
+entry_symbol = "gdextension_init"
+compatibility_minimum = "4.3"
+
+[libraries]
+macos.debug = "res://addons/gdext/libxiangke-godot-bridge.macos.debug.dylib"
+macos.release = "res://addons/gdext/libxiangke-godot-bridge.macos.release.dylib"
+windows.debug.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.windows.debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.windows.release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.linux.debug.x86_64.so"
+linux.release.x86_64 = "res://addons/gdext/libxiangke-godot-bridge.linux.release.x86_64.so"
+# Web (WASM/Emscripten)
+web.debug.wasm32 = "res://extensions/target/wasm32-unknown-emscripten/debug/xiangke_godot_bridge.wasm"
+web.release.wasm32 = "res://rust/target/wasm32-unknown-emscripten/release/xiangke_godot_bridge.wasm"
