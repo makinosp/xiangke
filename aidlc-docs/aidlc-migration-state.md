@@ -4,7 +4,8 @@
 
 - **Project Type**: Brownfield (GDScript → Rust Migration)
 - **Start Date**: 2026-07-03T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Phase 3: Battle System — Code Generation Complete
+- **Current Stage**: CONSTRUCTION - Phase 5: Cleanup & Test — Build and Test
+  (Complete)
 
 ## Workspace State
 
@@ -40,10 +41,19 @@
 - [x] Functional Design (2026-07-06)
 - [x] NFR Requirements (2026-07-06)
 
-
 #### Phase 3: Battle System
 
 - [x] Functional Design (2026-07-06)
 - [x] NFR Requirements (2026-07-06)
 - [x] Code Generation Part 1: Planning (2026-07-06)
 - [x] Code Generation Part 2: Generation (2026-07-06) — 45 tests, 5 modules
+
+#### Phase 4: Integration
+
+- [x] Code Generation (2026-07-06) — godot_bridge RustBattleSystem (20+
+      #[func]), GDScript wrappers rewritten, 103/103 tests passed
+
+#### Phase 5: Cleanup & Test
+
+- [x] Build and Test (2026-07-11) — Orphaned .uid removed, gdextension WASM path
+      fixed, 100/100 Rust tests pass, instructions generated
