@@ -4,13 +4,13 @@ on:
   push:
     branches: [main, feature/**]
     paths:
-      - "rust/**"
+      - "extensions/**"
       - "Cargo.toml"
       - "justfile"
   pull_request:
     branches: [main]
     paths:
-      - "rust/**"
+      - "extensions/**"
       - "Cargo.toml"
 
 env:
