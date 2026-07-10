@@ -8,3 +8,7 @@
 	path = .vendor/godot-docs
 	url = https://github.com/godotengine/godot-docs.git
 	branch = master
+[submodule ".vendor/godot-rust"]
+	path = .vendor/godot-rust-book
+	url = https://github.com/godot-rust/book.git
+	branch = master
