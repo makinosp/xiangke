@@ -140,4 +140,4 @@ jobs:
             ls -la target/wasm32-unknown-emscripten/release/ 2>/dev/null || echo "Directory not found"
             exit 1
           fi
-        working-directory: rust
+        working-directory: extensions
