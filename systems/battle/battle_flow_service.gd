@@ -145,6 +145,14 @@ func process_start_of_turn(participant_index: int) -> PackedStringArray:
 	return logs
 
 
+func process_end_of_turn(participant_index: int) -> PackedStringArray:
+	var logs := PackedStringArray()
+	var arr := _rust_system.process_end_of_turn(participant_index)
+	for i in arr.size():
+		logs.append(arr[i])
+	return logs
+
+
 func get_participant(index: int) -> BattleParticipant:
 	var dict := _rust_system.get_participant(index)
 	if dict.is_empty():

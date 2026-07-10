@@ -18,3 +18,8 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# GDExtension native libraries (build artifacts from extensions/)
+addons/gdext/*.dylib
+addons/gdext/*.so
+addons/gdext/*.dll
