@@ -1001,3 +1001,19 @@ Plan updated at `aidlc-docs/construction/plans/phase3-battle-code-generation-pla
 **Context**: Workspace cleanup. Migration artifacts now centralized in `unit-1-migration/`. Ready to proceed to Code Generation.
 
 ---
+
+## Structural Change: Rename rust to extensions
+**Timestamp**: 2026-07-10T10:27:31Z
+**User Input**: "Using AI-DLC, ディレクトリ rust を extensions にリネームしたい。"
+**AI Response**: Acknowledged. I will analyze the impact of renaming the `rust` directory to `extensions` and execute the change following the AI-DLC process.
+**Context**: Post-Construction phase. Structural refactoring.
+
+---
+
+## Structural Change: Rename rust to extensions (Completed)
+**Timestamp**: 2026-07-10T10:29:01Z
+**User Input**: "Using AI-DLC, ディレクトリ rust を extensions にリネームしたい。"
+**AI Response**: Successfully renamed `rust` directory to `extensions` and updated all critical references in `addons/gdext/xiangke.gdextension` and `justfile`.
+**Context**: Post-Construction phase. Structural refactoring completed.
+
+---

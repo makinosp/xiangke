@@ -11,16 +11,16 @@
 
 # Build Rust GDExtension for native (macOS/Linux/Windows)
 build-rust:
-    cd rust && cargo build
+    cd extensions && cargo build
 
 # Build Rust GDExtension for Web (WASM/Emscripten)
 # Requires: nightly toolchain, Emscripten SDK, rust-src component
 build-rust-wasm:
-    cd rust && cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
+    cd extensions && cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten
 
 # Build WASM in release mode with size optimization
 build-rust-wasm-release:
-    cd rust && cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten --release
+    cd extensions && cargo +nightly build -Zbuild-std --target wasm32-unknown-emscripten --release
     wasm-opt -Oz \
       --enable-bulk-memory \
       --enable-sign-ext \
@@ -31,13 +31,13 @@ build-rust-wasm-release:
 
 # Quick-check WASM compilation without full build
 check-rust-wasm:
-    cd rust && cargo +nightly check -Zbuild-std --target wasm32-unknown-emscripten
+    cd extensions && cargo +nightly check -Zbuild-std --target wasm32-unknown-emscripten
 
 test-rust:
-    cd rust && cargo test
+    cd extensions && cargo test
 
 check-rust:
-    cd rust && cargo check
+    cd extensions && cargo check
 
 run-godot: build-rust
     godot
