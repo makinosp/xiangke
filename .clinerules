@@ -1,5 +1,0 @@
-## Rust Reference
-
-When processing Rust files (`**/*.rs`), you MUST follow the guidelines in
-`.ai-rules/rust-reference-guide.md` and consult the authoritative reference in
-`.vendor/rust-reference/src/`.

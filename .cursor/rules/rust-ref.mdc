@@ -7,3 +7,17 @@ globs: "**/*.rs"
 
 Follow the guidelines in `.ai-rules/rust-reference-guide.md` when writing or
 modifying Rust code.
+
+## godot-rust Reference
+
+For godot-rust (Rust bindings for Godot 4) documentation, consult:
+`.vendor/godot-rust-book/`
+
+## Godot Reference
+
+For Godot Engine documentation, consult: `.vendor/godot-docs/`
+
+## godot-rust Reference
+
+For godot-rust (Rust bindings for Godot 4) documentation, consult:
+`.vendor/godot-rust-book/`
