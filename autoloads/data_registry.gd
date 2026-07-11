@@ -25,6 +25,7 @@ func _ready() -> void:
 func load_all() -> void:
 	var data_loader = DataLoader.new()
 	var data: Dictionary = data_loader.load_all()
+	data_loader.free()
 	_characters = data["characters"]
 	_moves = data["moves"]
 	_is_loaded = true
@@ -32,6 +33,7 @@ func load_all() -> void:
 	# Run validation and log results
 	var validator = DataValidator.new()
 	var result = validator.validate_all(_characters, _moves)
+	validator.free()
 	if not result.is_valid():
 		push_warning("DataRegistry: Validation issues found:\n%s" % result.get_summary())
 	else:

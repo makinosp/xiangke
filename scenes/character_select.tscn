@@ -117,3 +117,6 @@ text = "Description will appear here..."
 custom_colors/font_color = Color(0.9, 0.9, 0.9)
 lines_truncated = true
 max_lines_visible = 6
+
+[connection signal="pressed" from="ConfirmCorpsButton" to="." method="_on_confirm_corps_pressed"]
+[connection signal="pressed" from="DeployButton" to="." method="_on_deploy_pressed"]
