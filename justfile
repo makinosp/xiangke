@@ -45,7 +45,7 @@ run-godot: build-rust
 
 # Godot project validation
 inspect: build-rust
-    godot --headless --check-only --quit
+    godot --headless --check-only --debug --verbose --quit
 
 # Combined: build Rust + run Godot
 run: build-rust
