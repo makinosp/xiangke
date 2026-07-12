@@ -138,7 +138,7 @@ func _on_confirm_corps_pressed() -> void:
 
 ## Loads only the corps characters for Phase 2 selection.
 func _load_corps_characters() -> void:
-	var corps_ids := GameManager.corps_roster.corps_characters
+	var corps_ids: Array[String] = GameManager.corps_roster.corps_characters
 	for char_id in corps_ids:
 		var char_data := DataRegistry.get_character(char_id) as CharacterData
 		if char_data == null:
