@@ -16,8 +16,11 @@ signal focus_changed(control: Control)
 ##
 ## Parameters:
 ##   controls: Array of Control nodes to include in the group.
-func register_focus_group(controls: Array[Control]) -> void:
-	focus_group = controls
+func register_focus_group(controls: Array) -> void:
+	focus_group.clear()
+	for c in controls:
+		if c is Control:
+			focus_group.append(c as Control)
 	focused_index = 0
 	if focus_group.size() > 0:
 		_set_focus(0)

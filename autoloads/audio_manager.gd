@@ -72,8 +72,7 @@ func _ensure_audio_buses() -> void:
 
 
 ## Path to silent audio file for Web autoplay unlock.
-const SILENT_AUDIO_PATH: String = "res://audio/silent.ogg"
-const SILENT_AUDIO_FALLBACK: String = "res://audio/silent.wav"
+const SILENT_AUDIO_PATH: String = "res://audio/silent.wav"
 
 
 ## Initializes audio system.
@@ -84,9 +83,6 @@ func initialize_audio() -> void:
 
 	# Play silent sound to unlock Web Audio API
 	var silent_stream := load(SILENT_AUDIO_PATH) as AudioStream
-	if silent_stream == null:
-		silent_stream = load(SILENT_AUDIO_FALLBACK) as AudioStream
-	
 	if silent_stream != null:
 		bgm_player.stream = silent_stream
 		bgm_player.play()

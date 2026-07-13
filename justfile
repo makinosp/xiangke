@@ -12,6 +12,7 @@
 # Build Rust GDExtension for native (macOS/Linux/Windows)
 build-rust:
     cd extensions && cargo build
+    cp extensions/target/debug/libxiangke_godot_bridge.dylib addons/gdext/libxiangke-godot-bridge.macos.debug.dylib
 
 # Build Rust GDExtension for Web (WASM/Emscripten)
 # Requires: nightly toolchain, Emscripten SDK, rust-src component
@@ -43,8 +44,8 @@ run-godot: build-rust
     godot
 
 # Godot project validation
-inspect:
-    godot --headless --check-only --quit
+inspect: build-rust
+    godot --headless --check-only --debug --verbose --quit
 
 # Combined: build Rust + run Godot
 run: build-rust

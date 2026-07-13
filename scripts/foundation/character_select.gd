@@ -34,7 +34,7 @@ var _phase: int = 1 # 1 = Corps selection, 2 = Battle selection
 ## Selected character IDs in current phase.
 var _selected_ids: Array[String] = []
 ## All character buttons for focus management.
-var _character_buttons: Array[Button] = []
+var _character_buttons: Array[Control] = []
 
 
 func _ready() -> void:
@@ -51,7 +51,7 @@ func _load_characters() -> void:
 			continue
 
 		var btn := Button.new()
-		btn.text = char_data.character_name
+		btn.text = char_data.name
 		btn.connect("pressed", Callable(self, "_on_character_pressed").bind(char_id))
 		btn.connect("mouse_entered", Callable(self, "_on_character_hovered").bind(char_id))
 		btn.connect("mouse_exited", Callable(self, "_on_character_hover_exit"))
@@ -87,24 +87,22 @@ func _on_character_hovered(char_id: String) -> void:
 	if char_data == null:
 		return
 
-	preview_name.text = char_data.character_name
+	preview_name.text = char_data.name
 	# Update stats fields
-	preview_type.text = "Type: %s" % _format_types(char_data.types)
-	preview_hp.text = "HP: %d" % char_data.base_stats.hp
-	preview_attack.text = "Attack: %d" % char_data.base_stats.attack
-	preview_defense.text = "Defense: %d" % char_data.base_stats.defense
-	preview_speed.text = "Speed: %d" % char_data.base_stats.speed
+	preview_type.text = "Type: %s" % _format_type(char_data.type, char_data.secondary_type)
+	preview_hp.text = "HP: %d" % char_data.hp
+	preview_attack.text = "Attack: %d" % char_data.attack
+	preview_defense.text = "Defense: %d" % char_data.defense
+	preview_speed.text = "Speed: %d" % char_data.speed
 	preview_desc.text = char_data.description if char_data.description else ""
 	stats_preview.show()
 
 
 ## Formats character types for display.
-func _format_types(types: Array) -> String:
-	var result := ""
-	for i in range(min(types.size(), 2)):
-		if i > 0:
-			result += "/"
-		result += TypeEnums.Type.keys()[types[i]]
+func _format_type(primary: int, secondary: int) -> String:
+	var result: String = TypeEnums.Type.keys()[primary]
+	if secondary >= 0:
+		result += "/" + TypeEnums.Type.keys()[secondary]
 	return result
 
 
@@ -120,6 +118,8 @@ func _on_confirm_corps_pressed() -> void:
 
 	# Register corps selection
 	GameManager.corps_roster.set_corps_selection(_selected_ids)
+	# Generate opponent corps
+	_generate_opponent_corps()
 
 	# Move to Phase 2
 	_phase = 2
@@ -138,14 +138,14 @@ func _on_confirm_corps_pressed() -> void:
 
 ## Loads only the corps characters for Phase 2 selection.
 func _load_corps_characters() -> void:
-	var corps_ids := GameManager.corps_roster.corps_characters
+	var corps_ids: Array[String] = GameManager.corps_roster.corps_characters
 	for char_id in corps_ids:
 		var char_data := DataRegistry.get_character(char_id) as CharacterData
 		if char_data == null:
 			continue
 
 		var btn := Button.new()
-		btn.text = char_data.character_name
+		btn.text = char_data.name
 		btn.connect("pressed", Callable(self, "_on_character_pressed").bind(char_id))
 		btn.connect("mouse_entered", Callable(self, "_on_character_hovered").bind(char_id))
 		btn.connect("mouse_exited", Callable(self, "_on_character_hover_exit"))
@@ -154,6 +154,23 @@ func _load_corps_characters() -> void:
 		_character_buttons.append(btn)
 
 	UIFocusManager.register_focus_group(_character_buttons)
+
+
+## Generates a random opponent corps of 6 characters (Phase 1 complete).
+func _generate_opponent_corps() -> void:
+	var all_chars := DataRegistry.get_all_characters()
+	var pool: Array[String] = []
+	for char_id in all_chars.keys():
+		if not GameManager.corps_roster.corps_characters.has(char_id):
+			pool.append(char_id)
+	
+	pool.shuffle()
+	var opponent_ids: Array[String] = []
+	for i in range(min(6, pool.size())):
+		if i < pool.size():
+			opponent_ids.append(pool[i])
+	
+	GameManager.corps_roster.opponent_corps = opponent_ids
 
 
 ## Called when the Deploy button is pressed (Phase 2 completion).
