@@ -33,16 +33,20 @@ pub fn advance_to_next_turn(
     state: &mut BattleState,
     rng: &mut impl Rng,
 ) -> Result<(), BattleError> {
+    // Ensure we have a valid turn queue
     if state.turn_queue.is_empty() || state.turn_queue_index >= state.turn_queue.len() {
         start_new_round(state, rng)?;
     }
 
+    // Move to next candidate in queue
     state.turn_queue_index += 1;
 
+    // If we've exhausted the queue, start a new round
     if state.turn_queue_index >= state.turn_queue.len() {
         start_new_round(state, rng)?;
     }
 
+    // Find the next active participant
     while state.turn_queue_index < state.turn_queue.len() {
         let idx = state.turn_queue[state.turn_queue_index];
         if idx < state.participants.len() {
@@ -56,6 +60,7 @@ pub fn advance_to_next_turn(
         state.turn_queue_index += 1;
     }
 
+    // No active participants found, start a new round
     match start_new_round(state, rng) {
         Ok(()) => {
             if state.turn_queue.is_empty() {
