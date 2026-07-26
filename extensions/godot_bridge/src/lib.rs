@@ -7,7 +7,6 @@ use godot::prelude::*;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 use xiangke_battle::action;
-use xiangke_battle::flow;
 use xiangke_battle::manager;
 use xiangke_battle::participant::{BattleParticipant, Team};
 use xiangke_battle::state::{BattleState, Status};
@@ -17,8 +16,6 @@ use xiangke_core::types::{DamageCategory, EffectType, TypeElement};
 
 type Dict = VarDictionary;
 type Arr = VarArray;
-
-struct XiangkeExtension;
 
 fn dict_char(d: &Dict) -> Option<CharacterData> {
     let id = d.get("id")?.to::<String>();
