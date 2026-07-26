@@ -11,7 +11,6 @@ use xiangke_battle::state::{BattleState, Status, MAX_TURNS};
 
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
-use xiangke_core::status::StatusEffectData;
 use xiangke_core::types::{DamageCategory, EffectType, TypeElement};
 
 /// Helper to create a character with one damaging move.
@@ -125,8 +124,8 @@ fn test_full_battle_3v3_player_advantage() {
 
         // AI selects action
         let action = ai.select_action(&state, active_idx);
-        if let Some(action) = action {
-            if let Some(mv) = state.move_lookup.get(&action.move_id) {
+        if let Some(action) = action
+            && let Some(mv) = state.move_lookup.get(&action.move_id) {
                 let target = action.target_index;
                 // Use split_at_mut for safe dual mutable borrow
                 let result = if active_idx < target {
@@ -148,13 +147,11 @@ fn test_full_battle_3v3_player_advantage() {
                         &mut rng,
                     )
                 };
-                if let Ok(ref result) = result {
-                    if result.damage_dealt > 0 || result.hit {
+                if let Ok(ref result) = result
+                    && (result.damage_dealt > 0 || result.hit) {
                         state.add_log(result.log_message.clone());
                     }
-                }
             }
-        }
 
         // Check if battle ended
         let status = state.evaluate_status();
@@ -164,7 +161,7 @@ fn test_full_battle_3v3_player_advantage() {
         }
 
         // Advance to next turn
-        if let Err(e) = manager::advance_to_next_turn(&mut state, &mut rng) {
+        if let Err(_e) = manager::advance_to_next_turn(&mut state, &mut rng) {
             // Check if battle should end
             let status = state.evaluate_status();
             if status != Status::Active {
@@ -289,8 +286,8 @@ fn test_battle_1v1_victory() {
         }
 
         // AI action
-        if let Some(action) = ai.select_action(&state, active_idx) {
-            if let Some(mv) = state.move_lookup.get(&action.move_id) {
+        if let Some(action) = ai.select_action(&state, active_idx)
+            && let Some(mv) = state.move_lookup.get(&action.move_id) {
                 let target = action.target_index;
                 let result = if active_idx < target {
                     let (left, right) = state.participants.split_at_mut(target);
@@ -299,13 +296,11 @@ fn test_battle_1v1_victory() {
                     let (left, right) = state.participants.split_at_mut(active_idx);
                     calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
                 };
-                if let Ok(ref result) = result {
-                    if result.damage_dealt > 0 || result.hit {
+                if let Ok(ref result) = result
+                    && (result.damage_dealt > 0 || result.hit) {
                         state.add_log(result.log_message.clone());
                     }
-                }
             }
-        }
 
         let status = state.evaluate_status();
         if status != Status::Active {
@@ -313,7 +308,7 @@ fn test_battle_1v1_victory() {
             break;
         }
 
-        if let Err(_) = manager::advance_to_next_turn(&mut state, &mut rng) {
+        if manager::advance_to_next_turn(&mut state, &mut rng).is_err() {
             let status = state.evaluate_status();
             if status != Status::Active {
                 state.apply_status(status);
@@ -394,8 +389,8 @@ fn test_battle_draw_by_turn_limit() {
             let _logs = process_end_of_turn(p, &state.status_effect_configs, &mut rng);
         }
 
-        if let Some(action) = ai.select_action(&state, active_idx) {
-            if let Some(mv) = state.move_lookup.get(&action.move_id) {
+        if let Some(action) = ai.select_action(&state, active_idx)
+            && let Some(mv) = state.move_lookup.get(&action.move_id) {
                 let target = action.target_index;
                 let _result = if active_idx < target {
                     let (left, right) = state.participants.split_at_mut(target);
@@ -405,7 +400,6 @@ fn test_battle_draw_by_turn_limit() {
                     calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
                 };
             }
-        }
 
         let status = state.evaluate_status();
         if status != Status::Active {
@@ -417,7 +411,7 @@ fn test_battle_draw_by_turn_limit() {
     }
 
     // If neither side was defeated, it should be a draw or active at turn limit
-    let final_status = state.evaluate_status();
+    let _final_status = state.evaluate_status();
     assert!(
         state.turn_count > 0,
         "Battle should have made progress"

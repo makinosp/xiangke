@@ -429,7 +429,7 @@ mod tests {
     #[test]
     fn test_super_effective_flag() {
         let (mut atk, mut def) = make_attacker();
-        let mut mv = make_move();
+        let mv = make_move();
         def.character_data.element = TypeElement::Water; // Fire beats Water (2.0)
         let mut rng = StdRng::seed_from_u64(42);
         let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();

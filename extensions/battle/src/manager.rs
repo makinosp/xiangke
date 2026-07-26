@@ -209,7 +209,7 @@ mod tests {
     fn test_speed_tie_breaking() {
         // Same speed participants should still produce a deterministic order
         let mut participants = Vec::new();
-        for i in 0..4 {
+        for _i in 0..4 {
             participants.push(make_participant(Team::Player, 100, 50));
         }
         let mut rng = StdRng::seed_from_u64(42);
