@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
-use rand::rngs::StdRng;
 use rand::SeedableRng;
+use rand::rngs::StdRng;
 
 use xiangke_battle::action::calculate_damage;
-use xiangke_battle::flow::{process_end_of_turn, AiStrategy, BasicAi};
+use xiangke_battle::flow::{AiStrategy, BasicAi, process_end_of_turn};
 use xiangke_battle::manager;
 use xiangke_battle::participant::{BattleParticipant, Team};
-use xiangke_battle::state::{BattleState, Status, MAX_TURNS};
+use xiangke_battle::state::{BattleState, MAX_TURNS, Status};
 
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
@@ -125,33 +125,23 @@ fn test_full_battle_3v3_player_advantage() {
         // AI selects action
         let action = ai.select_action(&state, active_idx);
         if let Some(action) = action
-            && let Some(mv) = state.move_lookup.get(&action.move_id) {
-                let target = action.target_index;
-                // Use split_at_mut for safe dual mutable borrow
-                let result = if active_idx < target {
-                    let (left, right) = state.participants.split_at_mut(target);
-                    calculate_damage(
-                        &mut left[active_idx],
-                        &mut right[0],
-                        mv,
-                        target,
-                        &mut rng,
-                    )
-                } else {
-                    let (left, right) = state.participants.split_at_mut(active_idx);
-                    calculate_damage(
-                        &mut right[0],
-                        &mut left[target],
-                        mv,
-                        target,
-                        &mut rng,
-                    )
-                };
-                if let Ok(ref result) = result
-                    && (result.damage_dealt > 0 || result.hit) {
-                        state.add_log(result.log_message.clone());
-                    }
+            && let Some(mv) = state.move_lookup.get(&action.move_id)
+        {
+            let target = action.target_index;
+            // Use split_at_mut for safe dual mutable borrow
+            let result = if active_idx < target {
+                let (left, right) = state.participants.split_at_mut(target);
+                calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
+            } else {
+                let (left, right) = state.participants.split_at_mut(active_idx);
+                calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
+            };
+            if let Ok(ref result) = result
+                && (result.damage_dealt > 0 || result.hit)
+            {
+                state.add_log(result.log_message.clone());
             }
+        }
 
         // Check if battle ended
         let status = state.evaluate_status();
@@ -287,20 +277,22 @@ fn test_battle_1v1_victory() {
 
         // AI action
         if let Some(action) = ai.select_action(&state, active_idx)
-            && let Some(mv) = state.move_lookup.get(&action.move_id) {
-                let target = action.target_index;
-                let result = if active_idx < target {
-                    let (left, right) = state.participants.split_at_mut(target);
-                    calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
-                } else {
-                    let (left, right) = state.participants.split_at_mut(active_idx);
-                    calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
-                };
-                if let Ok(ref result) = result
-                    && (result.damage_dealt > 0 || result.hit) {
-                        state.add_log(result.log_message.clone());
-                    }
+            && let Some(mv) = state.move_lookup.get(&action.move_id)
+        {
+            let target = action.target_index;
+            let result = if active_idx < target {
+                let (left, right) = state.participants.split_at_mut(target);
+                calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
+            } else {
+                let (left, right) = state.participants.split_at_mut(active_idx);
+                calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
+            };
+            if let Ok(ref result) = result
+                && (result.damage_dealt > 0 || result.hit)
+            {
+                state.add_log(result.log_message.clone());
             }
+        }
 
         let status = state.evaluate_status();
         if status != Status::Active {
@@ -390,16 +382,17 @@ fn test_battle_draw_by_turn_limit() {
         }
 
         if let Some(action) = ai.select_action(&state, active_idx)
-            && let Some(mv) = state.move_lookup.get(&action.move_id) {
-                let target = action.target_index;
-                let _result = if active_idx < target {
-                    let (left, right) = state.participants.split_at_mut(target);
-                    calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
-                } else {
-                    let (left, right) = state.participants.split_at_mut(active_idx);
-                    calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
-                };
-            }
+            && let Some(mv) = state.move_lookup.get(&action.move_id)
+        {
+            let target = action.target_index;
+            let _result = if active_idx < target {
+                let (left, right) = state.participants.split_at_mut(target);
+                calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
+            } else {
+                let (left, right) = state.participants.split_at_mut(active_idx);
+                calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
+            };
+        }
 
         let status = state.evaluate_status();
         if status != Status::Active {
@@ -412,8 +405,5 @@ fn test_battle_draw_by_turn_limit() {
 
     // If neither side was defeated, it should be a draw or active at turn limit
     let _final_status = state.evaluate_status();
-    assert!(
-        state.turn_count > 0,
-        "Battle should have made progress"
-    );
+    assert!(state.turn_count > 0, "Battle should have made progress");
 }

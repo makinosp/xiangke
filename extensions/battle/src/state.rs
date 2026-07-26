@@ -377,9 +377,18 @@ mod tests {
     #[test]
     fn test_battle_error_all_variants() {
         let variants: [(&str, BattleError); 7] = [
-            ("Invalid participant", BattleError::InvalidParticipant("a".into())),
-            ("Invalid battle state", BattleError::InvalidBattleState("b".into())),
-            ("Defeated participant", BattleError::DefeatedParticipant("c".into())),
+            (
+                "Invalid participant",
+                BattleError::InvalidParticipant("a".into()),
+            ),
+            (
+                "Invalid battle state",
+                BattleError::InvalidBattleState("b".into()),
+            ),
+            (
+                "Defeated participant",
+                BattleError::DefeatedParticipant("c".into()),
+            ),
             ("Move not found", BattleError::MoveNotFound("d".into())),
             ("No active participants", BattleError::NoActiveParticipants),
             ("Battle has already ended", BattleError::BattleAlreadyEnded),
@@ -387,7 +396,10 @@ mod tests {
         ];
         for (expected, err) in &variants {
             let msg = format!("{err}");
-            assert!(msg.contains(expected), "expected '{msg}' to contain '{expected}'");
+            assert!(
+                msg.contains(expected),
+                "expected '{msg}' to contain '{expected}'"
+            );
         }
     }
 
@@ -424,8 +436,16 @@ mod tests {
         ];
         let state = BattleState::new(participants, empty_move_lookup()).unwrap();
         assert!(state.status_effect_configs.contains_key(&EffectType::Burn));
-        assert!(state.status_effect_configs.contains_key(&EffectType::Poison));
-        assert!(state.status_effect_configs.contains_key(&EffectType::Confusion));
+        assert!(
+            state
+                .status_effect_configs
+                .contains_key(&EffectType::Poison)
+        );
+        assert!(
+            state
+                .status_effect_configs
+                .contains_key(&EffectType::Confusion)
+        );
     }
 
     #[test]

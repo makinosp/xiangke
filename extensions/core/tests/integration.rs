@@ -103,10 +103,7 @@ fn test_character_secondary_type_serde() {
             intelligence: 100,
             spirit: 90,
         },
-        moves: vec![
-            "water_surge".into(),
-            "wood_heal".into(),
-        ],
+        moves: vec!["water_surge".into(), "wood_heal".into()],
         description: "Shu strategist".into(),
     };
 

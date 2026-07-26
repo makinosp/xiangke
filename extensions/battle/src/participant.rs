@@ -278,7 +278,10 @@ mod tests {
         let mut p = BattleParticipant::new(dummy_character(), Team::Player, 0).unwrap();
         p.apply_stat_stage(Stat::Attack, 2);
         let eff = p.effective_stat(Stat::Attack);
-        assert!((eff - 180.0).abs() < f64::EPSILON, "expected 180, got {eff}");
+        assert!(
+            (eff - 180.0).abs() < f64::EPSILON,
+            "expected 180, got {eff}"
+        );
     }
 
     #[test]

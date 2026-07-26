@@ -434,7 +434,11 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(42);
         let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
         assert!(result.hit);
-        assert!(result.is_super_effective, "Fire vs Water should be super effective (got eff={}, expected 2.0)", result.type_effectiveness);
+        assert!(
+            result.is_super_effective,
+            "Fire vs Water should be super effective (got eff={}, expected 2.0)",
+            result.type_effectiveness
+        );
     }
 
     #[test]
@@ -445,7 +449,11 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(42);
         let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
         assert!(result.hit);
-        assert!(result.is_not_very_effective, "Fire vs Wood should be not very effective (got eff={}, expected 0.5)", result.type_effectiveness);
+        assert!(
+            result.is_not_very_effective,
+            "Fire vs Wood should be not very effective (got eff={}, expected 0.5)",
+            result.type_effectiveness
+        );
     }
 
     #[test]
@@ -481,49 +489,64 @@ mod tests {
 
     #[test]
     fn test_damage_log_immune_message() {
-        let msg = build_damage_log("Attacker", "Defender", "Test", &ActionResult {
-            damage_dealt: 0,
-            target_index: 1,
-            hit: true,
-            is_critical: false,
-            type_effectiveness: 0.0,
-            is_super_effective: false,
-            is_not_very_effective: false,
-            is_immune: true,
-            status_applied: None,
-            status_resisted: false,
-            recoil_damage: 0,
-            heal_amount: 0,
-            raw_damage: 0,
-            log_message: String::new(),
-        });
+        let msg = build_damage_log(
+            "Attacker",
+            "Defender",
+            "Test",
+            &ActionResult {
+                damage_dealt: 0,
+                target_index: 1,
+                hit: true,
+                is_critical: false,
+                type_effectiveness: 0.0,
+                is_super_effective: false,
+                is_not_very_effective: false,
+                is_immune: true,
+                status_applied: None,
+                status_resisted: false,
+                recoil_damage: 0,
+                heal_amount: 0,
+                raw_damage: 0,
+                log_message: String::new(),
+            },
+        );
         assert!(msg.contains("doesn't affect"));
     }
 
     #[test]
     fn test_damage_log_super_effective() {
-        let msg = build_damage_log("A", "B", "Fire", &ActionResult {
-            is_super_effective: true,
-            is_not_very_effective: false,
-            is_immune: false,
-            is_critical: true,
-            recoil_damage: 0,
-            ..ActionResult::new(1)
-        });
+        let msg = build_damage_log(
+            "A",
+            "B",
+            "Fire",
+            &ActionResult {
+                is_super_effective: true,
+                is_not_very_effective: false,
+                is_immune: false,
+                is_critical: true,
+                recoil_damage: 0,
+                ..ActionResult::new(1)
+            },
+        );
         assert!(msg.contains("super effective"));
         assert!(msg.contains("critical"));
     }
 
     #[test]
     fn test_damage_log_recoil() {
-        let msg = build_damage_log("A", "B", "Strike", &ActionResult {
-            is_super_effective: false,
-            is_not_very_effective: false,
-            is_immune: false,
-            is_critical: false,
-            recoil_damage: 10,
-            ..ActionResult::new(1)
-        });
+        let msg = build_damage_log(
+            "A",
+            "B",
+            "Strike",
+            &ActionResult {
+                is_super_effective: false,
+                is_not_very_effective: false,
+                is_immune: false,
+                is_critical: false,
+                recoil_damage: 10,
+                ..ActionResult::new(1)
+            },
+        );
         assert!(msg.contains("recoil"));
     }
 

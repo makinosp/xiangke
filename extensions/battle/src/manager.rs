@@ -235,8 +235,10 @@ mod tests {
                 break;
             }
             if let Some(idx) = state.active_participant {
-                assert!(!state.participants[idx].is_defeated,
-                    "defeated participant should not be active");
+                assert!(
+                    !state.participants[idx].is_defeated,
+                    "defeated participant should not be active"
+                );
             }
             advance_count += 1;
         }
