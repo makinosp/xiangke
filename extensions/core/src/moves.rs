@@ -2,29 +2,46 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::{DamageCategory, EffectType, Stat, TypeElement};
 
+/// A move definition: stats, element, effect, and other properties.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MoveData {
+    /// Unique identifier (e.g. "fire_strike").
     pub id: String,
+    /// Display name.
     pub name: String,
+    /// Element type of this move.
     pub element: TypeElement,
+    /// Base power (0 = non-damaging move).
     pub power: u32,
+    /// Accuracy percentage (0–100).
     pub accuracy: u32,
+    /// Secondary status effect type.
     pub effect: EffectType,
+    /// Chance to apply the secondary effect (percentage).
     pub effect_chance: u32,
+    /// Which stat is modified by this move (if any).
     pub stat_mod_stat: Option<Stat>,
+    /// Stat modification stage change (positive = buff, negative = debuff).
     pub stat_mod_stage: i32,
+    /// Number of hits for multi-hit moves.
     pub hit_count: u32,
+    /// Recoil damage percentage of damage dealt.
     pub recoil: u32,
+    /// Healing percentage of max HP.
     pub healing: u32,
+    /// Damage category (Physical or Arts).
     pub damage_category: DamageCategory,
+    /// Flavor description text.
     pub description: String,
 }
 
 impl MoveData {
+    /// Returns `true` if this move modifies a stat (buff or debuff).
     pub fn has_stat_mod(&self) -> bool {
         self.stat_mod_stat.is_some() && self.stat_mod_stage != 0
     }
 
+    /// Returns `true` if this move deals damage (`power > 0`).
     pub fn is_damaging(&self) -> bool {
         self.power > 0
     }

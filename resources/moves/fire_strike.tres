@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_move")
 id = "fire_strike"
-name = "火撃"
+name = "炎撃"
 type = 1
 power = 80
 accuracy = 95

@@ -2,32 +2,49 @@ use serde::{Deserialize, Serialize};
 
 use crate::types::TypeElement;
 
+/// Raw stat values for a character before any stage multipliers.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Stats {
+    /// Hit points / health.
     pub hp: u32,
+    /// Physical attack power.
     pub attack: u32,
+    /// Physical defense.
     pub defense: u32,
+    /// Turn speed (initiative).
     pub speed: u32,
+    /// Arts attack power (Intelligence).
     pub intelligence: u32,
+    /// Arts defense (Spirit).
     pub spirit: u32,
 }
 
+/// A character definition: stats, element, and available move IDs.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterData {
+    /// Unique identifier (e.g. "guan_yu").
     pub id: String,
+    /// Display name.
     pub name: String,
+    /// Primary element type.
     pub element: TypeElement,
+    /// Optional secondary element type for dual-type characters.
     pub secondary_element: Option<TypeElement>,
+    /// Base stats before any battle-time modifications.
     pub base_stats: Stats,
+    /// List of move IDs this character knows.
     pub moves: Vec<String>,
+    /// Flavor description text.
     pub description: String,
 }
 
 impl CharacterData {
+    /// Returns `true` if this character has a secondary element type.
     pub fn has_secondary_type(&self) -> bool {
         self.secondary_element.is_some()
     }
 
+    /// Returns the sum of all six base stats (HP + all five battle stats).
     pub fn get_stat_sum(&self) -> u32 {
         self.base_stats.hp
             + self.base_stats.attack

@@ -31,10 +31,14 @@ const MAX_STAT_SUM: u32 = 3000;
 /// Required number of moves per character.
 const REQUIRED_MOVE_COUNT: usize = 4;
 
+/// A validation error with a code, message, and context string.
 #[derive(Debug, Clone)]
 pub struct ValidationError {
+    /// Error code (e.g. "TR-2", "CR-1").
     pub code: String,
+    /// Human-readable error description.
     pub message: String,
+    /// Context about the source of the error.
     pub context: String,
 }
 
@@ -48,10 +52,14 @@ impl fmt::Display for ValidationError {
     }
 }
 
+/// A non-fatal validation warning.
 #[derive(Debug, Clone)]
 pub struct ValidationWarning {
+    /// Warning code.
     pub code: String,
+    /// Warning description.
     pub message: String,
+    /// Context about the source.
     pub context: String,
 }
 
@@ -65,16 +73,23 @@ impl fmt::Display for ValidationWarning {
     }
 }
 
+/// Aggregated result of a data validation pass.
 #[derive(Debug, Clone)]
 pub struct ValidationResult {
+    /// List of errors found.
     pub errors: Vec<ValidationError>,
+    /// List of warnings found.
     pub warnings: Vec<ValidationWarning>,
+    /// Total number of files scanned.
     pub total_files_scanned: u32,
+    /// Number of valid files.
     pub valid_files: u32,
+    /// Number of invalid files.
     pub invalid_files: u32,
 }
 
 impl ValidationResult {
+    /// Creates a new empty `ValidationResult`.
     pub fn new() -> Self {
         Self {
             errors: Vec::new(),
@@ -85,6 +100,7 @@ impl ValidationResult {
         }
     }
 
+    /// Appends an error with the given code, message, and context.
     pub fn add_error(&mut self, code: &str, message: &str, context: &str) {
         self.errors.push(ValidationError {
             code: code.to_string(),
@@ -93,6 +109,7 @@ impl ValidationResult {
         });
     }
 
+    /// Appends a warning with the given code, message, and context.
     pub fn add_warning(&mut self, code: &str, message: &str, context: &str) {
         self.warnings.push(ValidationWarning {
             code: code.to_string(),
@@ -101,10 +118,12 @@ impl ValidationResult {
         });
     }
 
+    /// Returns `true` if there are no errors (warnings are non-fatal).
     pub fn is_valid(&self) -> bool {
         self.errors.is_empty()
     }
 
+    /// Produces a formatted summary string of all errors and warnings.
     pub fn get_summary(&self) -> String {
         let mut result = String::from("=== Data Validation Summary ===\n");
         result.push_str(&format!("Files scanned: {}\n", self.total_files_scanned));
@@ -172,6 +191,12 @@ fn is_valid_stat(value: u32) -> bool {
     (value as usize) < Stat::ALL.len()
 }
 
+/// Validates the type effectiveness chart for consistency.
+///
+/// Checks:
+/// - TR-1: Expected 7×7 matrix (enforced by type system).
+/// - TR-2: No element is super-effective or immune to itself.
+/// - Yang↔Yin mutual super-effectiveness.
 pub fn validate_type_chart(
     chart: &[[f64; TypeElement::COUNT]; TypeElement::COUNT],
 ) -> Result<(), Vec<ValidationError>> {
@@ -300,6 +325,11 @@ pub fn validate_type_chart(
     }
 }
 
+/// Validates a single move data against game rules.
+///
+/// Checks: MR-1 (ID format), MR-2 (name length), MR-3 (power range),
+/// MR-4 (accuracy range), MR-5 (effect chance), MR-6 (stat mod stage),
+/// MR-7 (hit count), MR-8 (recoil), MR-9 (healing), MR-10 (type validity).
 pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<ValidationError>> {
     let mut errors = Vec::new();
 
@@ -447,6 +477,11 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
     }
 }
 
+/// Validates a character and its associated moves.
+///
+/// Checks: CR-1 (ID format), CR-2 (name length), CR-3 (stat ranges),
+/// CR-4 (stat sum cap), CR-5 (move count), CR-6 (type validity),
+/// CR-7 (move IDs exist in the provided move list).
 pub fn validate_character(
     data: &crate::character::CharacterData,
     moves: &[crate::moves::MoveData],

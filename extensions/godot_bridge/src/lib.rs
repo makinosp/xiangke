@@ -1,3 +1,12 @@
+//! xiangke-godot-bridge: GDExtension bindings between Godot 4 and the Rust battle engine.
+//!
+//! This crate provides the `RustBattleSystem` Godot Node class that exposes
+//! battle operations as `#[func]` methods callable from GDScript.
+//! Key responsibilities:
+//! - Converting between Godot dictionaries and Rust data types
+//! - Exposing battle operations (init, execute_turn, get_state, etc.)
+//! - Managing a per-instance random number generator
+
 use std::collections::HashMap;
 
 use godot::builtin::{VarArray, VarDictionary};

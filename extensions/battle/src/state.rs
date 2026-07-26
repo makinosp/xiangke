@@ -9,57 +9,88 @@ use xiangke_core::types::EffectType;
 
 use crate::participant::{BattleParticipant, Team};
 
+/// The overall status of a battle.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Status {
+    /// Battle is ongoing.
     Active,
+    /// Player team has won.
     Victory,
+    /// Player team has lost.
     Defeat,
+    /// Battle ended in a draw (turn limit reached).
     Draw,
+    /// Battle was escaped from.
     Escaped,
 }
 
+/// Maximum number of turns before the battle ends in a draw.
 pub const MAX_TURNS: u32 = 50;
 
+/// Errors that can occur during battle operations.
 #[derive(Debug, Clone, Error)]
 pub enum BattleError {
+    /// Invalid character data (e.g. HP == 0).
     #[error("Invalid participant: {0}")]
     InvalidParticipant(String),
 
+    /// Invalid battle configuration (e.g. missing players/enemies).
     #[error("Invalid battle state: {0}")]
     InvalidBattleState(String),
 
+    /// Operation attempted on a defeated participant.
     #[error("Defeated participant: {0}")]
     DefeatedParticipant(String),
 
+    /// Move ID not found in the battle's move lookup.
     #[error("Move not found: {0}")]
     MoveNotFound(String),
 
+    /// No active (non-defeated) participants remain.
     #[error("No active participants remaining")]
     NoActiveParticipants,
 
+    /// Action attempted after battle has ended.
     #[error("Battle has already ended")]
     BattleAlreadyEnded,
 
+    /// Invalid target specified for an action.
     #[error("Invalid target: {0}")]
     InvalidTarget(String),
 }
 
+/// The complete state of a battle, including participants, turn queue, and log.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BattleState {
+    /// Unique battle identifier.
     pub battle_id: String,
+    /// All participants in the battle.
     pub participants: Vec<BattleParticipant>,
+    /// Total number of turns elapsed.
     pub turn_count: u32,
+    /// Current round number.
     pub round_count: u32,
+    /// Overall battle status.
     pub battle_status: Status,
+    /// Ordered indices into `participants` for the current round.
     pub turn_queue: Vec<usize>,
+    /// Index into `turn_queue` for the current position.
     pub turn_queue_index: usize,
+    /// Index of the currently active participant.
     pub active_participant: Option<usize>,
+    /// Lookup table mapping move ID strings to move data.
     pub move_lookup: HashMap<String, Box<MoveData>>,
+    /// Configuration data for status effects (DoT rates, etc.).
     pub status_effect_configs: HashMap<EffectType, StatusEffectData>,
+    /// Chronological battle log entries.
     pub battle_log: Vec<String>,
 }
 
 impl BattleState {
+    /// Creates a new `BattleState` with the given participants and move lookup.
+    ///
+    /// Automatically configures default status effect data (Burn, Poison, Confusion).
+    /// Returns an error if no player or no enemy participants exist.
     pub fn new(
         participants: Vec<BattleParticipant>,
         move_lookup: HashMap<String, Box<MoveData>>,
@@ -108,18 +139,24 @@ impl BattleState {
         })
     }
 
+    /// Returns an iterator over all player-controlled participants.
     pub fn player_participants(&self) -> impl Iterator<Item = &BattleParticipant> {
         self.participants.iter().filter(|p| p.team == Team::Player)
     }
 
+    /// Returns an iterator over all enemy participants.
     pub fn enemy_participants(&self) -> impl Iterator<Item = &BattleParticipant> {
         self.participants.iter().filter(|p| p.team == Team::Enemy)
     }
 
+    /// Returns an iterator over all non-defeated participants.
     pub fn active_participants(&self) -> impl Iterator<Item = &BattleParticipant> {
         self.participants.iter().filter(|p| !p.is_defeated)
     }
 
+    /// Evaluates the current battle outcome and returns the appropriate [`Status`].
+    ///
+    /// Checks enemy defeat → Victory, player defeat → Defeat, turn limit → Draw.
     pub fn evaluate_status(&self) -> Status {
         if self.battle_status != Status::Active {
             return self.battle_status;
@@ -146,6 +183,7 @@ impl BattleState {
         Status::Active
     }
 
+    /// Sets the battle status and logs the corresponding outcome message.
     pub fn apply_status(&mut self, status: Status) {
         self.battle_status = status;
         match status {
@@ -156,6 +194,7 @@ impl BattleState {
         }
     }
 
+    /// Appends a timestamped log entry (prefixed with turn/round numbers).
     pub fn add_log(&mut self, message: String) {
         self.battle_log.push(format!(
             "[T{}/R{}] {}",
@@ -163,6 +202,7 @@ impl BattleState {
         ));
     }
 
+    /// Returns the `n` most recent log entries.
     pub fn recent_log(&self, n: usize) -> Vec<&str> {
         let start = self.battle_log.len().saturating_sub(n);
         self.battle_log[start..]
@@ -171,6 +211,7 @@ impl BattleState {
             .collect()
     }
 
+    /// Resets the battle state to its initial conditions (HP restored, log cleared).
     pub fn reset(&mut self) {
         self.turn_count = 0;
         self.round_count = 0;

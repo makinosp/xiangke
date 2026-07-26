@@ -9,15 +9,24 @@ pub const POISON_DAMAGE_RATIO: f64 = 2.0 * BURN_DAMAGE_RATIO;
 /// Maximum damage cap for escalating status effects (25% of max HP).
 pub const MAX_DOT_CAP: f64 = 0.25;
 
+/// Configuration data for a status effect (DoT, stat modification, etc.).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatusEffectData {
+    /// The type of status effect.
     pub status_type: EffectType,
+    /// Display name.
     pub name: String,
+    /// Description of the effect.
     pub description: String,
+    /// Damage per turn as a fraction of max HP.
     pub damage_per_turn: f64,
+    /// Whether damage escalates over time.
     pub escalating: bool,
+    /// Maximum fractional damage cap (e.g. 0.25 = 25% of max HP).
     pub max_damage_cap: f64,
+    /// Which stat is modified by this effect (if any).
     pub stat_mod_stat: Option<Stat>,
+    /// Multiplier applied to the affected stat.
     pub stat_mod_multiplier: f64,
 }
 
@@ -37,10 +46,12 @@ impl Default for StatusEffectData {
 }
 
 impl StatusEffectData {
+    /// Returns `true` if this effect deals damage over time.
     pub fn has_damage_over_time(&self) -> bool {
         self.damage_per_turn > 0.0
     }
 
+    /// Returns `true` if this effect modifies a character's stats.
     pub fn has_stat_modification(&self) -> bool {
         self.stat_mod_stat.is_some() && (self.stat_mod_multiplier - 1.0).abs() > f64::EPSILON
     }

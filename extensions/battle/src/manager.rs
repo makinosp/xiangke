@@ -3,6 +3,10 @@ use rand::seq::SliceRandom;
 
 use crate::state::{BattleError, BattleState, Status};
 
+/// Calculates the turn order for all non-defeated participants.
+///
+/// Sorts by effective Speed (descending), with random shuffle to break ties.
+/// Returns a list of participant indices.
 pub fn calculate_turn_queue(
     participants: &[crate::participant::BattleParticipant],
     rng: &mut impl Rng,
@@ -19,6 +23,8 @@ pub fn calculate_turn_queue(
     entries.into_iter().map(|(i, _)| i).collect()
 }
 
+/// Starts a new round by incrementing the round counter and recalculating the turn queue.
+/// Returns an error if no active participants exist.
 pub fn start_new_round(state: &mut BattleState, rng: &mut impl Rng) -> Result<(), BattleError> {
     state.round_count += 1;
     state.turn_queue = calculate_turn_queue(&state.participants, rng);
@@ -29,20 +35,28 @@ pub fn start_new_round(state: &mut BattleState, rng: &mut impl Rng) -> Result<()
     Ok(())
 }
 
+/// Advances the battle to the next turn, skipping defeated participants.
+///
+/// Starts a new round if the turn queue is exhausted. Returns an error
+/// if no active participants are found.
 pub fn advance_to_next_turn(
     state: &mut BattleState,
     rng: &mut impl Rng,
 ) -> Result<(), BattleError> {
+    // Ensure we have a valid turn queue
     if state.turn_queue.is_empty() || state.turn_queue_index >= state.turn_queue.len() {
         start_new_round(state, rng)?;
     }
 
+    // Move to next candidate in queue
     state.turn_queue_index += 1;
 
+    // If we've exhausted the queue, start a new round
     if state.turn_queue_index >= state.turn_queue.len() {
         start_new_round(state, rng)?;
     }
 
+    // Find the next active participant
     while state.turn_queue_index < state.turn_queue.len() {
         let idx = state.turn_queue[state.turn_queue_index];
         if idx < state.participants.len() {
@@ -56,6 +70,7 @@ pub fn advance_to_next_turn(
         state.turn_queue_index += 1;
     }
 
+    // No active participants found, start a new round
     match start_new_round(state, rng) {
         Ok(()) => {
             if state.turn_queue.is_empty() {
@@ -69,6 +84,8 @@ pub fn advance_to_next_turn(
     }
 }
 
+/// Initializes the battle by setting up the first round and selecting the first active participant.
+/// Returns an error if the battle is already ended or has no active participants.
 pub fn start_battle(state: &mut BattleState, rng: &mut impl Rng) -> Result<(), BattleError> {
     if state.battle_status != Status::Active {
         return Err(BattleError::BattleAlreadyEnded);

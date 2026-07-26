@@ -8,27 +8,41 @@ use xiangke_core::types::{DamageCategory, EffectType};
 use crate::participant::BattleParticipant;
 use crate::state::BattleError;
 
-const STAB_MULTIPLIER: f64 = 1.2;
 const MIN_VARIANCE: f64 = 0.85;
 const MAX_VARIANCE: f64 = 1.0;
 const CRITICAL_CHANCE: f64 = 6.0;
 const CRITICAL_MULTIPLIER: f64 = 1.5;
 
+/// The result of a single action execution during battle.
 #[derive(Debug, Clone)]
 pub struct ActionResult {
+    /// Damage dealt to the target.
     pub damage_dealt: u32,
+    /// Index of the target participant.
     pub target_index: usize,
+    /// Whether the move landed (false = miss).
     pub hit: bool,
+    /// Whether the hit was critical.
     pub is_critical: bool,
+    /// Type effectiveness multiplier (0.0–4.0).
     pub type_effectiveness: f64,
+    /// True when type_effectiveness > 1.0.
     pub is_super_effective: bool,
+    /// True when 0 < type_effectiveness < 1.0.
     pub is_not_very_effective: bool,
+    /// True when type_effectiveness == 0.0.
     pub is_immune: bool,
+    /// Status effect that was applied, if any.
     pub status_applied: Option<EffectType>,
+    /// True if the target already had this status.
     pub status_resisted: bool,
+    /// Recoil damage dealt back to the attacker.
     pub recoil_damage: u32,
+    /// HP restored to the attacker (healing moves).
     pub heal_amount: u32,
+    /// Raw damage before any variance/critical modifications.
     pub raw_damage: u32,
+    /// Formatted log message describing the action result.
     pub log_message: String,
 }
 
@@ -53,14 +67,19 @@ impl ActionResult {
     }
 }
 
+/// Checks whether a move hits based on its accuracy stat and a random roll.
+/// Returns `true` if the generated value is less than the accuracy.
 pub fn check_accuracy(accuracy: u32, rng: &mut impl Rng) -> bool {
     rng.r#gen::<f64>() * 100.0 < accuracy as f64
 }
 
+/// Checks whether a secondary effect triggers based on its chance and a random roll.
+/// Returns `true` if the generated value is less than the effect chance.
 pub fn check_effect_chance(chance: u32, rng: &mut impl Rng) -> bool {
     rng.r#gen::<f64>() * 100.0 < chance as f64
 }
 
+/// Returns `true` if the attacker's element matches the move's element (Same-Type Attack Bonus).
 pub fn has_stab(attacker: &BattleParticipant, mv: &MoveData) -> bool {
     attacker.character_data.element == mv.element
 }
@@ -91,6 +110,116 @@ fn build_damage_log(
     parts.join(" ")
 }
 
+#[derive(Debug, Clone)]
+struct RawDamage {
+    pub raw_damage: u32,
+    pub type_effectiveness: f64,
+    pub is_super_effective: bool,
+    pub is_not_very_effective: bool,
+    pub is_immune: bool,
+}
+
+fn calculate_raw_damage(
+    attacker: &BattleParticipant,
+    defender: &BattleParticipant,
+    mv: &MoveData,
+    type_chart: &TypeChart,
+) -> RawDamage {
+    let (effective_atk, effective_def) = match mv.damage_category {
+        DamageCategory::Physical => (attacker.effective_attack(), defender.effective_defense()),
+        DamageCategory::Arts => (
+            attacker.effective_intelligence(),
+            defender.effective_spirit(),
+        ),
+    };
+    let effective_def = effective_def.max(1.0);
+    let raw_damage = ((effective_atk * mv.power as f64 * calc::DAMAGE_MULTIPLIER) / effective_def)
+        .ceil()
+        .max(1.0) as u32;
+
+    let def_secondary = defender
+        .character_data
+        .secondary_element
+        .unwrap_or(defender.character_data.element);
+    let type_effectiveness =
+        type_chart.effectiveness_dual(mv.element, defender.character_data.element, def_secondary);
+    let is_super_effective = type_effectiveness > 1.0;
+    let is_not_very_effective = type_effectiveness > 0.0 && type_effectiveness < 1.0;
+    let is_immune = type_effectiveness == 0.0;
+
+    RawDamage {
+        raw_damage,
+        type_effectiveness,
+        is_super_effective,
+        is_not_very_effective,
+        is_immune,
+    }
+}
+
+fn apply_variance(raw_damage: u32, rng: &mut impl Rng) -> u32 {
+    let variance: f64 = rng.gen_range(MIN_VARIANCE..MAX_VARIANCE);
+    (raw_damage as f64 * variance).max(1.0) as u32
+}
+
+fn apply_critical_hit(damage: u32, rng: &mut impl Rng) -> (u32, bool) {
+    if rng.r#gen::<f64>() * 100.0 < CRITICAL_CHANCE {
+        let critical_damage = (damage as f64 * CRITICAL_MULTIPLIER) as u32;
+        (critical_damage, true)
+    } else {
+        (damage, false)
+    }
+}
+
+fn apply_recoil_damage(attacker: &mut BattleParticipant, damage_dealt: u32, mv: &MoveData) -> u32 {
+    if mv.recoil > 0 && damage_dealt > 0 {
+        let recoil = (damage_dealt as f64 * mv.recoil as f64 / 100.0)
+            .ceil()
+            .max(1.0) as u32;
+        attacker.take_damage(recoil)
+    } else {
+        0
+    }
+}
+
+fn apply_healing(attacker: &mut BattleParticipant, mv: &MoveData) -> u32 {
+    if mv.healing > 0 {
+        let heal = (attacker.max_hp as f64 * mv.healing as f64 / 100.0)
+            .ceil()
+            .max(1.0) as u32;
+        attacker.heal(heal)
+    } else {
+        0
+    }
+}
+
+fn apply_status_effect(
+    defender: &mut BattleParticipant,
+    mv: &MoveData,
+    rng: &mut impl Rng,
+) -> (Option<EffectType>, bool) {
+    if mv.effect != EffectType::None && mv.effect_chance > 0 {
+        let resisted = defender.has_status(mv.effect);
+        if !resisted && check_effect_chance(mv.effect_chance, rng) {
+            defender.apply_status(mv.effect);
+            (Some(mv.effect), false)
+        } else {
+            (None, resisted)
+        }
+    } else {
+        (None, false)
+    }
+}
+
+/// Calculates damage for an attack action and returns the full result.
+///
+/// The damage pipeline:
+/// 1. Checks if attacker/defender are alive.
+/// 2. Rolls accuracy — returns miss on failure.
+/// 3. Calculates raw damage from base power, effective stats, STAB, and type chart.
+/// 4. Applies variance (±15% uniform random).
+/// 5. Rolls for critical hit (1.5× multiplier, ~6% base chance).
+/// 6. Applies secondary effect (status, recoil, healing) if applicable.
+/// 7. Builds a formatted log message.
 pub fn calculate_damage(
     attacker: &mut BattleParticipant,
     defender: &mut BattleParticipant,
@@ -120,63 +249,26 @@ pub fn calculate_damage(
     let mut result = ActionResult::new(target_index);
 
     if mv.power > 0 {
-        let (effective_atk, effective_def) = match mv.damage_category {
-            DamageCategory::Physical => (attacker.effective_attack(), defender.effective_defense()),
-            DamageCategory::Arts => (
-                attacker.effective_intelligence(),
-                defender.effective_spirit(),
-            ),
-        };
-        let effective_def = effective_def.max(1.0);
-        result.raw_damage = ((effective_atk * mv.power as f64 * calc::DAMAGE_MULTIPLIER)
-            / effective_def)
-            .ceil()
-            .max(1.0) as u32;
-
         let type_chart = TypeChart::default();
-        let def_secondary = defender
-            .character_data
-            .secondary_element
-            .unwrap_or(defender.character_data.element);
-        result.type_effectiveness = type_chart.effectiveness_dual(
-            mv.element,
-            defender.character_data.element,
-            def_secondary,
-        );
-        result.is_super_effective = result.type_effectiveness > 1.0;
-        result.is_not_very_effective =
-            result.type_effectiveness > 0.0 && result.type_effectiveness < 1.0;
-        result.is_immune = result.type_effectiveness == 0.0;
+        let raw_damage = calculate_raw_damage(attacker, defender, mv, &type_chart);
+        let variance_damage = apply_variance(raw_damage.raw_damage, rng);
+        let (critical_damage, is_critical) = apply_critical_hit(variance_damage, rng);
+        let mut final_damage = critical_damage;
 
-        let stab_multiplier = if has_stab(attacker, mv) {
-            STAB_MULTIPLIER
-        } else {
-            1.0
-        };
-
-        let variance: f64 = rng.gen_range(MIN_VARIANCE..MAX_VARIANCE);
-
-        let mut final_damage =
-            (result.raw_damage as f64 * result.type_effectiveness * stab_multiplier * variance)
-                .max(1.0) as u32;
-
-        if result.is_immune {
+        if raw_damage.is_immune {
             final_damage = 0;
         }
 
-        if rng.r#gen::<f64>() * 100.0 < CRITICAL_CHANCE {
-            result.is_critical = true;
-            final_damage = (final_damage as f64 * CRITICAL_MULTIPLIER) as u32;
-        }
+        result.raw_damage = raw_damage.raw_damage;
+        result.type_effectiveness = raw_damage.type_effectiveness;
+        result.is_super_effective = raw_damage.is_super_effective;
+        result.is_not_very_effective = raw_damage.is_not_very_effective;
+        result.is_immune = raw_damage.is_immune;
+        result.is_critical = is_critical;
 
         result.damage_dealt = defender.take_damage(final_damage);
 
-        if mv.recoil > 0 && result.damage_dealt > 0 {
-            let recoil = (result.damage_dealt as f64 * mv.recoil as f64 / 100.0)
-                .ceil()
-                .max(1.0) as u32;
-            result.recoil_damage = attacker.take_damage(recoil);
-        }
+        result.recoil_damage = apply_recoil_damage(attacker, result.damage_dealt, mv);
 
         result.log_message = build_damage_log(
             &attacker.character_data.name,
@@ -187,10 +279,7 @@ pub fn calculate_damage(
     }
 
     if mv.healing > 0 {
-        let heal = (attacker.max_hp as f64 * mv.healing as f64 / 100.0)
-            .ceil()
-            .max(1.0) as u32;
-        result.heal_amount = attacker.heal(heal);
+        result.heal_amount = apply_healing(attacker, mv);
         if result.log_message.is_empty() {
             result.log_message = format!(
                 "{} used {} and restored {} HP!",
@@ -204,15 +293,9 @@ pub fn calculate_damage(
         }
     }
 
-    if mv.effect != EffectType::None && mv.effect_chance > 0 {
-        let resisted = defender.has_status(mv.effect);
-        if !resisted && check_effect_chance(mv.effect_chance, rng) {
-            defender.apply_status(mv.effect);
-            result.status_applied = Some(mv.effect);
-        } else {
-            result.status_resisted = resisted;
-        }
-    }
+    let (status_applied, status_resisted) = apply_status_effect(defender, mv, rng);
+    result.status_applied = status_applied;
+    result.status_resisted = status_resisted;
 
     Ok(result)
 }
