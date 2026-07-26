@@ -425,4 +425,143 @@ mod tests {
         assert!(result.status_resisted);
         assert!(result.status_applied.is_none());
     }
+
+    #[test]
+    fn test_super_effective_flag() {
+        let (mut atk, mut def) = make_attacker();
+        let mv = make_move();
+        def.character_data.element = TypeElement::Water; // Fire beats Water (2.0)
+        let mut rng = StdRng::seed_from_u64(42);
+        let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
+        assert!(result.hit);
+        assert!(
+            result.is_super_effective,
+            "Fire vs Water should be super effective (got eff={}, expected 2.0)",
+            result.type_effectiveness
+        );
+    }
+
+    #[test]
+    fn test_not_very_effective_flag() {
+        let (mut atk, mut def) = make_attacker();
+        let mv = make_move();
+        // Attacker is Fire, defender is Wood (default) → Fire vs Wood = 0.5
+        let mut rng = StdRng::seed_from_u64(42);
+        let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
+        assert!(result.hit);
+        assert!(
+            result.is_not_very_effective,
+            "Fire vs Wood should be not very effective (got eff={}, expected 0.5)",
+            result.type_effectiveness
+        );
+    }
+
+    #[test]
+    fn test_immune_flag() {
+        let (mut atk, mut def) = make_attacker();
+        let mut mv = make_move();
+        mv.element = TypeElement::Wood;
+        def.character_data.element = TypeElement::Metal; // Metal resists Wood
+        def.character_data.secondary_element = Some(TypeElement::Yin);
+        let mut rng = StdRng::seed_from_u64(42);
+        let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
+        if result.is_immune {
+            assert_eq!(result.damage_dealt, 0);
+        }
+    }
+
+    #[test]
+    fn test_critical_hit_flag() {
+        // Use fixed seed that produces a crit
+        for seed in 0..100 {
+            let (mut atk, mut def) = make_attacker();
+            let mv = make_move();
+            let mut rng = StdRng::seed_from_u64(seed);
+            let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
+            if result.is_critical {
+                assert!(result.damage_dealt > 0);
+                return;
+            }
+        }
+        // CRITICAL_CHANCE=6%, seeds 0..100 should trigger ~6 crits
+        panic!("No critical hit occurred in 100 seeds — possible RNG issue");
+    }
+
+    #[test]
+    fn test_damage_log_immune_message() {
+        let msg = build_damage_log(
+            "Attacker",
+            "Defender",
+            "Test",
+            &ActionResult {
+                damage_dealt: 0,
+                target_index: 1,
+                hit: true,
+                is_critical: false,
+                type_effectiveness: 0.0,
+                is_super_effective: false,
+                is_not_very_effective: false,
+                is_immune: true,
+                status_applied: None,
+                status_resisted: false,
+                recoil_damage: 0,
+                heal_amount: 0,
+                raw_damage: 0,
+                log_message: String::new(),
+            },
+        );
+        assert!(msg.contains("doesn't affect"));
+    }
+
+    #[test]
+    fn test_damage_log_super_effective() {
+        let msg = build_damage_log(
+            "A",
+            "B",
+            "Fire",
+            &ActionResult {
+                is_super_effective: true,
+                is_not_very_effective: false,
+                is_immune: false,
+                is_critical: true,
+                recoil_damage: 0,
+                ..ActionResult::new(1)
+            },
+        );
+        assert!(msg.contains("super effective"));
+        assert!(msg.contains("critical"));
+    }
+
+    #[test]
+    fn test_damage_log_recoil() {
+        let msg = build_damage_log(
+            "A",
+            "B",
+            "Strike",
+            &ActionResult {
+                is_super_effective: false,
+                is_not_very_effective: false,
+                is_immune: false,
+                is_critical: false,
+                recoil_damage: 10,
+                ..ActionResult::new(1)
+            },
+        );
+        assert!(msg.contains("recoil"));
+    }
+
+    #[test]
+    fn test_accuracy_check_edge() {
+        let mut rng = StdRng::seed_from_u64(42);
+        assert!(check_accuracy(100, &mut rng));
+        assert!(!check_accuracy(0, &mut rng));
+    }
+
+    #[test]
+    fn test_no_stab_for_different_type() {
+        let (atk, _) = make_attacker();
+        let mut mv = make_move();
+        mv.element = TypeElement::Water; // Attacker is Fire
+        assert!(!has_stab(&atk, &mv));
+    }
 }

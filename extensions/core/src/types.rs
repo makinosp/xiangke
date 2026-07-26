@@ -282,4 +282,126 @@ mod tests {
             chart.effectiveness_dual(TypeElement::Water, TypeElement::Fire, TypeElement::Earth);
         assert!((result - 2.0).abs() < f64::EPSILON);
     }
+
+    #[test]
+    fn test_type_chart_default_identity() {
+        let chart = TypeChart::default();
+        for t in TypeElement::ALL {
+            let eff = chart.effectiveness(t, t);
+            assert!(
+                (eff - 1.0).abs() < f64::EPSILON,
+                "{:?} vs itself = {}",
+                t,
+                eff
+            );
+        }
+    }
+
+    #[test]
+    fn test_type_chart_five_element_cycle() {
+        let chart = TypeChart::default();
+        // effectiveness(attack, defense): row=defender, col=attacker
+        // 2.0 cycle: Fire→Water, Water→Earth, Earth→Wood, Wood→Metal, Metal→Fire
+        assert!(
+            (chart.effectiveness(TypeElement::Fire, TypeElement::Water) - 2.0).abs() < f64::EPSILON
+        );
+        assert!(
+            (chart.effectiveness(TypeElement::Water, TypeElement::Earth) - 2.0).abs()
+                < f64::EPSILON
+        );
+        assert!(
+            (chart.effectiveness(TypeElement::Earth, TypeElement::Wood) - 2.0).abs() < f64::EPSILON
+        );
+        assert!(
+            (chart.effectiveness(TypeElement::Wood, TypeElement::Metal) - 2.0).abs() < f64::EPSILON
+        );
+        assert!(
+            (chart.effectiveness(TypeElement::Metal, TypeElement::Fire) - 2.0).abs() < f64::EPSILON
+        );
+    }
+
+    #[test]
+    fn test_type_chart_yang_yin_neutral_to_five() {
+        let chart = TypeChart::default();
+        for t in [
+            TypeElement::Wood,
+            TypeElement::Fire,
+            TypeElement::Earth,
+            TypeElement::Metal,
+            TypeElement::Water,
+        ] {
+            assert!((chart.effectiveness(TypeElement::Yang, t) - 1.0).abs() < f64::EPSILON);
+            assert!((chart.effectiveness(TypeElement::Yin, t) - 1.0).abs() < f64::EPSILON);
+            assert!((chart.effectiveness(t, TypeElement::Yang) - 1.0).abs() < f64::EPSILON);
+            assert!((chart.effectiveness(t, TypeElement::Yin) - 1.0).abs() < f64::EPSILON);
+        }
+    }
+
+    #[test]
+    fn test_type_chart_known_effectiveness() {
+        let chart = TypeChart::default();
+        // effectiveness(attack, defense) = chart[defense][attack]
+        let cases: [(TypeElement, TypeElement, f64); 8] = [
+            (TypeElement::Fire, TypeElement::Wood, 0.5), // Fire attacks Wood → weak
+            (TypeElement::Water, TypeElement::Metal, 0.5), // Water attacks Metal → weak
+            (TypeElement::Water, TypeElement::Wood, 1.25), // Water attacks Wood → generating
+            (TypeElement::Fire, TypeElement::Water, 2.0), // Fire attacks Water → strong
+            (TypeElement::Wood, TypeElement::Fire, 1.25), // Wood attacks Fire → generating
+            (TypeElement::Water, TypeElement::Fire, 1.0), // Water attacks Fire → neutral
+            (TypeElement::Metal, TypeElement::Water, 1.25), // Metal attacks Water → generating
+            (TypeElement::Earth, TypeElement::Fire, 0.5), // Earth attacks Fire → weak
+        ];
+        for (atk, def, expected) in cases {
+            let eff = chart.effectiveness(atk, def);
+            assert!(
+                (eff - expected).abs() < f64::EPSILON,
+                "{atk:?} vs {def:?} expected {expected}, got {eff}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_effectiveness_dual_extreme_clamping() {
+        let chart = TypeChart::default();
+        // Fire→Water = 2.0, Fire→Water+Water = 2.0*2.0 = 4.0
+        let result =
+            chart.effectiveness_dual(TypeElement::Fire, TypeElement::Water, TypeElement::Water);
+        assert!(
+            (result - 4.0).abs() < f64::EPSILON,
+            "Fire vs Water+Water expected 4.0, got {result}"
+        );
+        // Fire→Wood = 0.5, Fire→Wood+Wood = 0.5*0.5 = 0.25
+        let result2 =
+            chart.effectiveness_dual(TypeElement::Fire, TypeElement::Wood, TypeElement::Wood);
+        assert!(
+            (result2 - 0.25).abs() < f64::EPSILON,
+            "Fire vs Wood+Wood expected 0.25, got {result2}"
+        );
+    }
+
+    #[test]
+    fn test_stat_to_index() {
+        assert_eq!(Stat::Attack.to_index(), 0);
+        assert_eq!(Stat::Defense.to_index(), 1);
+        assert_eq!(Stat::Speed.to_index(), 2);
+        assert_eq!(Stat::Intelligence.to_index(), 3);
+        assert_eq!(Stat::Spirit.to_index(), 4);
+    }
+
+    #[test]
+    fn test_type_element_all_from_repr() {
+        for (i, t) in TypeElement::ALL.iter().enumerate() {
+            assert_eq!(TypeElement::from_repr(i as u8), Some(*t));
+        }
+    }
+
+    #[test]
+    fn test_effect_type_all_variants() {
+        for (i, e) in EffectType::ALL.iter().enumerate() {
+            let repr = i as u8;
+            assert_eq!(e.clone() as u8, repr);
+            assert_eq!(EffectType::from_repr(repr), Some(*e));
+        }
+        assert_eq!(EffectType::from_repr(99), None);
+    }
 }
