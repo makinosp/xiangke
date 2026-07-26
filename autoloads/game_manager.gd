@@ -1,12 +1,14 @@
 ## GameManager autoload singleton.
 ## Central state machine for managing game flow and scene transitions.
-## Handles the four-state loop: TITLE → CHARACTER_SELECT → BATTLE → RESULT → TITLE.
+## Handles the five-state loop:
+## TITLE → CORPS_CREATION → CHARACTER_SELECT → BATTLE → RESULT → TITLE.
 extends Node
 
 ## Application states for the game state machine.
 enum GameState {
 	TITLE, ## Title screen is active. Entry point.
-	CHARACTER_SELECT, ## Character selection screen is active.
+	CORPS_CREATION, ## Corps creation screen is active (Phase 1: select 6).
+	CHARACTER_SELECT, ## Battle selection screen is active (Phase 2: pick 3 from corps).
 	BATTLE, ## Battle scene is active (managed by Unit 3).
 	RESULT ## Battle result screen is active.
 }
@@ -26,6 +28,11 @@ var corps_roster: RefCounted
 func _ready() -> void:
 	# Initialize corps_roster using preload to ensure class is resolved
 	corps_roster = preload("res://scripts/foundation/corps_roster.gd").new()
+	# Restore saved corps data if available
+	var save_data := SaveManager.current_data
+	if save_data.has("corps_characters") and save_data["corps_characters"] is Array:
+		if save_data["corps_characters"].size() == 6:
+			corps_roster.restore_from_save(save_data)
 	_process_state(current_state)
 
 
@@ -57,6 +64,8 @@ func get_scene_for_state(state: GameState) -> String:
 	match state:
 		GameState.TITLE:
 			return "res://scenes/title_screen.tscn"
+		GameState.CORPS_CREATION:
+			return "res://scenes/corps_creation.tscn"
 		GameState.CHARACTER_SELECT:
 			return "res://scenes/character_select.tscn"
 		GameState.BATTLE:
@@ -73,6 +82,8 @@ func _is_valid_transition(from: GameState, to: GameState) -> bool:
 
 	match from:
 		GameState.TITLE:
+			return to == GameState.CORPS_CREATION
+		GameState.CORPS_CREATION:
 			return to == GameState.CHARACTER_SELECT
 		GameState.CHARACTER_SELECT:
 			return to == GameState.BATTLE

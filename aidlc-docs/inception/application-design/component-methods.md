@@ -134,16 +134,7 @@ func show_action_menu(moves: Array[Move]) -> void
 func hide_action_menu() -> void
 func display_battle_log(message: String) -> void
 func show_result_screen(winner: Character) -> void
-func show_character_select(characters: Array[Character]) -> void
-```
-
----
-
-## AudioController
-
-```gdscript
-# AudioController.gd (Autoload)
-extends Node
+func show_corps_creation(characters: Array[Character]) -> void
 
 # Methods
 func play_bgm(bgm_name: String) -> void

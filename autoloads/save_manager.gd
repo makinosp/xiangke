@@ -71,6 +71,9 @@ func save_game(data: Dictionary = {}) -> void:
 	config.set_value("progress", "selected_character", data.get("selected_character", ""))
 	config.set_value("progress", "last_battle_won", data.get("last_battle_won", false))
 	config.set_value("progress", "last_battle_time", data.get("last_battle_time", ""))
+	# Store corps_characters as JSON string (ConfigFile does not natively support arrays)
+	var corps_data: Array = data.get("corps_characters", [])
+	config.set_value("progress", "corps_characters", JSON.stringify(corps_data))
 
 	# Meta section
 	config.set_value("meta", "save_version", SAVE_VERSION)
@@ -101,6 +104,7 @@ func _create_default_save() -> Dictionary:
 		"selected_character": "",
 		"last_battle_won": false,
 		"last_battle_time": "",
+		"corps_characters": [],
 		"_warning": ""
 	}
 
@@ -133,6 +137,12 @@ func _parse_save_data(config: ConfigFile) -> Dictionary:
 	data["selected_character"] = config.get_value("progress", "selected_character", "")
 	data["last_battle_won"] = config.get_value("progress", "last_battle_won", false)
 	data["last_battle_time"] = config.get_value("progress", "last_battle_time", "")
+	# Load corps_characters from JSON string
+	var corps_json: String = config.get_value("progress", "corps_characters", "[]")
+	if not corps_json.is_empty():
+		var parsed = JSON.parse_string(corps_json)
+		if parsed is Array:
+			data["corps_characters"] = parsed
 
 	# Validate version
 	var save_version: int = config.get_value("meta", "save_version", 0)
