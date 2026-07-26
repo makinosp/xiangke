@@ -373,4 +373,69 @@ mod tests {
         let msg = format!("{err}");
         assert!(msg.contains("Invalid participant"));
     }
+
+    #[test]
+    fn test_battle_error_all_variants() {
+        let variants: [(&str, BattleError); 7] = [
+            ("Invalid participant", BattleError::InvalidParticipant("a".into())),
+            ("Invalid battle state", BattleError::InvalidBattleState("b".into())),
+            ("Defeated participant", BattleError::DefeatedParticipant("c".into())),
+            ("Move not found", BattleError::MoveNotFound("d".into())),
+            ("No active participants", BattleError::NoActiveParticipants),
+            ("Battle has already ended", BattleError::BattleAlreadyEnded),
+            ("Invalid target", BattleError::InvalidTarget("e".into())),
+        ];
+        for (expected, err) in &variants {
+            let msg = format!("{err}");
+            assert!(msg.contains(expected), "expected '{msg}' to contain '{expected}'");
+        }
+    }
+
+    #[test]
+    fn test_evaluate_draw_at_exact_turn_limit() {
+        let participants = vec![
+            make_participant(Team::Player, 100),
+            make_participant(Team::Enemy, 100),
+        ];
+        let mut state = BattleState::new(participants, empty_move_lookup()).unwrap();
+        state.turn_count = MAX_TURNS;
+        assert_eq!(state.evaluate_status(), Status::Draw);
+        state.turn_count = MAX_TURNS + 1;
+        assert_eq!(state.evaluate_status(), Status::Draw);
+    }
+
+    #[test]
+    fn test_battle_state_apply_status() {
+        let participants = vec![
+            make_participant(Team::Player, 100),
+            make_participant(Team::Enemy, 100),
+        ];
+        let mut state = BattleState::new(participants, empty_move_lookup()).unwrap();
+        state.apply_status(Status::Victory);
+        assert_eq!(state.battle_status, Status::Victory);
+        assert!(state.battle_log.iter().any(|l| l.contains("Victory")));
+    }
+
+    #[test]
+    fn test_battle_state_status_effect_configs() {
+        let participants = vec![
+            make_participant(Team::Player, 100),
+            make_participant(Team::Enemy, 100),
+        ];
+        let state = BattleState::new(participants, empty_move_lookup()).unwrap();
+        assert!(state.status_effect_configs.contains_key(&EffectType::Burn));
+        assert!(state.status_effect_configs.contains_key(&EffectType::Poison));
+        assert!(state.status_effect_configs.contains_key(&EffectType::Confusion));
+    }
+
+    #[test]
+    fn test_battle_state_evaluate_ignores_non_active() {
+        let participants = vec![
+            make_participant(Team::Player, 100),
+            make_participant(Team::Enemy, 100),
+        ];
+        let mut state = BattleState::new(participants, empty_move_lookup()).unwrap();
+        state.apply_status(Status::Victory);
+        assert_eq!(state.evaluate_status(), Status::Victory);
+    }
 }

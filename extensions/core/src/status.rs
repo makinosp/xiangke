@@ -133,4 +133,68 @@ mod tests {
         assert_eq!(deserialized.status_type, EffectType::Confusion);
         assert_eq!(deserialized.stat_mod_stat, Some(Stat::Speed));
     }
+
+    #[test]
+    fn test_status_default_constructor() {
+        let status = StatusEffectData::default();
+        assert_eq!(status.status_type, EffectType::None);
+        assert_eq!(status.damage_per_turn, BURN_DAMAGE_RATIO);
+        assert_eq!(status.max_damage_cap, MAX_DOT_CAP);
+        assert!(status.has_damage_over_time()); // default has BURN_DAMAGE_RATIO > 0
+        assert!(!status.has_stat_modification());
+    }
+
+    #[test]
+    fn test_status_constants() {
+        assert!((BURN_DAMAGE_RATIO - 1.0 / 16.0).abs() < f64::EPSILON);
+        assert!((POISON_DAMAGE_RATIO - 2.0 / 16.0).abs() < f64::EPSILON);
+        assert!((MAX_DOT_CAP - 0.25).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_status_chain_and_confusion() {
+        let chain = StatusEffectData {
+            status_type: EffectType::Chain,
+            name: "連鎖".into(),
+            description: "Links damage".into(),
+            damage_per_turn: 0.0,
+            escalating: false,
+            max_damage_cap: 0.0,
+            stat_mod_stat: None,
+            stat_mod_multiplier: 1.0,
+        };
+        assert_eq!(chain.status_type, EffectType::Chain);
+        assert!(!chain.has_damage_over_time());
+        assert!(!chain.has_stat_modification());
+
+        let confusion = StatusEffectData {
+            status_type: EffectType::Confusion,
+            name: "混乱".into(),
+            description: "May hit itself".into(),
+            damage_per_turn: 0.0,
+            escalating: false,
+            max_damage_cap: 0.0,
+            stat_mod_stat: Some(Stat::Speed),
+            stat_mod_multiplier: 0.75,
+        };
+        assert!(confusion.has_stat_modification());
+        assert!((confusion.stat_mod_multiplier - 0.75).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_status_poison_config() {
+        let poison = StatusEffectData {
+            status_type: EffectType::Poison,
+            name: "毒".into(),
+            description: "Escalating DoT".into(),
+            damage_per_turn: POISON_DAMAGE_RATIO,
+            escalating: true,
+            max_damage_cap: MAX_DOT_CAP,
+            stat_mod_stat: None,
+            stat_mod_multiplier: 1.0,
+        };
+        assert!(poison.escalating);
+        assert!((poison.damage_per_turn - POISON_DAMAGE_RATIO).abs() < f64::EPSILON);
+        assert!(!poison.has_stat_modification());
+    }
 }

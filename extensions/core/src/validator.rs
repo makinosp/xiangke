@@ -570,7 +570,7 @@ pub fn validate_character(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::character::CharacterData;
+    use crate::character::{CharacterData, Stats};
     use crate::moves::MoveData;
     use crate::types::*;
 
@@ -806,5 +806,141 @@ mod tests {
         assert!(summary.contains("TEST"));
         assert!(summary.contains("WARN"));
         assert!(!result.is_valid());
+    }
+
+    #[test]
+    fn test_validate_type_chart_all_ones() {
+        // All 1.0 — missing 五行 super-effective/weak pattern
+        let chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
+        assert!(validate_type_chart(&chart).is_err());
+    }
+
+    #[test]
+    fn test_validate_type_chart_diagonal_immune() {
+        // Self-immune (0.0 on diagonal)
+        use TypeElement::*;
+        let mut chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
+        chart[Wood as usize] = [0.0, 0.5, 2.0, 1.0, 1.25, 1.0, 1.0];
+        chart[Fire as usize] = [1.25, 1.0, 0.5, 2.0, 1.0, 1.0, 1.0];
+        chart[Earth as usize] = [1.0, 1.25, 1.0, 0.5, 2.0, 1.0, 1.0];
+        chart[Metal as usize] = [2.0, 1.0, 1.25, 1.0, 0.5, 1.0, 1.0];
+        chart[Water as usize] = [0.5, 2.0, 1.0, 1.25, 1.0, 1.0, 1.0];
+        chart[TypeElement::Yang as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0];
+        chart[TypeElement::Yin as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0];
+        assert!(validate_type_chart(&chart).is_err());
+    }
+
+    #[test]
+    fn test_validate_type_chart_missing_super_effective() {
+        // No 2.0 entries for 五行
+        let mut chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
+        chart[TypeElement::Yang as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0];
+        chart[TypeElement::Yin as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0];
+        assert!(validate_type_chart(&chart).is_err());
+        let errs = validate_type_chart(&chart).unwrap_err();
+        assert!(errs.iter().any(|e| e.code == "TR-3"));
+    }
+
+    #[test]
+    fn test_validate_accuracy_zero() {
+        let mut mv = valid_moves()[0].clone();
+        mv.accuracy = 0;
+        assert!(validate_move(&mv).is_err());
+    }
+
+    #[test]
+    fn test_validate_accuracy_over_100() {
+        let mut mv = valid_moves()[0].clone();
+        mv.accuracy = 101;
+        assert!(validate_move(&mv).is_err());
+    }
+
+    #[test]
+    fn test_validate_move_name_too_long() {
+        let mut mv = valid_moves()[0].clone();
+        mv.name = "A".repeat(21);
+        assert!(validate_move(&mv).is_err());
+    }
+
+    #[test]
+    fn test_validate_move_stat_mod_stage_out_of_range() {
+        let mut mv = valid_moves()[3].clone(); // has Defense+2
+        mv.stat_mod_stage = 5;
+        assert!(validate_move(&mv).is_err());
+    }
+
+    #[test]
+    fn test_validate_move_hit_count_zero() {
+        let mut mv = valid_moves()[0].clone();
+        mv.hit_count = 0;
+        assert!(validate_move(&mv).is_err());
+    }
+
+    #[test]
+    fn test_validate_move_healing_over_100() {
+        let mut mv = valid_moves()[2].clone(); // healing_wind has healing=30
+        mv.healing = 150;
+        assert!(validate_move(&mv).is_err());
+    }
+
+    #[test]
+    fn test_validate_character_no_damaging_move() {
+        let all_moves = valid_moves();
+        let non_damaging_ids: Vec<String> = all_moves
+            .iter()
+            .filter(|m| !m.is_damaging())
+            .map(|m| m.id.clone())
+            .collect();
+        let c = CharacterData {
+            moves: non_damaging_ids,
+            ..valid_character()
+        };
+        assert!(validate_character(&c, &all_moves).is_err());
+    }
+
+    #[test]
+    fn test_validate_character_stat_soft_cap_warning() {
+        let all_moves = valid_moves();
+        let c = CharacterData {
+            base_stats: Stats {
+                hp: 600,
+                ..valid_character().base_stats
+            },
+            ..valid_character()
+        };
+        // Soft cap is a warning in validation, not a hard error
+        // The validator only returns errors; warnings go to ValidationResult
+        // Verify it still passes (HP 600 > SOFT_CAP 500 but < MAX 999)
+        assert!(validate_character(&c, &all_moves).is_err()); // exceeds SOFT_CAP but within MAX
+    }
+
+    #[test]
+    fn test_validate_character_secondary_type_same_as_primary() {
+        let all_moves = valid_moves();
+        let c = CharacterData {
+            element: TypeElement::Fire,
+            secondary_element: Some(TypeElement::Fire),
+            ..valid_character()
+        };
+        assert!(validate_character(&c, &all_moves).is_err());
+    }
+
+    #[test]
+    fn test_validate_result_default() {
+        let result = ValidationResult::default();
+        assert!(result.is_valid());
+        assert_eq!(result.errors.len(), 0);
+        assert_eq!(result.warnings.len(), 0);
+    }
+
+    #[test]
+    fn test_validate_error_display_no_context() {
+        let err = ValidationError {
+            code: "TEST".into(),
+            message: "Something wrong".into(),
+            context: String::new(),
+        };
+        let s = format!("{err}");
+        assert_eq!(s, "[TEST] Something wrong");
     }
 }

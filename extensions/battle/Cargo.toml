@@ -10,3 +10,6 @@ xiangke-core = { path = "../core" }
 serde.workspace = true
 rand.workspace = true
 thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

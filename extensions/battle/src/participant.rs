@@ -238,4 +238,56 @@ mod tests {
         assert!(!p.has_status(EffectType::Poison));
         p.apply_status(EffectType::Burn);
     }
+
+    #[test]
+    fn test_effective_spirit() {
+        let p = BattleParticipant::new(dummy_character(), Team::Player, 0).unwrap();
+        let eff = p.effective_spirit();
+        assert!((eff - 50.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_effective_intelligence() {
+        let p = BattleParticipant::new(dummy_character(), Team::Player, 0).unwrap();
+        let eff = p.effective_intelligence();
+        assert!((eff - 60.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_multiple_statuses() {
+        let mut p = BattleParticipant::new(dummy_character(), Team::Player, 0).unwrap();
+        p.apply_status(EffectType::Burn);
+        p.apply_status(EffectType::Poison);
+        p.apply_status(EffectType::Confusion);
+        assert!(p.has_status(EffectType::Burn));
+        assert!(p.has_status(EffectType::Poison));
+        assert!(p.has_status(EffectType::Confusion));
+        assert!(!p.has_status(EffectType::Charm));
+    }
+
+    #[test]
+    fn test_take_damage_zero() {
+        let mut p = BattleParticipant::new(dummy_character(), Team::Player, 0).unwrap();
+        let dealt = p.take_damage(0);
+        assert_eq!(dealt, 0);
+        assert_eq!(p.current_hp, 100);
+    }
+
+    #[test]
+    fn test_effective_stat_with_stage() {
+        let mut p = BattleParticipant::new(dummy_character(), Team::Player, 0).unwrap();
+        p.apply_stat_stage(Stat::Attack, 2);
+        let eff = p.effective_stat(Stat::Attack);
+        assert!((eff - 180.0).abs() < f64::EPSILON, "expected 180, got {eff}");
+    }
+
+    #[test]
+    fn test_all_effective_stats() {
+        let p = BattleParticipant::new(dummy_character(), Team::Player, 0).unwrap();
+        assert!((p.effective_attack() - 90.0).abs() < f64::EPSILON);
+        assert!((p.effective_defense() - 80.0).abs() < f64::EPSILON);
+        assert!((p.effective_speed() - 70.0).abs() < f64::EPSILON);
+        assert!((p.effective_intelligence() - 60.0).abs() < f64::EPSILON);
+        assert!((p.effective_spirit() - 50.0).abs() < f64::EPSILON);
+    }
 }

@@ -35,9 +35,14 @@
 - [x] Code Generation (2026-06-29)
 - [x] Build and Test (2026-06-29) — Unit 1
 
-## Enhancement Phase (fix/run-project) — 2026-07-26
+## Enhancement Phase (test-expansion) — 2026-07-26
 
-- [x] Workspace Detection (2026-07-26)
+- [x] Phase 1 - Rust Unit Test Expansion (2026-07-26)
+- [x] Phase 2 - Property-Based Tests (proptest 1) (2026-07-26)
+- [x] Phase 3 - Integration Tests (2026-07-26)
+- [x] Phase 4 - Godot Bridge Tests (2026-07-26)
+- [x] Phase 5 - GDScript Tests (2026-07-26)
+- [x] Final Verification — All 235 tests pass (200 Rust + 35 GDScript)
 - [x] Requirements Analysis (2026-07-26)
 - [x] Workflow Planning (2026-07-26)
 

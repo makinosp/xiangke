@@ -103,4 +103,35 @@ mod tests {
         let result = calculate_raw_damage(100.0, 60, 0.5);
         assert_eq!(result, 4800);
     }
+
+    #[test]
+    fn test_raw_damage_high_attack() {
+        let result = calculate_raw_damage(255.0, 255, 1.0);
+        assert_eq!(result, 52020);
+    }
+
+    #[test]
+    fn test_stat_stage_all_valid_values() {
+        for stage in -6..=6 {
+            let m = stat_stage_multiplier(stage);
+            assert!(
+                m.is_finite(),
+                "stage {stage} produced non-finite multiplier"
+            );
+            assert!(m > 0.0, "stage {stage} produced non-positive multiplier");
+        }
+    }
+
+    #[test]
+    fn test_stat_stage_monotonic() {
+        for lower in -6..6 {
+            let upper = lower + 1;
+            let ml = stat_stage_multiplier(lower);
+            let mu = stat_stage_multiplier(upper);
+            assert!(
+                mu > ml,
+                "stage {upper} multiplier {mu} should be > stage {lower} multiplier {ml}"
+            );
+        }
+    }
 }

@@ -20,3 +20,6 @@ pub mod manager;
 
 /// Battle flow orchestration.
 pub mod flow;
+
+#[cfg(test)]
+mod proptests;

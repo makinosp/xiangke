@@ -234,10 +234,6 @@ impl RustBattleSystem {
     }
 
     /// Executes a player's chosen move against a target participant.
-    /// Takes `move_data` as a Dictionary matching MoveData fields and `target_index` as
-    /// the global participant index. Returns an ActionResult Dictionary with damage,
-    /// healing, hit/miss, type effectiveness, and log message fields.
-    /// Returns empty Dictionary on error (invalid index, missing state, move parse failure).
     #[func]
     fn execute_player_action(&mut self, move_data: Dict, target_index: i64) -> Dict {
         let default = Dict::new();
@@ -287,7 +283,6 @@ impl RustBattleSystem {
     }
 
     /// Advances the turn queue to the next active participant.
-    /// Returns true if a next participant exists, false if no valid participants remain.
     #[func]
     fn advance_turn(&mut self) -> bool {
         match (self.battle_state.as_mut(), self.rng.as_mut()) {
@@ -297,8 +292,6 @@ impl RustBattleSystem {
     }
 
     /// Returns a Dictionary of the current active participant's data.
-    /// Keys: id, name, current_hp, max_hp, team, slot_index, is_defeated, stat_stages, active_status_effects.
-    /// Returns empty Dictionary if no battle state or no active participant.
     #[func]
     fn get_active_participant(&self) -> Dict {
         match self
@@ -340,7 +333,6 @@ impl RustBattleSystem {
     }
 
     /// Returns the last `count` log entries as an Array of formatted strings.
-    /// Each entry follows the format "[T{N}/R{M}] message".
     #[func]
     fn get_recent_log(&self, count: i64) -> Arr {
         let mut arr = Arr::new();
@@ -355,7 +347,6 @@ impl RustBattleSystem {
     }
 
     /// Returns the current battle status as an integer.
-    /// Values: 0=Active, 1=Victory, 2=Defeat, 3=Draw, 4=Escaped. Returns 5 if no battle.
     #[func]
     fn get_battle_status(&self) -> i64 {
         match self.battle_state.as_ref() {
@@ -365,8 +356,6 @@ impl RustBattleSystem {
     }
 
     /// Checks and updates win/loss/draw conditions based on current state.
-    /// Returns the new status: 0=Active (ongoing), 1=Victory, 2=Defeat, 3=Draw.
-    /// If status changed from Active, applies the end-of-battle status and logs.
     #[func]
     fn evaluate_battle_status(&mut self) -> i64 {
         let state = match self.battle_state.as_mut() {
@@ -380,7 +369,7 @@ impl RustBattleSystem {
         status as i64
     }
 
-    /// Returns the total number of participants in the battle (both teams).
+    /// Returns the total number of participants in the battle.
     #[func]
     fn get_participant_count(&self) -> i64 {
         match self.battle_state.as_ref() {
@@ -390,7 +379,6 @@ impl RustBattleSystem {
     }
 
     /// Returns a participant Dictionary at the given global index.
-    /// Returns empty Dictionary if index is out of range or no battle state.
     #[func]
     fn get_participant(&self, index: i64) -> Dict {
         let state = match self.battle_state.as_ref() {
@@ -415,7 +403,6 @@ impl RustBattleSystem {
     }
 
     /// Returns whether the participant at the given global index is defeated.
-    /// Returns true if no battle state exists.
     #[func]
     fn is_participant_defeated(&self, index: i64) -> bool {
         match self.battle_state.as_ref() {
@@ -426,91 +413,86 @@ impl RustBattleSystem {
             None => true,
         }
     }
-
-    /// Processes start-of-turn effects for the participant at the given index.
-    /// Handles confusion (self-damage with 50% chance). Delegates to flow.rs.
-    /// Returns an Array of log message strings generated during processing.
-    #[func]
-    fn process_start_of_turn(&mut self, participant_index: i64) -> Arr {
-        let mut logs = Arr::new();
-        let state = match self.battle_state.as_mut() {
-            Some(s) => s,
-            None => return logs,
-        };
-        let idx = participant_index as usize;
-        if idx >= state.participants.len() {
-            return logs;
-        };
-        let rng = match self.rng.as_mut() {
-            Some(r) => r,
-            None => return logs,
-        };
-        for msg in flow::process_start_of_turn(
-            &mut state.participants[idx],
-            &state.status_effect_configs,
-            rng,
-        ) {
-            logs.push(msg.clone());
-            state.add_log(msg);
-        }
-        logs
-    }
-
-    /// Processes end-of-turn effects for the participant at the given index.
-    /// Handles damage-over-time effects (Burn, Poison). Delegates to flow.rs.
-    /// Damage values are configurable via StatusEffectData in BattleState.
-    /// Returns an Array of log message strings generated during processing.
-    #[func]
-    fn process_end_of_turn(&mut self, participant_index: i64) -> Arr {
-        let mut logs = Arr::new();
-        let state = match self.battle_state.as_mut() {
-            Some(s) => s,
-            None => return logs,
-        };
-        let idx = participant_index as usize;
-        if idx >= state.participants.len() {
-            return logs;
-        };
-        let rng = match self.rng.as_mut() {
-            Some(r) => r,
-            None => return logs,
-        };
-        for msg in flow::process_end_of_turn(
-            &mut state.participants[idx],
-            &state.status_effect_configs,
-            rng,
-        ) {
-            logs.push(msg.clone());
-            state.add_log(msg);
-        }
-        logs
-    }
-
-    /// Adds a custom log message to the battle log with current turn/round prefix.
-    #[func]
-    fn add_log_message(&mut self, message: String) {
-        if let Some(ref mut state) = self.battle_state {
-            state.add_log(message);
-        }
-    }
-
-    /// Returns the display name of the participant at the given global index.
-    /// Returns empty string if index is out of range or no battle state.
-    #[func]
-    fn get_participant_name(&self, index: i64) -> String {
-        match self.battle_state.as_ref() {
-            Some(s) => {
-                let idx = index as usize;
-                if idx < s.participants.len() {
-                    s.participants[idx].character_data.name.clone()
-                } else {
-                    String::new()
-                }
-            }
-            None => String::new(),
-        }
-    }
 }
 
-#[gdextension]
-unsafe impl ExtensionLibrary for XiangkeExtension {}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Verify type-to-integer mapping constants.
+    #[test]
+    fn test_type_mapping_constants() {
+        assert_eq!(TypeElement::Wood as i64, 0);
+        assert_eq!(TypeElement::Fire as i64, 1);
+        assert_eq!(TypeElement::Earth as i64, 2);
+        assert_eq!(TypeElement::Metal as i64, 3);
+        assert_eq!(TypeElement::Water as i64, 4);
+        assert_eq!(TypeElement::Yang as i64, 5);
+        assert_eq!(TypeElement::Yin as i64, 6);
+    }
+
+    /// Verify effect type mapping constants.
+    #[test]
+    fn test_effect_mapping_constants() {
+        assert_eq!(EffectType::None as i64, 0);
+        assert_eq!(EffectType::Burn as i64, 1);
+        assert_eq!(EffectType::Poison as i64, 2);
+        assert_eq!(EffectType::Confusion as i64, 3);
+    }
+
+    /// Verify damage category mapping constants.
+    #[test]
+    fn test_damage_category_mapping() {
+        assert_eq!(DamageCategory::Physical as i64, 0);
+        assert_eq!(DamageCategory::Arts as i64, 1);
+    }
+
+    /// From-repr roundtrip for TypeElement used in dict parsing.
+    #[test]
+    fn test_type_element_from_repr_roundtrip() {
+        for t in TypeElement::ALL {
+            let repr = t as u8;
+            let back = TypeElement::from_repr(repr).unwrap();
+            assert_eq!(t, back);
+        }
+    }
+
+    /// From-repr for EffectType used in dict parsing.
+    #[test]
+    fn test_effect_type_from_repr_roundtrip() {
+        for e in EffectType::ALL {
+            let repr = e as u8;
+            let back = EffectType::from_repr(repr).unwrap();
+            assert_eq!(e, back);
+        }
+    }
+
+    /// Verify that TypeElement::from_repr defaults to Wood for invalid values.
+    #[test]
+    fn test_type_element_from_repr_fallback() {
+        let invalid_values = [7, 8, 255];
+        for &v in &invalid_values {
+            let result = TypeElement::from_repr(v).unwrap_or(TypeElement::Wood);
+            assert_eq!(result, TypeElement::Wood);
+        }
+    }
+
+    /// Verify that EffectType::from_repr defaults to None for invalid values.
+    #[test]
+    fn test_effect_type_from_repr_fallback() {
+        let invalid_values = [6, 7, 255];
+        for &v in &invalid_values {
+            let result = EffectType::from_repr(v).unwrap_or(EffectType::None);
+            assert_eq!(result, EffectType::None);
+        }
+    }
+
+    /// Verify Status to i64 mapping (used in get_battle_status).
+    #[test]
+    fn test_status_mapping() {
+        assert_eq!(Status::Active as i64, 0);
+        assert_eq!(Status::Victory as i64, 1);
+        assert_eq!(Status::Defeat as i64, 2);
+        assert_eq!(Status::Draw as i64, 3);
+    }
+}

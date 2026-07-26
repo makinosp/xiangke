@@ -192,4 +192,62 @@ mod tests {
         assert!(!state.turn_queue.is_empty());
         assert_eq!(state.turn_queue_index, 0);
     }
+
+    #[test]
+    fn test_multiple_rounds() {
+        let mut state = make_state(1, 1);
+        let mut rng = StdRng::seed_from_u64(42);
+        start_battle(&mut state, &mut rng).unwrap();
+        assert_eq!(state.round_count, 1);
+        // Advance through entire first round (2 participants)
+        advance_to_next_turn(&mut state, &mut rng).unwrap();
+        // Should start round 2
+        assert!(state.round_count >= 1);
+    }
+
+    #[test]
+    fn test_speed_tie_breaking() {
+        // Same speed participants should still produce a deterministic order
+        let mut participants = Vec::new();
+        for i in 0..4 {
+            participants.push(make_participant(Team::Player, 100, 50));
+        }
+        let mut rng = StdRng::seed_from_u64(42);
+        let queue = calculate_turn_queue(&participants, &mut rng);
+        assert_eq!(queue.len(), 4);
+        // Order may vary due to shuffle, but must contain all indices
+        for idx in 0..4 {
+            assert!(queue.contains(&idx), "queue {queue:?} missing index {idx}");
+        }
+    }
+
+    #[test]
+    fn test_advance_to_next_turn_defeated_skipped() {
+        let mut state = make_state(2, 1);
+        let mut rng = StdRng::seed_from_u64(42);
+        start_battle(&mut state, &mut rng).unwrap();
+        // Defeat all players except one
+        state.participants[0].is_defeated = true;
+        // Advance until all undefeated participants have had a turn
+        let mut advance_count = 0;
+        while advance_count < 10 {
+            if advance_to_next_turn(&mut state, &mut rng).is_err() {
+                break;
+            }
+            if let Some(idx) = state.active_participant {
+                assert!(!state.participants[idx].is_defeated,
+                    "defeated participant should not be active");
+            }
+            advance_count += 1;
+        }
+    }
+
+    #[test]
+    fn test_start_battle_battle_already_ended() {
+        let mut state = make_state(1, 1);
+        let mut rng = StdRng::seed_from_u64(42);
+        state.battle_status = Status::Victory;
+        let result = start_battle(&mut state, &mut rng);
+        assert!(result.is_err());
+    }
 }

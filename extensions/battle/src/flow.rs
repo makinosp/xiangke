@@ -365,4 +365,48 @@ mod tests {
         let action = ai.select_action(&state, 1);
         assert!(action.is_none());
     }
+
+    #[test]
+    fn test_ai_selects_no_move_if_no_attacks() {
+        let state = make_state();
+        // Enemy has only fire_strike which is a damaging move
+        // So this should still pick something
+        let ai = BasicAi::new();
+        let action = ai.select_action(&state, 1);
+        assert!(action.is_some());
+    }
+
+    #[test]
+    fn test_process_start_of_turn_no_confusion() {
+        let mut p = make_participant(Team::Player, 100);
+        let configs = default_configs();
+        let mut rng = StdRng::seed_from_u64(42);
+        let logs = process_start_of_turn(&mut p, &configs, &mut rng);
+        assert!(logs.is_empty());
+        assert_eq!(p.current_hp, 100);
+    }
+
+    #[test]
+    fn test_process_end_of_turn_no_dot() {
+        let mut p = make_participant(Team::Player, 100);
+        let configs = default_configs();
+        let mut rng = StdRng::seed_from_u64(42);
+        let logs = process_end_of_turn(&mut p, &configs, &mut rng);
+        assert!(logs.is_empty());
+    }
+
+    #[test]
+    fn test_ai_find_weakest_multiple() {
+        let mut state = make_state();
+        state.participants.push(make_participant(Team::Enemy, 100));
+        state.participants[0].take_damage(30);
+        state.participants[2].take_damage(60);
+        let ai = BasicAi::new();
+        // Enemy (index 0 and 2) - pick the one with lowest HP ratio
+        // Index 2 has taken 60 damage = 40/100 = 0.4 ratio
+        // Index 0 has taken 30 damage = 70/100 = 0.7 ratio
+        // Index 2 is weaker
+        let weakest = ai.find_weakest_enemy(&state, 1);
+        assert!(weakest.is_some());
+    }
 }

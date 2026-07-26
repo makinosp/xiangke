@@ -142,4 +142,74 @@ mod tests {
         assert_eq!(deserialized.base_stats.intelligence, 60);
         assert_eq!(deserialized.moves.len(), 1);
     }
+
+    #[test]
+    fn test_character_min_stats() {
+        let chara = CharacterData {
+            id: "minion".into(),
+            name: "Min".into(),
+            element: TypeElement::Fire,
+            secondary_element: None,
+            base_stats: Stats {
+                hp: 1,
+                attack: 1,
+                defense: 1,
+                speed: 1,
+                intelligence: 1,
+                spirit: 1,
+            },
+            moves: vec![],
+            description: "".into(),
+        };
+        assert_eq!(chara.get_stat_sum(), 6);
+        assert!(chara.description.is_empty());
+    }
+
+    #[test]
+    fn test_character_max_stat_sum_boundary() {
+        let chara = CharacterData {
+            id: "maximus".into(),
+            name: "Max".into(),
+            element: TypeElement::Earth,
+            secondary_element: Some(TypeElement::Metal),
+            base_stats: Stats {
+                hp: 500,
+                attack: 500,
+                defense: 500,
+                speed: 500,
+                intelligence: 500,
+                spirit: 500,
+            },
+            moves: vec!["a".into(), "b".into(), "c".into(), "d".into()],
+            description: "Maximum stat sum".into(),
+        };
+        assert_eq!(chara.get_stat_sum(), 3000);
+        assert!(chara.has_secondary_type());
+    }
+
+    #[test]
+    fn test_character_serialization_empty_fields() {
+        let chara = CharacterData {
+            id: "empty".into(),
+            name: "Empty".into(),
+            element: TypeElement::Yang,
+            secondary_element: None,
+            base_stats: Stats {
+                hp: 100,
+                attack: 50,
+                defense: 50,
+                speed: 50,
+                intelligence: 50,
+                spirit: 50,
+            },
+            moves: vec![],
+            description: String::new(),
+        };
+        let json = serde_json::to_string(&chara).unwrap();
+        let deserialized: CharacterData = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized.id, "empty");
+        assert!(deserialized.description.is_empty());
+        assert!(deserialized.moves.is_empty());
+        assert!(!deserialized.has_secondary_type());
+    }
 }
