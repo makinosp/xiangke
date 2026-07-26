@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/status_effect_data.gd" id="1_stat"]
+
+[resource]
+script = ExtResource("1_stat")
+effect_type = 5
+name = "Charm"
+description = "Reduces the target's attack through enchantment."
+damage_per_turn = 0.0
+escalating = false
+max_damage_cap = 0.0
+stat_mod_stat = 0
+stat_mod_multiplier = 0.5

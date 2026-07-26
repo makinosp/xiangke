@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "sun_quan"
+name = "孫権"
+type = 4
+secondary_type = 2
+hp = 110
+attack = 80
+defense = 85
+speed = 90
+intelligence = 95
+spirit = 90
+moves = PackedStringArray("water_surge", "earth_barrier", "war_cry", "wood_heal")
+description = "The young tiger of Jiangdong. Founder of the Wu kingdom with unwavering resolve."

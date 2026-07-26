@@ -1140,3 +1140,72 @@ rust を extensions にリネームしたい。" **AI Response**: Successfully r
 Post-Construction phase. Structural refactoring completed.
 
 ---
+
+## New Request — Fix Unimplemented Features (fix/run-project)
+
+**Timestamp**: 2026-07-26T00:00:00Z **User Input**: "OK.
+それらを進めましょう。AI-DLC Workflowsに従って進めます。" **AI Response**:
+Starting new AI-DLC workflow for fixing all unimplemented features on branch
+fix/run-project.
+
+**Requirements Analysis Results**:
+
+- All unimplemented features to be fixed
+- 10 new characters (total 13)
+- Placeholder BGM/SFX audio files
+- StatusEffectData .tres files
+- _tween_damage animation implementation
+- Confirm/Deploy button layout fix
+- No merge to main (continue on branch)
+
+**Workspace State**: Brownfield (existing GDScript + Rust project) **Request
+Type**: Enhancement (complete partially implemented features) **Scope**:
+Multiple components (content, UI, audio) **Complexity**: Moderate
+
+**Context**: Post-Migration enhancement phase. Fix/run-project branch.
+
+---
+
+## Enhancement Phase: Fix Run Project (Completed)
+
+**Timestamp**: 2026-07-26T18:00:00Z **Status**: All 4 Units + Build & Test
+completed successfully.
+
+### Changes Made
+
+**Unit A — Character Content (10 new .tres files)**
+
+- cao_cao (Water/Yin), sun_quan (Water/Earth), lu_bu (Fire), zhao_yun (Metal),
+  xia_hou_dun (Earth), zhang_fei (Earth/Yang), si_ma_yi (Yin), huang_zhong
+  (Fire), ma_chao (Metal), diao_chan (Yang/Yin)
+- Total 13 characters with balanced stat ranges (HP 75-130, ATK 45-140)
+
+**Unit B — Placeholder Audio (10 .ogg files)**
+
+- 3 BGM: main_theme, battle_theme, title_theme (~136KB each, ~3s pink noise)
+- 7 SFX: click, hover, confirm, cancel, battle_start, victory, defeat (~14KB
+  each, ~0.3s pink noise)
+
+**Unit C — Status Effects (5 .tres files)**
+
+- burn.tres (dmg 0.125/turn, atk×0.5), poison.tres (dmg 0.1 escalating),
+  confusion.tres, chain.tres, charm.tres (atk×0.5)
+- Rust StatusVariant enum extended in `core/src/status.rs`
+
+**Unit D — UI & Animation Fixes**
+
+- `character_select.tscn`: Removed invalid theme_override_colors/font_color →
+  `add_theme_color_override()` in GDScript
+- `battle_scene.gd`: Added `_tween_damage_feedback()` with color-coded tweens;
+  fixed `var :=` → `var: int` for Variant inference warnings
+- `battle_flow_service.gd`: `Array(c.moves)` to convert PackedStringArray→Array
+  for Rust bridge
+- `battle_participant.gd`: Explicit element-by-element Array[int] assignment
+  instead of direct `=` from Variant
+- `icon.svg`: Created with "相" character
+
+### Build & Test Results
+
+- **Rust**: 103/103 tests passed (core 55, battle 48)
+- **Godot**: No script errors. Characters: 13, Moves: 8, Audio initialized
+  cleanly.

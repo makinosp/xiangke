@@ -304,10 +304,45 @@ func _on_action_executed(result: Dictionary, source: BattleParticipant, target: 
 	if not result.get("log_message", "").is_empty():
 		status_label.text = result["log_message"]
 
-	if result.get("damage_dealt", 0) > 0:
-		_tween_damage(source, target, result["damage_dealt"])
-	if result.get("recoil_damage", 0) > 0:
-		_tween_damage(source, source, result["recoil_damage"], Color.RED)
+	var dmg: int = result.get("damage_dealt", 0)
+	if dmg > 0:
+		_tween_damage_feedback(target, dmg, Color.RED)
+	var heal: int = result.get("healing_done", 0)
+	if heal > 0:
+		_tween_damage_feedback(target, heal, Color.GREEN_YELLOW)
+	var recoil: int = result.get("recoil_damage", 0)
+	if recoil > 0:
+		_tween_damage_feedback(source, recoil, Color.ORANGE_RED)
+
+
+## Provides visual tween animation feedback for damage/healing.
+## Temporarily flashes the HP label with the given color.
+func _tween_damage_feedback(participant: BattleParticipant, amount: int, flash_color: Color) -> void:
+	# Find the HP label for this participant
+	var hp_labels: Array[Label] = []
+	hp_labels.append_array(_find_hp_labels(player_hp_container, participant))
+	hp_labels.append_array(_find_hp_labels(enemy_hp_container, participant))
+
+	for label: Label in hp_labels:
+		var original_color := label.modulate
+		label.modulate = flash_color
+		var tween := create_tween()
+		tween.set_ease(Tween.EASE_OUT)
+		tween.tween_property(label, "modulate", original_color, 0.4)
+		tween.play()
+
+
+## Searches an HP container for a label matching the given participant.
+static func _find_hp_labels(container: HBoxContainer, participant: BattleParticipant) -> Array[Label]:
+	var result: Array[Label] = []
+	if participant.character_data == null:
+		return result
+	var target_name: String = participant.character_data.name
+	for child in container.get_children():
+		var label := child as Label
+		if label != null and label.text.begins_with(target_name):
+			result.append(label)
+	return result
 
 
 func _on_participant_defeated(participant: BattleParticipant) -> void:
@@ -367,14 +402,6 @@ func _update_log_display() -> void:
 		return
 	var recent: PackedStringArray = _flow_service.get_recent_log(10)
 	battle_log_label.text = "\n".join(recent)
-
-
-static func _tween_damage(
-		_source: BattleParticipant,
-		_target: BattleParticipant,
-		_amount: int,
-		_color: Color = Color.WHITE) -> void:
-	pass
 
 
 func _input(event: InputEvent) -> void:

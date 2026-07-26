@@ -23,6 +23,12 @@ static func from_dict(data: Dictionary) -> BattleParticipant:
 	p.team = data.get("team", Team.ENEMY)
 	p.slot_index = data.get("slot_index", 0)
 	p.is_defeated = data.get("is_defeated", false)
-	p.stat_stages = data.get("stat_stages", [])
-	p.active_status_effects = data.get("active_status_effects", [])
+	var raw_stages: Array = data.get("stat_stages", [])
+	p.stat_stages = []
+	for s in raw_stages:
+		p.stat_stages.append(s)
+	var raw_effects: Array = data.get("active_status_effects", [])
+	p.active_status_effects = []
+	for e in raw_effects:
+		p.active_status_effects.append(e)
 	return p

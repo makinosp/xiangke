@@ -194,7 +194,7 @@ func _build_char_array(chars: Array[CharacterData]) -> Array:
 			"speed": c.speed,
 			"intelligence": c.intelligence,
 			"spirit": c.spirit,
-			"moves": c.moves,
+			"moves": Array(c.moves),
 			"description": c.description,
 		})
 	return arr

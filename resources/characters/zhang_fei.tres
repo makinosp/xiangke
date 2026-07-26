@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "zhang_fei"
+name = "張飛"
+type = 2
+secondary_type = 5
+hp = 130
+attack = 125
+defense = 80
+speed = 55
+intelligence = 45
+spirit = 60
+moves = PackedStringArray("earth_barrier", "metal_slash", "war_cry", "iron_cleave")
+description = "The valiant warrior of Shu. His fearsome presence alone can turn the tide of battle."
