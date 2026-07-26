@@ -6,9 +6,12 @@ use xiangke_core::types::{EffectType, Stat};
 
 use crate::state::BattleError;
 
+/// The team affiliation of a battle participant.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Team {
+    /// Player-controlled team.
     Player,
+    /// Enemy/AI-controlled team.
     Enemy,
 }
 
@@ -16,19 +19,35 @@ fn effect_bit(effect: EffectType) -> u8 {
     1u8 << (effect as u8)
 }
 
+/// A participant in battle with runtime state (HP, stat stages, status effects).
+///
+/// Wraps [`CharacterData`] with mutable battle-time data like current HP,
+/// temporary stat stage modifiers, and active status effect flags.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BattleParticipant {
+    /// The underlying character definition.
     pub character_data: CharacterData,
+    /// Current HP.
     pub current_hp: u32,
+    /// Maximum HP (from character data at creation time).
     pub max_hp: u32,
+    /// Team affiliation.
     pub team: Team,
+    /// Index within the team's party (0-based).
     pub slot_index: u32,
+    /// Whether this participant has been defeated (HP == 0).
     pub is_defeated: bool,
+    /// Current stat stage modifiers for each stat.
     pub stat_stages: [i32; Stat::COUNT],
+    /// Bitfield of active status effects.
     pub active_status_effects: u8,
 }
 
 impl BattleParticipant {
+    /// Creates a new `BattleParticipant` from character data.
+    ///
+    /// Initializes HP to max, clears stat stages and status effects.
+    /// Returns an error if `data.base_stats.hp == 0`.
     pub fn new(data: CharacterData, team: Team, slot: u32) -> Result<Self, BattleError> {
         if data.base_stats.hp == 0 {
             return Err(BattleError::InvalidParticipant(
@@ -47,10 +66,13 @@ impl BattleParticipant {
         })
     }
 
+    /// Returns the current stat stage for the given stat.
     pub fn stat_stage(&self, stat: Stat) -> i32 {
         self.stat_stages[stat.to_index()]
     }
 
+    /// Applies a stat stage change, clamped to [`STAT_STAGE_MIN`, `STAT_STAGE_MAX`].
+    /// Positive `delta` = buff, negative = debuff.
     pub fn apply_stat_stage(&mut self, stat: Stat, delta: i32) {
         let idx = stat.to_index();
         let current = self.stat_stages[idx];
@@ -59,10 +81,12 @@ impl BattleParticipant {
             .clamp(calc::STAT_STAGE_MIN, calc::STAT_STAGE_MAX);
     }
 
+    /// Resets all stat stages to 0 (neutral).
     pub fn reset_stat_stages(&mut self) {
         self.stat_stages = [0; Stat::COUNT];
     }
 
+    /// Computes the effective value of a stat after applying stage multipliers.
     pub fn effective_stat(&self, stat: Stat) -> f64 {
         let base = match stat {
             Stat::Attack => self.character_data.base_stats.attack as f64,
@@ -75,26 +99,34 @@ impl BattleParticipant {
         base * calc::stat_stage_multiplier(stage)
     }
 
+    /// Effective Attack stat (Physical damage).
     pub fn effective_attack(&self) -> f64 {
         self.effective_stat(Stat::Attack)
     }
 
+    /// Effective Defense stat (Physical damage reduction).
     pub fn effective_defense(&self) -> f64 {
         self.effective_stat(Stat::Defense)
     }
 
+    /// Effective Speed stat (turn initiative).
     pub fn effective_speed(&self) -> f64 {
         self.effective_stat(Stat::Speed)
     }
 
+    /// Effective Intelligence stat (Arts damage).
     pub fn effective_intelligence(&self) -> f64 {
         self.effective_stat(Stat::Intelligence)
     }
 
+    /// Effective Spirit stat (Arts damage reduction).
     pub fn effective_spirit(&self) -> f64 {
         self.effective_stat(Stat::Spirit)
     }
 
+    /// Applies damage to this participant, reducing current HP.
+    /// Returns the actual damage dealt (will not exceed current HP).
+    /// Sets `is_defeated` if HP reaches 0.
     pub fn take_damage(&mut self, amount: u32) -> u32 {
         let actual = amount.min(self.current_hp);
         self.current_hp -= actual;
@@ -104,16 +136,20 @@ impl BattleParticipant {
         actual
     }
 
+    /// Heals this participant, restoring HP up to `max_hp`.
+    /// Returns the actual HP restored.
     pub fn heal(&mut self, amount: u32) -> u32 {
         let actual = amount.min(self.max_hp - self.current_hp);
         self.current_hp += actual;
         actual
     }
 
+    /// Applies a status effect to this participant (bitfield-OR).
     pub fn apply_status(&mut self, effect: EffectType) {
         self.active_status_effects |= effect_bit(effect);
     }
 
+    /// Returns `true` if this participant has the given status effect.
     pub fn has_status(&self, effect: EffectType) -> bool {
         self.active_status_effects & effect_bit(effect) != 0
     }

@@ -1,21 +1,34 @@
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, FromRepr};
 
+/// The five-phase element types plus Yang/Yin for the type effectiveness system.
+///
+/// Each character and move is associated with one (sometimes two) elements.
+/// Type interactions follow a chart: Wood→Fire→Metal→Wood with Earth→Water→Fire→... cycles,
+/// plus Yang↔Yin mutual super-effectiveness.
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr,
 )]
 #[repr(u8)]
 pub enum TypeElement {
+    /// Wood element (0).
     Wood = 0,
+    /// Fire element (1).
     Fire = 1,
+    /// Earth element (2).
     Earth = 2,
+    /// Metal element (3).
     Metal = 3,
+    /// Water element (4).
     Water = 4,
+    /// Yang element (5) — super-effective against Yin.
     Yang = 5,
+    /// Yin element (6) — super-effective against Yang.
     Yin = 6,
 }
 
 impl TypeElement {
+    /// All valid `TypeElement` values in enum order.
     pub const ALL: [TypeElement; 7] = [
         TypeElement::Wood,
         TypeElement::Fire,
@@ -26,23 +39,32 @@ impl TypeElement {
         TypeElement::Yin,
     ];
 
+    /// Number of defined element types.
     pub const COUNT: usize = 7;
 }
 
+/// Types of status effects that can be applied during battle.
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Display, EnumString, FromRepr,
 )]
 #[repr(u8)]
 pub enum EffectType {
+    /// No effect.
     None = 0,
+    /// Burn — deals damage over time each turn.
     Burn = 1,
+    /// Poison — deals escalating damage over time.
     Poison = 2,
+    /// Confusion — chance to self-hit each turn.
     Confusion = 3,
+    /// Chain — additional constraint effect.
     Chain = 4,
+    /// Charm — manipulation effect.
     Charm = 5,
 }
 
 impl EffectType {
+    /// All valid `EffectType` values in enum order.
     pub const ALL: [EffectType; 6] = [
         EffectType::None,
         EffectType::Burn,
@@ -53,29 +75,43 @@ impl EffectType {
     ];
 }
 
+/// Damage category determining which stats are used for attack/defense.
+///
+/// - `Physical`: uses Attack vs Defense.
+/// - `Arts`: uses Intelligence vs Spirit.
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr,
 )]
 #[repr(u8)]
 pub enum DamageCategory {
+    /// Physical damage — uses Attack vs Defense.
     Physical = 0,
+    /// Arts damage — uses Intelligence vs Spirit.
     Arts = 1,
 }
 
+/// Character stats used in battle calculations.
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr,
 )]
 #[repr(u8)]
 pub enum Stat {
+    /// Physical attack power.
     Attack = 0,
+    /// Physical defense.
     Defense = 1,
+    /// Turn speed (determines initiative order).
     Speed = 2,
+    /// Arts attack power / magical prowess.
     Intelligence = 3,
+    /// Arts defense / magical resistance.
     Spirit = 4,
 }
 
 impl Stat {
+    /// Number of distinct stat types.
     pub const COUNT: usize = 5;
+    /// All valid `Stat` values in enum order.
     pub const ALL: [Stat; 5] = [
         Stat::Attack,
         Stat::Defense,
@@ -84,11 +120,16 @@ impl Stat {
         Stat::Spirit,
     ];
 
+    /// Returns the zero-based index of this stat for array lookups.
     pub fn to_index(&self) -> usize {
         *self as usize
     }
 }
 
+/// The type effectiveness chart — a 7×7 matrix of multipliers.
+///
+/// Rows = defender element, Columns = attacker element.
+/// Values range from 0.0 (immune) through 0.5, 1.0, 1.25, 2.0 (super-effective).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TypeChart([[f64; TypeElement::COUNT]; TypeElement::COUNT]);
 
@@ -148,10 +189,15 @@ impl Default for TypeChart {
 }
 
 impl TypeChart {
+    /// Returns the type effectiveness multiplier for `attack` vs `defense`.
     pub fn effectiveness(&self, attack: TypeElement, defense: TypeElement) -> f64 {
         self.0[defense as usize][attack as usize]
     }
 
+    /// Returns the combined effectiveness multiplier against a dual-type defender.
+    ///
+    /// Multiplies the effectiveness against each of the defender's elements,
+    /// clamped to the range [0.25, 4.0].
     pub fn effectiveness_dual(
         &self,
         attack: TypeElement,

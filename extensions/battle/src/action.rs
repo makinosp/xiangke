@@ -8,27 +8,41 @@ use xiangke_core::types::{DamageCategory, EffectType};
 use crate::participant::BattleParticipant;
 use crate::state::BattleError;
 
-const STAB_MULTIPLIER: f64 = 1.2;
 const MIN_VARIANCE: f64 = 0.85;
 const MAX_VARIANCE: f64 = 1.0;
 const CRITICAL_CHANCE: f64 = 6.0;
 const CRITICAL_MULTIPLIER: f64 = 1.5;
 
+/// The result of a single action execution during battle.
 #[derive(Debug, Clone)]
 pub struct ActionResult {
+    /// Damage dealt to the target.
     pub damage_dealt: u32,
+    /// Index of the target participant.
     pub target_index: usize,
+    /// Whether the move landed (false = miss).
     pub hit: bool,
+    /// Whether the hit was critical.
     pub is_critical: bool,
+    /// Type effectiveness multiplier (0.0–4.0).
     pub type_effectiveness: f64,
+    /// True when type_effectiveness > 1.0.
     pub is_super_effective: bool,
+    /// True when 0 < type_effectiveness < 1.0.
     pub is_not_very_effective: bool,
+    /// True when type_effectiveness == 0.0.
     pub is_immune: bool,
+    /// Status effect that was applied, if any.
     pub status_applied: Option<EffectType>,
+    /// True if the target already had this status.
     pub status_resisted: bool,
+    /// Recoil damage dealt back to the attacker.
     pub recoil_damage: u32,
+    /// HP restored to the attacker (healing moves).
     pub heal_amount: u32,
+    /// Raw damage before any variance/critical modifications.
     pub raw_damage: u32,
+    /// Formatted log message describing the action result.
     pub log_message: String,
 }
 
@@ -53,14 +67,19 @@ impl ActionResult {
     }
 }
 
+/// Checks whether a move hits based on its accuracy stat and a random roll.
+/// Returns `true` if the generated value is less than the accuracy.
 pub fn check_accuracy(accuracy: u32, rng: &mut impl Rng) -> bool {
     rng.r#gen::<f64>() * 100.0 < accuracy as f64
 }
 
+/// Checks whether a secondary effect triggers based on its chance and a random roll.
+/// Returns `true` if the generated value is less than the effect chance.
 pub fn check_effect_chance(chance: u32, rng: &mut impl Rng) -> bool {
     rng.r#gen::<f64>() * 100.0 < chance as f64
 }
 
+/// Returns `true` if the attacker's element matches the move's element (Same-Type Attack Bonus).
 pub fn has_stab(attacker: &BattleParticipant, mv: &MoveData) -> bool {
     attacker.character_data.element == mv.element
 }
@@ -191,6 +210,16 @@ fn apply_status_effect(
     }
 }
 
+/// Calculates damage for an attack action and returns the full result.
+///
+/// The damage pipeline:
+/// 1. Checks if attacker/defender are alive.
+/// 2. Rolls accuracy — returns miss on failure.
+/// 3. Calculates raw damage from base power, effective stats, STAB, and type chart.
+/// 4. Applies variance (±15% uniform random).
+/// 5. Rolls for critical hit (1.5× multiplier, ~6% base chance).
+/// 6. Applies secondary effect (status, recoil, healing) if applicable.
+/// 7. Builds a formatted log message.
 pub fn calculate_damage(
     attacker: &mut BattleParticipant,
     defender: &mut BattleParticipant,

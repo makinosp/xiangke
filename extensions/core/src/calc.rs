@@ -5,6 +5,14 @@ pub const STAT_STAGE_MIN: i32 = -STAT_STAGE_MAX;
 /// Base damage multiplier applied before effectiveness/stab/variance.
 pub const DAMAGE_MULTIPLIER: f64 = 0.8;
 
+/// Converts a stat stage change to a multiplier.
+///
+/// - Stage 0 → ×1.0 (neutral)
+/// - Positive stages → (2 + stage) / 2  (e.g. +1 → ×1.5, +6 → ×4.0)
+/// - Negative stages → 2 / (2 - stage) (e.g. −1 → ×2/3, −6 → ×0.25)
+///
+/// # Panics
+/// Panics if `stage` is outside [`STAT_STAGE_MIN`, `STAT_STAGE_MAX`].
 pub fn stat_stage_multiplier(stage: i32) -> f64 {
     assert!(
         (STAT_STAGE_MIN..=STAT_STAGE_MAX).contains(&stage),
@@ -19,6 +27,9 @@ pub fn stat_stage_multiplier(stage: i32) -> f64 {
     }
 }
 
+/// Computes raw damage before type effectiveness, STAB, critical, and variance.
+///
+/// Formula: `ceil((attack * power * 0.8) / defense)`, minimum 1.
 pub fn calculate_raw_damage(attack: f64, power: u32, defense: f64) -> u32 {
     let def = defense.max(1.0);
     ((attack * power as f64 * DAMAGE_MULTIPLIER) / def)

@@ -9,20 +9,28 @@ use xiangke_core::types::TypeChart;
 use crate::participant::BattleParticipant;
 use crate::state::BattleState;
 
+/// The action selected by an AI strategy.
 #[derive(Debug, Clone)]
 pub struct AIAction {
+    /// ID of the move to use.
     pub move_id: String,
+    /// Target participant index.
     pub target_index: usize,
+    /// Heuristic score for this action (higher = preferred).
     pub score: f64,
 }
 
+/// Trait for AI decision-making strategies.
 pub trait AiStrategy {
+    /// Selects an action for the given participant, or `None` if no valid action exists.
     fn select_action(&self, state: &BattleState, participant_index: usize) -> Option<AIAction>;
 }
 
+/// A basic AI that targets the weakest enemy with the best-scoring move.
 pub struct BasicAi;
 
 impl BasicAi {
+    /// Creates a new `BasicAi` instance.
     pub fn new() -> Self {
         Self
     }
@@ -129,6 +137,8 @@ impl AiStrategy for BasicAi {
     }
 }
 
+/// Processes start-of-turn effects for a participant (e.g. confusion self-damage).
+/// Returns a list of log messages describing what occurred.
 pub fn process_start_of_turn(
     participant: &mut BattleParticipant,
     configs: &HashMap<EffectType, StatusEffectData>,
@@ -155,6 +165,8 @@ pub fn process_start_of_turn(
 
 const DOT_EFFECTS: [EffectType; 2] = [EffectType::Burn, EffectType::Poison];
 
+/// Processes end-of-turn effects for a participant (e.g. Burn/Poison damage-over-time).
+/// Returns a list of log messages describing what occurred.
 pub fn process_end_of_turn(
     participant: &mut BattleParticipant,
     configs: &HashMap<EffectType, StatusEffectData>,
