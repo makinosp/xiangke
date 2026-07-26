@@ -70,6 +70,45 @@ func reset() -> void:
 	opponent_corps.clear()
 
 
+## Serializes corps_characters and opponent_corps to a dictionary for saving.
+func to_dict() -> Dictionary:
+	return {
+		"corps_characters": corps_characters.duplicate(),
+		"opponent_corps": opponent_corps.duplicate()
+	}
+
+
+## Restores corps data from a dictionary (e.g., loaded save data).
+##
+## Parameters:
+##   data: Dictionary with optional "corps_characters" and "opponent_corps" keys.
+func from_dict(data: Dictionary) -> void:
+	if data.has("corps_characters") and data["corps_characters"] is Array:
+		var ids: Array[String] = []
+		for id in data["corps_characters"]:
+			ids.append(str(id))
+		if ids.size() == 6:
+			corps_characters = ids
+	if data.has("opponent_corps") and data["opponent_corps"] is Array:
+		var ids: Array[String] = []
+		for id in data["opponent_corps"]:
+			ids.append(str(id))
+		opponent_corps = ids
+
+
+## Restores corps_characters from save data without affecting other fields.
+##
+## Parameters:
+##   data: Dictionary with optional "corps_characters" key.
+func restore_from_save(data: Dictionary) -> void:
+	if data.has("corps_characters") and data["corps_characters"] is Array:
+		var ids: Array[String] = []
+		for id in data["corps_characters"]:
+			ids.append(str(id))
+		if ids.size() == 6:
+			corps_characters = ids
+
+
 ## Checks for duplicate IDs in an array.
 func _has_duplicates(ids: Array[String]) -> bool:
 	var seen: Dictionary = {}

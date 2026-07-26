@@ -14,19 +14,21 @@ Represents the active game state within the GameManager's finite state machine.
 
 ### Values
 
-| State              | Description                                                      |
-| ------------------ | ---------------------------------------------------------------- |
-| `TITLE`            | Title screen is active. Entry point of the game loop.            |
-| `CHARACTER_SELECT` | Character selection screen is active (both Phase 1 and Phase 2). |
-| `BATTLE`           | Battle scene is active. Managed by BattleManager (Unit 3).       |
-| `RESULT`           | Battle result screen is active following a battle conclusion.    |
+| State              | Description                                                           |
+| ------------------ | --------------------------------------------------------------------- |
+| `TITLE`            | Title screen is active. Entry point of the game loop.                 |
+| `CORPS_CREATION`   | Corps creation screen is active. Player selects 6 characters.         |
+| `CHARACTER_SELECT` | Battle selection screen is active. Player picks 3 from their corps.   |
+| `BATTLE`           | Battle scene is active. Managed by BattleManager (Unit 3).            |
+| `RESULT`           | Battle result screen is active following a battle conclusion.         |
 
 ### Constraints
 
-- The state machine is minimal:
-  `TITLE → CHARACTER_SELECT → BATTLE → RESULT → TITLE`.
+- The state machine has 5 states:
+  `TITLE → CORPS_CREATION → CHARACTER_SELECT → BATTLE → RESULT → TITLE`.
 - No pause, settings, or game-over sub-states exist in v1.
 - Transitions are unidirectional along the defined loop (no arbitrary jumps).
+- `CHARACTER_SELECT` state is only reachable from `CORPS_CREATION`.
 - `BATTLE` state is only reachable from `CHARACTER_SELECT`.
 - `RESULT` state is only reachable from `BATTLE`.
 
@@ -34,22 +36,24 @@ Represents the active game state within the GameManager's finite state machine.
 
 ## Entity: CharacterSelectPhase (Enum)
 
-Represents the current phase within the two-phase character selection flow.
+Represents the current phase within the two-screen character selection flow.
+Phase 1 is handled by the CorpsCreation screen; Phase 2 by CharacterSelect.
 
 ### Values
 
-| Phase              | Description                                                      |
-| ------------------ | ---------------------------------------------------------------- |
-| `CORPS_SELECTION`  | Phase 1: Player selects 6 characters to form their corps/legion. |
-| `BATTLE_SELECTION` | Phase 2: Player selects 3 out of their 6 characters to battle.   |
+| Phase              | Description                                                             |
+| ------------------ | ----------------------------------------------------------------------- |
+| `CORPS_SELECTION`  | CorpsCreation screen: Player selects 6 characters to form their corps.  |
+| `BATTLE_SELECTION` | CharacterSelect screen: Player selects 3 out of their 6 to deploy.      |
 
 ### Constraints
 
-- `CORPS_SELECTION` must complete before `BATTLE_SELECTION` begins.
-- The opponent's 6-character corps is revealed between Phase 1 and Phase 2.
-- Exactly 6 characters must be selected in Phase 1.
-- Exactly 3 characters must be selected in Phase 2 from the 6 chosen in Phase 1.
-- Phase 2 selection order determines battle deployment order.
+- `CORPS_SELECTION` is completed on the CorpsCreation screen (separate scene).
+- `BATTLE_SELECTION` is completed on the CharacterSelect screen (separate scene).
+- The opponent's 6-character corps is generated during the transition between screens.
+- Exactly 6 characters must be selected in `CORPS_SELECTION`.
+- Exactly 3 characters must be selected in `BATTLE_SELECTION` from the 6 chosen.
+- `BATTLE_SELECTION` order determines battle deployment order.
 
 ---
 
@@ -66,9 +70,10 @@ Godot's `ConfigFile` API.
 | `settings` | `bgm_volume`         | Float  | BGM volume level (0.0–1.0).                           |
 | `settings` | `sfx_volume`         | Float  | SFX volume level (0.0–1.0).                           |
 | `settings` | `master_muted`       | Bool   | Whether master output is muted.                       |
-| `progress` | `selected_character` | String | ID of the last selected character (for quick resume). |
-| `progress` | `last_battle_won`    | Bool   | Whether the last completed battle was a victory.      |
-| `progress` | `last_battle_time`   | String | ISO 8601 timestamp of the last completed battle.      |
+| `progress` | `selected_character` | String   | ID of the last selected character (for quick resume). |
+| `progress` | `last_battle_won`    | Bool     | Whether the last completed battle was a victory.      |
+| `progress` | `last_battle_time`   | String   | ISO 8601 timestamp of the last completed battle.      |
+| `progress` | `corps_characters`   | String[] | JSON-serialized list of 6 character IDs (saved corps).|
 | `meta`     | `save_version`       | Int    | Save file format version (for migration).             |
 
 ### Constraints

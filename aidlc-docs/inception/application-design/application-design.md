@@ -24,12 +24,13 @@ communication for loose coupling between systems.
 
 ### Scenes
 
-| Scene             | Purpose                                |
-| ----------------- | -------------------------------------- |
-| `TitleScreen`     | Game title, start button, settings     |
-| `CharacterSelect` | Character roster, selection UI         |
-| `BattleScene`     | Main battle view, action menu, HP bars |
-| `ResultScreen`    | Battle outcome, score, replay option   |
+| Scene             | Purpose                                   |
+| ----------------- | ----------------------------------------- |
+| `TitleScreen`     | Game title, start button, settings        |
+| `CorpsCreation`   | Corps roster creation, 6-character select |
+| `CharacterSelect` | Battle party selection, 3-from-corps      |
+| `BattleScene`     | Main battle view, action menu, HP bars    |
+| `ResultScreen`    | Battle outcome, score, replay option      |
 
 ---
 
@@ -37,7 +38,7 @@ communication for loose coupling between systems.
 
 ### GameManager
 
-- Central state machine (TITLE, SELECT, BATTLE, RESULT)
+- Central state machine (TITLE, CORPS_CREATION, CHARACTER_SELECT, BATTLE, RESULT)
 - Stores selected player/enemy characters
 - Coordinates scene transitions
 

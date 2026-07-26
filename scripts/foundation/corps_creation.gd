@@ -1,13 +1,13 @@
-## CharacterSelect script.
-## Manages Phase 2 of character selection: select 3 characters from the
-## pre-selected corps for battle deployment.
-## Displays opponent's corps as read-only.
+## CorpsCreation script.
+## Manages the corps creation screen where the player selects 6 characters
+## from the full roster to form their corps (Phase 1 of character selection).
+## On confirm, transitions to CharacterSelect (Phase 2).
 extends Control
 
 ## Reference to the character grid container.
 @onready var character_grid: GridContainer = $CharacterGrid
-## Reference to the deploy button.
-@onready var deploy_button: Button = $DeployButton
+## Reference to the confirm button.
+@onready var confirm_button: Button = $ConfirmButton
 ## Reference to the phase indicator label.
 @onready var phase_label: Label = $PhaseLabel
 ## Reference to the stats preview panel.
@@ -37,10 +37,8 @@ extends Control
 @onready var preview_move_4: Label = $StatsPreview/MovesContainer/Move4Label
 ## Reference to the description in stats preview.
 @onready var preview_desc: Label = $StatsPreview/DescLabel
-## Reference to the opponent corps labels container.
-@onready var opponent_label_container: VBoxContainer = $OpponentPanel/ScrollContainer/OpponentList
 
-## Selected character IDs (Phase 2: 3 from corps).
+## Selected character IDs.
 var _selected_ids: Array[String] = []
 ## All character buttons for focus management.
 var _character_buttons: Array[Control] = []
@@ -48,10 +46,21 @@ var _character_buttons: Array[Control] = []
 
 func _ready() -> void:
 	_load_characters()
-	_load_opponent_display()
+	_preload_saved_corps()
 	_update_ui()
 	_setup_preview_colors()
 	stats_preview.hide()
+
+
+## Pre-selects characters from saved corps data if available.
+func _preload_saved_corps() -> void:
+	var save_data := SaveManager.current_data
+	if save_data.has("corps_characters") and save_data["corps_characters"] is Array:
+		var saved_ids: Array = save_data["corps_characters"]
+		for char_id in saved_ids:
+			if _selected_ids.size() < 6 and DataRegistry.has_character(str(char_id)):
+				_selected_ids.append(str(char_id))
+	_update_ui()
 
 
 ## Sets up the colors for the stats preview labels.
@@ -75,16 +84,17 @@ func _setup_preview_colors() -> void:
 	preview_desc.add_theme_color_override(&"font_color", desc_color)
 
 
-## Loads only the corps characters (from CorpsRoster) for Phase 2 selection.
+## Loads character data from DataRegistry and creates selection buttons.
 func _load_characters() -> void:
-	var corps_ids: Array[String] = GameManager.corps_roster.corps_characters
-	for char_id in corps_ids:
-		var char_data := DataRegistry.get_character(char_id) as CharacterData
+	var characters := DataRegistry.get_all_characters()
+	for char_id in characters.keys():
+		var char_data := characters[char_id] as CharacterData
 		if char_data == null:
 			continue
 
 		var btn := Button.new()
 		btn.text = char_data.name
+		# Store char_id in button metadata for later lookup
 		btn.set_meta(&"char_id", char_id)
 		btn.connect("pressed", Callable(self, "_on_character_pressed").bind(char_id))
 		btn.connect("mouse_entered", Callable(self, "_on_character_hovered").bind(char_id))
@@ -96,35 +106,13 @@ func _load_characters() -> void:
 	UIFocusManager.register_focus_group(_character_buttons)
 
 
-## Loads the opponent corps display (read-only labels).
-func _load_opponent_display() -> void:
-	var opponent_ids: Array[String] = GameManager.corps_roster.opponent_corps
-	# Clear existing opponent labels
-	for child in opponent_label_container.get_children():
-		child.queue_free()
-
-	for char_id in opponent_ids:
-		var char_data := DataRegistry.get_character(char_id) as CharacterData
-		if char_data == null:
-			continue
-
-		var label := Label.new()
-		label.text = "%s (%s)" % [char_data.name, _format_type(char_data.type, char_data.secondary_type)]
-		label.add_theme_color_override(&"font_color", Color(0.9, 0.7, 0.7)) # Reddish tint for enemy
-		opponent_label_container.add_child(label)
-
-
 ## Called when a character button is pressed.
 func _on_character_pressed(char_id: String) -> void:
-	# Only allow selection from corps_characters
-	if not GameManager.corps_roster.corps_characters.has(char_id):
-		return
-
 	if _selected_ids.has(char_id):
 		_selected_ids.erase(char_id)
 	else:
-		if _selected_ids.size() >= 3:
-			return
+		if _selected_ids.size() >= 6:
+			return # Max 6 selected
 		_selected_ids.append(char_id)
 
 	_update_ui()
@@ -176,22 +164,47 @@ func _on_character_hover_exit() -> void:
 	stats_preview.hide()
 
 
-## Called when the Deploy button is pressed.
-func _on_deploy_pressed() -> void:
-	if _selected_ids.size() != 3:
+## Called when the Confirm button is pressed (corps selection complete).
+func _on_confirm_pressed() -> void:
+	if _selected_ids.size() != 6:
 		return
 
-	# Register battle party selection
-	GameManager.corps_roster.set_battle_selection(_selected_ids)
+	# Register corps selection
+	GameManager.corps_roster.set_corps_selection(_selected_ids)
 
-	# Transition to battle
-	GameManager.transition_to_state(GameManager.GameState.BATTLE)
+	# Generate opponent corps
+	_generate_opponent_corps()
+
+	# Persist corps to save data
+	var save_data := SaveManager.current_data
+	save_data["corps_characters"] = _selected_ids.duplicate()
+	SaveManager.save_game(save_data)
+
+	# Transition to CharacterSelect (Phase 2)
+	GameManager.transition_to_state(GameManager.GameState.CHARACTER_SELECT)
+
+
+## Generates a random opponent corps of 6 characters.
+func _generate_opponent_corps() -> void:
+	var all_chars := DataRegistry.get_all_characters()
+	var pool: Array[String] = []
+	for char_id in all_chars.keys():
+		if not GameManager.corps_roster.corps_characters.has(char_id):
+			pool.append(char_id)
+
+	pool.shuffle()
+	var opponent_ids: Array[String] = []
+	for i in range(min(6, pool.size())):
+		if i < pool.size():
+			opponent_ids.append(pool[i])
+
+	GameManager.corps_roster.opponent_corps = opponent_ids
 
 
 ## Updates UI elements based on current selection state.
 func _update_ui() -> void:
-	phase_label.text = "Select 3 Characters to Deploy (%d/3)" % _selected_ids.size()
-	deploy_button.disabled = _selected_ids.size() != 3
+	phase_label.text = "Select 6 Characters for Your Corps (%d/6)" % _selected_ids.size()
+	confirm_button.disabled = _selected_ids.size() != 6
 
 	# Update button visual states — highlight selected buttons
 	for btn in _character_buttons:
@@ -202,4 +215,3 @@ func _update_ui() -> void:
 			(btn as Button).modulate = Color(0.7, 1.0, 0.7) # Green tint for selected
 		else:
 			(btn as Button).modulate = Color(1, 1, 1) # Normal
-

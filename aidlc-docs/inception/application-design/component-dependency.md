@@ -106,11 +106,16 @@ Dependency matrix and communication patterns between components.
 ### TitleScene
 
 - Uses: GameManager, AudioController, UIController
+- Transitions to: CorpsCreation
+
+### CorpsCreation
+
+- Uses: GameManager, DataRegistry, SaveManager, AudioController
 - Transitions to: CharacterSelect
 
 ### CharacterSelect
 
-- Uses: GameManager, UIController, AudioController
+- Uses: GameManager, DataRegistry, UIController, AudioController
 - Transitions to: BattleScene
 
 ### BattleScene

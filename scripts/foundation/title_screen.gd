@@ -26,8 +26,22 @@ func _on_start_button_pressed() -> void:
 	# Load save data
 	SaveManager.load_save()
 
-	# Transition to character select
-	GameManager.transition_to_state(GameManager.GameState.CHARACTER_SELECT)
+	# Reset battle data but preserve saved corps
+	GameManager.corps_roster.battle_characters.clear()
+	GameManager.corps_roster.opponent_corps.clear()
+
+	# If saved corps exists, restore it on the roster
+	var save_data := SaveManager.current_data
+	if save_data.has("corps_characters") and save_data["corps_characters"] is Array:
+		if save_data["corps_characters"].size() == 6:
+			GameManager.corps_roster.restore_from_save(save_data)
+		else:
+			GameManager.corps_roster.corps_characters.clear()
+	else:
+		GameManager.corps_roster.corps_characters.clear()
+
+	# Transition to corps creation
+	GameManager.transition_to_state(GameManager.GameState.CORPS_CREATION)
 
 
 ## Called when keyboard navigation is used.

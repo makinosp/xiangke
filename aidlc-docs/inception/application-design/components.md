@@ -135,8 +135,25 @@ battle game built with Godot Engine 4.x using GDScript.
 **Responsibilities**:
 
 - TitleScreen: Game title, start button, settings access
-- CharacterSelect: Character roster display, selection confirmation
+- CorpsCreation: Corps roster creation, player selects 6 characters
+- CharacterSelect: Battle party selection, player picks 3 from their corps
 - BattleScene: Main battle view with characters, HP bars, action menu
 - ResultScreen: Battle outcome, score display, replay option
 
 **Type**: Scene files (.tscn)
+
+---
+
+## Component: CorpsCreation
+
+**Purpose**: Manages the corps creation screen where players select 6 characters.
+
+**Responsibilities**:
+
+- Display all available characters in a grid
+- Manage selection/deselection (max 6, no duplicates)
+- Show stats preview with full 6 stats + move list on hover
+- On confirm: save corps to CorpsRoster, generate opponent corps, persist,
+  and transition to CharacterSelect
+
+**Type**: Node (attached to CorpsCreation scene)
