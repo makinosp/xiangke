@@ -39,3 +39,5 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Return to Title"
+
+[connection signal="pressed" from="ReturnButton" to="." method="_on_return_button_pressed"]
