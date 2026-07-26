@@ -1,65 +1,130 @@
-# Xiangke: Three Kingdoms Turn-Based Combat Game
+# Xiangke (相剋)
 
-A turn-based combat game inspired by the Romance of the Three Kingdoms, built
-with Godot Engine.
+A Three Kingdoms turn-based command battle game built with **Godot Engine 4.7**
+and **Rust GDExtension**.
 
 ![Godot Engine](https://img.shields.io/badge/Godot%20Engine-v4.7-%23478CBF?logo=godot-engine)
-![License](https://img.shields.io/badge/License-AGPLv3-blue.svg)
+![Rust](https://img.shields.io/badge/Rust-stable-orange?logo=rust)
+![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)
+
+> [!IMPORTANT]
+> **This project is under active development.** APIs, game mechanics, and
+> project structure may change without notice.
 
 ## 📖 Overview
 
-Xiangke (相剋) is a turn-based combat game set in the era of the Three Kingdoms.
-Players command legendary generals, each with unique abilities based on Yin-Yang
-and the Five Elements (陰陽五行) principles. Engage in combat where elemental
-affinities and tactical decisions determine victory!
+Xiangke (相剋) is a turn-based command battle game set in the era of the Three
+Kingdoms. Players command legendary generals, each with unique abilities based
+on Yin-Yang and the Five Elements (陰陽五行) principles.
+
+The game logic core is implemented in **Rust** for performance and safety,
+bridged to Godot via [gdext](https://github.com/godot-rust/gdext). The primary
+export target is **Web (HTML5/WebAssembly)**.
+
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph GodotEngine["Godot Engine"]
+        subgraph GDScriptLayer["GDScript Layer"]
+            scenes["scenes/"]
+            scripts["scripts/"]
+            autoloads["autoloads/"]
+            systems["systems/"]
+        end
+
+        GDScriptLayer -->|"gdext FFI"| RustGDE
+
+        subgraph RustGDE["Rust GDExtension (extensions/)"]
+            core["core/<br/>Game Logic"]
+            battle["battle/<br/>Combat Engine"]
+            bridge["godot_bridge/<br/>Godot Bindings"]
+        end
+
+        bridge --> core
+        bridge --> battle
+    end
+```
 
 ## 📁 Project Structure
 
 ```
 xiangke/
-├── resources/          # Game resources (characters, moves, etc.)
-│   ├── characters/     # Character data (.tres files)
-│   └── moves/          # Move data (.tres files)
-├── scripts/            # Game logic and data handling
-│   ├── character_data.gd  # Character data resource
-│   ├── move_data.gd       # Move data resource
-│   ├── status_effect_data.gd # Status effect definitions
-│   ├── type_chart.gd      # Elemental type effectiveness chart
-│   └── type_enums.gd      # Shared type definitions and enums
-├── systems/            # Core game systems
-│   └── data/           # Data loading and validation systems
-│       ├── data_loader.gd
-│       ├── data_validation_utils.gd
-│       └── data_validator.gd
-├── autoloads/          # Autoloaded scripts (singletons)
-│   └── data_registry.gd   # Central registry for game data
-├── project.godot       # Godot project configuration
-└── README.md           # This file
+├── addons/gdext/              # GDExtension shared libraries
+├── audio/
+│   ├── bgm/                   # Background music (3 tracks)
+│   └── sfx/                   # Sound effects (7 clips)
+├── autoloads/                 # Autoloaded singletons
+│   ├── audio_manager.gd       # BGM/SFX playback & web autoplay
+│   ├── data_registry.gd       # Central game data registry
+│   ├── game_manager.gd        # Game state management
+│   ├── save_manager.gd        # Local persistence (ConfigFile)
+│   └── ui_focus_manager.gd    # UI focus & navigation
+├── extensions/                # Rust GDExtension workspace
+│   ├── core/                  # Core game logic (types, type chart)
+│   ├── battle/                # Battle engine (flow, state, participants)
+│   ├── godot_bridge/          # Godot ↔ Rust bindings (cdylib)
+│   └── Cargo.toml             # Workspace root
+├── resources/
+│   ├── characters/            # 13 character .tres files
+│   ├── moves/                 # 8 move .tres files
+│   └── status_effects/        # 5 status effect .tres files
+├── scenes/                    # 5 game scenes
+├── scripts/
+│   ├── character_data.gd      # Character data resource
+│   ├── move_data.gd           # Move data resource
+│   ├── status_effect_data.gd  # Status effect definitions
+│   ├── type_chart.gd          # Elemental effectiveness chart
+│   ├── type_enums.gd          # Shared enums (Elements, etc.)
+│   └── foundation/            # Scene logic & UI scripts
+├── systems/
+│   ├── battle/                # Battle flow, state, participant
+│   └── data/                  # Data loading & validation
+├── tests/                     # GDScript unit tests
+├── justfile                   # Build & dev commands
+└── project.godot              # Godot project configuration
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- [Godot Engine 4.3](https://godotengine.org/download) (or later)
+- [Godot Engine 4.7](https://godotengine.org/download)
+- [Rust toolchain](https://rustup.rs/) (stable)
+- [just](https://github.com/casey/just) command runner
+- **For Web builds only**: Rust nightly toolchain +
+  [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
 
 ### Installation
 
-1. Clone this repository:
+```bash
+git clone https://github.com/makinosp/xiangke.git
+cd xiangke
+just build-rust       # Build Rust GDExtension (native)
+```
 
-   ```bash
-   git clone https://github.com/makinosp/xiangke.git
-   ```
+Then open `project.godot` in Godot Engine.
 
-2. Open the project in Godot Engine:
-   - Launch Godot
-   - Click "Import"
-   - Select the `project.godot` file in the cloned directory
+### Running
 
-### Running the Game
+```bash
+just run              # Build Rust + launch Godot
+```
 
-- Press `F5` in the Godot editor to run the current scene
-- Or click the "Play" button in the top-right corner
+Or press `F5` in the Godot editor.
+
+## 🔨 Development Commands
+
+| Command                        | Description                               |
+| ------------------------------ | ----------------------------------------- |
+| `just build-rust`              | Build Rust GDExtension for native (debug) |
+| `just build-rust-wasm`         | Build Rust GDExtension for Web (WASM)     |
+| `just build-rust-wasm-release` | Build WASM in release mode with size opt  |
+| `just check-rust-wasm`         | Quick-check WASM compilation              |
+| `just test-rust`               | Run Rust unit tests (200 tests)           |
+| `just check-rust`              | Run `cargo check` on Rust workspace       |
+| `just run`                     | Build Rust + launch Godot                 |
+| `just inspect`                 | Headless Godot validation (no errors)     |
 
 ## 🎯 How to Play
 
@@ -72,26 +137,23 @@ xiangke/
 
 ### Elemental System (五行 + 陰陽)
 
-- **Wood** (木) 🌳 → **Earth** (土) 🌍 → **Water** (水) 💧 → **Fire** (火) 🔥 →
-  **Metal** (金) ⚙️ → **Wood** (木) 🌳 (cycle)
+- **Wood** (木) → **Earth** (土) → **Water** (水) → **Fire** (火) → **Metal**
+  (金) → **Wood** (木) (cycle)
 - **Yin** (陰) and **Yang** (陽) are special elements that interact uniquely
 - Each element has strengths and weaknesses against others
 
-## 🛠️ Development
+## 🧪 Testing
 
-### Project Structure
+The project includes **235 tests** across two stacks:
 
-- **Resources**: All game data stored as `.tres` resources in `resources/`
-- **Scripts**: Game logic in GDScript under `scripts/` and `systems/`
-- **Autoloads**: Global systems like `data_registry.gd` for easy data access
-
-### Adding New Content
-
-1. Create new character/move resources in the appropriate `resources/` folder
-2. Update the data registry if needed (`autoloads/data_registry.gd`)
-3. Implement any new mechanics in the relevant script files
+- **Rust** (200 tests): Core logic and battle engine
+  ```bash
+  just test-rust
+  ```
+- **GDScript** (35 tests): Autoloads, type system, UI focus manager Run via
+  Godot's test runner (`tests/test_runner.tscn`).
 
 ## 📜 License
 
-This project is licensed under the GNU Affero General Public License v3.0 - see
+This project is licensed under the GNU Affero General Public License v3.0 — see
 the [LICENSE](LICENSE) file for details.
