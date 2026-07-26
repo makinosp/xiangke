@@ -40,6 +40,21 @@ var _character_buttons: Array[Control] = []
 func _ready() -> void:
 	_load_characters()
 	_update_ui()
+	_setup_preview_colors()
+
+
+## Sets up the colors for the stats preview labels.
+func _setup_preview_colors() -> void:
+	var white := Color(1, 1, 1)
+	var light_gray := Color(0.8, 0.8, 0.8)
+	var desc_color := Color(0.9, 0.9, 0.9)
+	preview_name.add_theme_color_override(&"font_color", white)
+	preview_type.add_theme_color_override(&"font_color", light_gray)
+	preview_hp.add_theme_color_override(&"font_color", light_gray)
+	preview_attack.add_theme_color_override(&"font_color", light_gray)
+	preview_defense.add_theme_color_override(&"font_color", light_gray)
+	preview_speed.add_theme_color_override(&"font_color", light_gray)
+	preview_desc.add_theme_color_override(&"font_color", desc_color)
 
 
 ## Loads character data from DataRegistry and creates selection buttons.
