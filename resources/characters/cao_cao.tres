@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "cao_cao"
+name = "曹操"
+type = 6
+secondary_type = 4
+hp = 130
+attack = 95
+defense = 100
+speed = 85
+intelligence = 110
+spirit = 105
+moves = PackedStringArray("water_surge", "earth_barrier", "war_cry", "metal_slash")
+description = "The cunning warlord who unified the north. A master of strategy and politics."

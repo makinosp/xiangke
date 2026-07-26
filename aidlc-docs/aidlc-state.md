@@ -4,7 +4,8 @@
 
 - **Project Type**: Greenfield
 - **Start Date**: 2026-06-28T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Build and Test Unit 3 (Complete)
+- **Current Stage**: ENHANCEMENT - Fix Run Project (Complete) — All 4 units +
+  Build & Test done. 103/103 Rust tests pass, Godot runs with no script errors.
 
 ## Workspace State
 
@@ -33,6 +34,21 @@
 - [x] Infrastructure Design (2026-06-29)
 - [x] Code Generation (2026-06-29)
 - [x] Build and Test (2026-06-29) — Unit 1
+
+## Enhancement Phase (fix/run-project) — 2026-07-26
+
+- [x] Workspace Detection (2026-07-26)
+- [x] Requirements Analysis (2026-07-26)
+- [x] Workflow Planning (2026-07-26)
+
+### 🟢 CONSTRUCTION PHASE (Unit A-D) — COMPLETED 2026-07-26
+
+- [x] Unit A: Character Content — 10 new .tres files (total 13)
+- [x] Unit B: Placeholder Audio — 10 .ogg files (3 BGM, 7 SFX)
+- [x] Unit C: Status Effects — 5 .tres files
+- [x] Unit D: UI & Animation (button layout, _tween_damage, var type hints)
+- [x] Build and Test — Rust 103/103 tests OK; Godot launches with no script
+      errors
 - [x] Functional Design Unit 2 (2026-06-30)
 - [x] NFR Requirements Unit 2 (2026-06-30)
 - [x] NFR Design Unit 2 (2026-07-01)

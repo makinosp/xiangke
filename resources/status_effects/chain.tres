@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/status_effect_data.gd" id="1_stat"]
+
+[resource]
+script = ExtResource("1_stat")
+effect_type = 4
+name = "Chain"
+description = "Links damage across multiple targets. Spreads incoming damage."
+damage_per_turn = 0.0
+escalating = false
+max_damage_cap = 0.0
+stat_mod_stat = -1
+stat_mod_multiplier = 1.0

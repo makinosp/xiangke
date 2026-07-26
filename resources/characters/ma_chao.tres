@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "ma_chao"
+name = "馬超"
+type = 3
+secondary_type = 4
+hp = 110
+attack = 125
+defense = 85
+speed = 115
+intelligence = 55
+spirit = 60
+moves = PackedStringArray("metal_slash", "iron_cleave", "water_surge", "war_cry")
+description = "The young general of Xiliang. His cavalry charges are swift as the wind."

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "huang_zhong"
+name = "黄忠"
+type = 1
+hp = 85
+attack = 115
+defense = 70
+speed = 90
+intelligence = 80
+spirit = 75
+moves = PackedStringArray("fire_strike", "flame_burst", "iron_cleave", "water_surge")
+description = "The veteran archer of Shu. Age has not dulled his aim or his fighting spirit."
