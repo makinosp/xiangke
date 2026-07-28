@@ -1,0 +1,7 @@
+{
+  "name": "xiangke",
+  "private": true,
+  "devDependencies": {
+    "@fission-ai/openspec": "^1.6.0"
+  }
+}

@@ -1,0 +1,12 @@
+schema: spec-driven
+
+# Project context
+context: |
+  Tech stack: Godot Engine 4.x, GDScript, Rust (GDExtension/godot-rust)
+  Core logic in Rust (xiangke-core, xiangke-battle crates)
+  GDScript ↔ Rust bridge via xiangke-godot-bridge (GDExtension)
+  Data format: Godot .tres resource files
+  Persistence: ConfigFile (user:// directory)
+  CI/CD: GitHub Actions, deploy to GitHub Pages
+  Primary target: Web (HTML5/WebAssembly)
+  Domain: Turn-based command battle game with 五行 (Five Elements) + 陰陽 (Yin-Yang) type system
