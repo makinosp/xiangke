@@ -421,6 +421,11 @@ impl RustBattleSystem {
     }
 }
 
+struct RustBattleExtension;
+
+#[gdextension]
+unsafe impl ExtensionLibrary for RustBattleExtension {}
+
 #[cfg(test)]
 mod tests {
     use super::*;

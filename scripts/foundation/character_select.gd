@@ -202,4 +202,3 @@ func _update_ui() -> void:
 			(btn as Button).modulate = Color(0.7, 1.0, 0.7) # Green tint for selected
 		else:
 			(btn as Button).modulate = Color(1, 1, 1) # Normal
-
