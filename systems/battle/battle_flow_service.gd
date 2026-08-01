@@ -85,9 +85,42 @@ func start_battle(
 	return true
 
 
-func execute_player_action(move: MoveData, target_index: int) -> Dictionary:
+func execute_player_action(move: MoveData) -> Dictionary:
 	var move_dict := _build_move_dict(move)
-	return _rust_system.execute_player_action(move_dict, target_index)
+	return _rust_system.execute_player_action(move_dict)
+
+
+## Switches the team's front character with a living benched participant.
+## Team: 0 = player, 1 = enemy. Returns true on success.
+func execute_switch(team: int, bench_index: int) -> bool:
+	return _rust_system.execute_switch(team, bench_index)
+
+
+## Returns the front participant of the given team (0 = player, 1 = enemy),
+## or null if the team has no living front character.
+func get_front_participant(team: int) -> BattleParticipant:
+	var dict := _rust_system.get_front_participant(team)
+	if dict.is_empty():
+		return null
+	return BattleParticipant.from_dict(dict)
+
+
+## Returns the living benched participants of the given team (0 = player,
+## 1 = enemy).
+func get_bench_participants(team: int) -> Array[BattleParticipant]:
+	var result: Array[BattleParticipant] = []
+	var arr := _rust_system.get_bench_participants(team)
+	for i in arr.size():
+		result.append(BattleParticipant.from_dict(arr[i]))
+	return result
+
+
+## Automatically brings the first living benched participant of a team to the
+## front when the team has no living front character (i.e. the front was
+## defeated). Team: 0 = player, 1 = enemy. Returns true if a replacement
+## entered.
+func replace_front_if_defeated(team: int) -> bool:
+	return _rust_system.auto_replace_participant(team)
 
 
 func advance_turn() -> bool:

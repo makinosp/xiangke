@@ -9,8 +9,7 @@ extends Control
 
 var _flow_service: BattleFlowService = null
 var _selected_move: MoveData = null
-var _selected_target_index: int = -1
-var _is_selecting_target: bool = false
+var _is_selecting_switch: bool = false
 
 
 func _ready() -> void:
@@ -42,7 +41,7 @@ func _setup_battle() -> void:
 		push_error("BattleScene: No valid player characters")
 		return
 
-	var enemy_ids: Array[String] = roster.opponent_corps
+	var enemy_ids: Array[String] = _select_enemy_battle_team(roster.opponent_corps)
 	var enemy_chars: Array[CharacterData] = []
 	for char_id: String in enemy_ids:
 		var char_data: CharacterData = DataRegistry.get_character(char_id)
@@ -85,6 +84,12 @@ func _handle_current_turn() -> void:
 		_on_battle_ended(status)
 		return
 
+	# If the active participant was defeated by status effects, skip ahead.
+	var active := _flow_service.get_active_participant()
+	if active == null or active.is_defeated:
+		call_deferred("_advance_turn")
+		return
+
 	if participant.team == BattleParticipant.Team.PLAYER:
 		status_label.text = "%s's turn!" % participant.character_data.name
 		_show_move_selection()
@@ -100,7 +105,7 @@ func _show_move_selection() -> void:
 	if participant == null or participant.character_data == null:
 		return
 
-	_is_selecting_target = false
+	_is_selecting_switch = false
 	action_container.hide()
 	move_container.show()
 
@@ -119,39 +124,40 @@ func _show_move_selection() -> void:
 		btn.size_flags_horizontal = Control.SIZE_EXPAND
 		move_container.add_child(btn)
 
-	var wait_btn := Button.new()
-	wait_btn.text = "Wait (Skip Turn)"
-	wait_btn.connect("pressed", Callable(self, "_on_wait_selected"))
-	move_container.add_child(wait_btn)
+	# Switch option: swap the front character with a living benched character.
+	var switch_btn := Button.new()
+	switch_btn.text = "Switch (Bench)"
+	switch_btn.connect("pressed", Callable(self, "_on_switch_selected"))
+	move_container.add_child(switch_btn)
 
 
-func _show_target_selection() -> void:
+## Displays the living benched characters for the player to choose a switch.
+func _show_switch_selection() -> void:
 	move_container.hide()
-	_is_selecting_target = true
-	status_label.text = "Select a target for %s:" % _selected_move.name
+	_is_selecting_switch = true
+	status_label.text = "Choose a character to switch in:"
 
 	for child: Node in action_container.get_children():
 		child.queue_free()
 
-	var total := _flow_service.get_participant_count()
-	for i in total:
-		if _flow_service.is_participant_defeated(i):
-			continue
-		var p := _flow_service.get_participant(i)
-		if p == null or p.team != BattleParticipant.Team.ENEMY:
-			continue
+	var bench := _flow_service.get_bench_participants(BattleParticipant.Team.PLAYER)
+	if bench.is_empty():
+		status_label.text = "No benched characters available!"
+		_is_selecting_switch = false
+		action_container.hide()
+		_show_move_selection()
+		return
 
+	for p: BattleParticipant in bench:
 		var btn := Button.new()
-		btn.text = "%s (HP: %d/%d)" % [
-				p.character_data.name if p.character_data != null else "Unknown",
-				p.current_hp,
-				p.max_hp]
-		btn.connect("pressed", Callable(self, "_on_target_selected").bind(i))
+		var name := "Unknown" if p.character_data == null else p.character_data.name
+		btn.text = "%s (HP: %d/%d)" % [name, p.current_hp, p.max_hp]
+		btn.connect("pressed", Callable(self, "_on_switch_target_selected").bind(p.slot_index))
 		action_container.add_child(btn)
 
 	var cancel_btn := Button.new()
 	cancel_btn.text = "Cancel"
-	cancel_btn.connect("pressed", Callable(self, "_on_cancel_target_selection"))
+	cancel_btn.connect("pressed", Callable(self, "_on_cancel_switch_selection"))
 	action_container.add_child(cancel_btn)
 
 	action_container.show()
@@ -159,34 +165,48 @@ func _show_target_selection() -> void:
 
 func _on_move_selected(move_data: MoveData) -> void:
 	_selected_move = move_data
-	_show_target_selection()
-
-
-func _on_wait_selected() -> void:
-	_selected_move = null
-	_is_selecting_target = false
+	_is_selecting_switch = false
+	# No target selection: the move always hits the opponent's front character.
+	var result := _flow_service.execute_player_action(move_data)
+	status_label.text = result.get("log_message", "Action executed.")
+	_update_hp_displays()
+	_update_log_display()
 	_advance_turn()
 
 
-func _on_target_selected(target_index: int) -> void:
-	_selected_target_index = target_index
-	_is_selecting_target = false
-
-	if _selected_move != null:
-		var result := _flow_service.execute_player_action(_selected_move, target_index)
-		status_label.text = result.get("log_message", "Action executed.")
-		_update_hp_displays()
-		_update_log_display()
-		_advance_turn()
+func _on_switch_selected() -> void:
+	_selected_move = null
+	_show_switch_selection()
 
 
-func _on_cancel_target_selection() -> void:
-	_is_selecting_target = false
+func _on_switch_target_selected(bench_index: int) -> void:
+	_is_selecting_switch = false
+	action_container.hide()
+
+	if _flow_service.execute_switch(BattleParticipant.Team.PLAYER, bench_index):
+		status_label.text = "Switched characters!"
+	else:
+		status_label.text = "Switch failed!"
+
+	_update_hp_displays()
+	_update_log_display()
+	_advance_turn()
+
+
+func _on_cancel_switch_selection() -> void:
+	_is_selecting_switch = false
 	action_container.hide()
 	_show_move_selection()
 
 
 func _advance_turn() -> void:
+	# Ensure both teams have a living front before advancing. This covers
+	# defeats caused by status effects (e.g. poison) outside direct attacks.
+	_flow_service.replace_front_if_defeated(BattleParticipant.Team.PLAYER)
+	_flow_service.replace_front_if_defeated(BattleParticipant.Team.ENEMY)
+	_update_hp_displays()
+	_update_log_display()
+
 	var current_idx := _flow_service.get_active_participant_index()
 	if current_idx >= 0:
 		var logs := _flow_service.process_end_of_turn(current_idx)
@@ -228,64 +248,103 @@ func _execute_ai_turn() -> void:
 		call_deferred("_advance_turn")
 		return
 
-	var move := _select_best_move(participant)
-	var target_idx := _find_weakest_target_index()
+	# Decide whether to switch: low HP or a type disadvantage.
+	var enemy_front := _flow_service.get_front_participant(BattleParticipant.Team.PLAYER)
+	if enemy_front != null and _should_ai_switch(participant, enemy_front):
+		var bench := _flow_service.get_bench_participants(BattleParticipant.Team.ENEMY)
+		if not bench.is_empty():
+			var switched := _flow_service.execute_switch(BattleParticipant.Team.ENEMY, bench[0].slot_index)
+			if switched:
+				status_label.text = "Enemy switched characters!"
+				_update_hp_displays()
+				_update_log_display()
+				call_deferred("_advance_turn")
+				return
 
-	if move != null and target_idx >= 0:
-		var result := _flow_service.execute_player_action(move, target_idx)
+	var move := _select_best_move(participant)
+	var player_front := _flow_service.get_front_participant(BattleParticipant.Team.PLAYER)
+
+	if move != null and player_front != null:
+		var result := _flow_service.execute_player_action(move)
 		status_label.text = result.get("log_message", "Enemy acted.")
 		_update_hp_displays()
 		_update_log_display()
 
+		# If the player's front was defeated, bring in a replacement.
+		if _flow_service.get_front_participant(BattleParticipant.Team.PLAYER) == null:
+			if _flow_service.replace_front_if_defeated(BattleParticipant.Team.PLAYER):
+				_update_hp_displays()
+				_update_log_display()
+
 	call_deferred("_advance_turn")
 
 
-func _find_weakest_target_index() -> int:
-	var total := _flow_service.get_participant_count()
-	var weakest: int = -1
-	var lowest_hp_ratio: float = 999.0
+## Returns true if the AI front should switch: front HP is low or the front
+## holds a type disadvantage against the opponent front.
+func _should_ai_switch(ai_front: BattleParticipant, opponent_front: BattleParticipant) -> bool:
+	if ai_front.character_data == null or opponent_front.character_data == null:
+		return false
+	var hp_ratio := float(ai_front.current_hp) / float(ai_front.max_hp)
+	if hp_ratio < 0.3:
+		return true
 
-	for i in total:
-		if _flow_service.is_participant_defeated(i):
+	var type_chart := TypeChart.new()
+	var best_eff := 0.0
+	for move_id: String in ai_front.character_data.moves:
+		var move_data: MoveData = DataRegistry.get_move(move_id)
+		if move_data == null or move_data.power <= 0:
 			continue
-		var p := _flow_service.get_participant(i)
-		if p == null or p.team != BattleParticipant.Team.PLAYER:
-			continue
-		var hp_ratio := float(p.current_hp) / float(p.max_hp)
-		if hp_ratio < lowest_hp_ratio:
-			lowest_hp_ratio = hp_ratio
-			weakest = i
+		var eff := type_chart.resolve_type_effectiveness(
+				move_data.type,
+				opponent_front.character_data.type,
+				opponent_front.character_data.secondary_type)
+		best_eff = max(best_eff, eff)
+	return best_eff > 0.0 and best_eff <= 0.5
 
-	return weakest
+
+## Selects the 3 enemy characters to field in battle from the 6-character
+## opponent corps. Picks the strongest 3 by combined stats; the strongest is
+## the first (initial front).
+func _select_enemy_battle_team(opponent_ids: Array[String]) -> Array[String]:
+	var ranked: Array[Dictionary] = []
+	for char_id: String in opponent_ids:
+		var char_data: CharacterData = DataRegistry.get_character(char_id)
+		if char_data == null:
+			continue
+		var total := char_data.hp + char_data.attack + char_data.defense \
+				+ char_data.speed + char_data.intelligence + char_data.spirit
+		ranked.append({"id": char_id, "total": total})
+
+	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a["total"] > b["total"])
+
+	var result: Array[String] = []
+	for i in range(min(3, ranked.size())):
+		result.append(ranked[i]["id"])
+	return result
 
 
 func _select_best_move(participant: BattleParticipant) -> MoveData:
 	var best_move: MoveData = null
 	var best_score: float = -1.0
 
+	# Only the opponent's front character is a valid target.
+	var opponent_front := _flow_service.get_front_participant(BattleParticipant.Team.PLAYER)
+	if opponent_front == null or opponent_front.character_data == null:
+		return null
+
+	var type_chart := TypeChart.new()
+
 	for move_id: String in participant.character_data.moves:
 		var move_data: MoveData = DataRegistry.get_move(move_id)
 		if move_data == null or move_data.power <= 0:
 			continue
 
-		var type_chart := TypeChart.new()
-		var total := _flow_service.get_participant_count()
-		var best_effectiveness: float = 0.0
-
-		for i in total:
-			if _flow_service.is_participant_defeated(i):
-				continue
-			var p := _flow_service.get_participant(i)
-			if p == null or p.team != BattleParticipant.Team.PLAYER:
-				continue
-			var eff := type_chart.resolve_type_effectiveness(
-					move_data.type,
-					p.character_data.type if p.character_data != null else -1,
-					p.character_data.secondary_type if p.character_data != null else -1)
-			if eff > best_effectiveness:
-				best_effectiveness = eff
-
-		var score := float(move_data.power) * best_effectiveness * (float(move_data.accuracy) / 100.0)
+		var eff := type_chart.resolve_type_effectiveness(
+				move_data.type,
+				opponent_front.character_data.type,
+				opponent_front.character_data.secondary_type)
+		var score := float(move_data.power) * eff * (float(move_data.accuracy) / 100.0)
 		if score > best_score:
 			best_score = score
 			best_move = move_data
@@ -370,30 +429,45 @@ func _update_hp_displays() -> void:
 	if _flow_service == null:
 		return
 
-	_update_team_hp(player_hp_container, _flow_service.get_player_participants())
-	_update_team_hp(enemy_hp_container, _flow_service.get_enemy_participants())
+	_update_team_hp(player_hp_container, BattleParticipant.Team.PLAYER)
+	_update_team_hp(enemy_hp_container, BattleParticipant.Team.ENEMY)
 
 
-static func _update_team_hp(container: HBoxContainer, participants: Array[BattleParticipant]) -> void:
+## Renders the team's HP: the front character highlighted, benched characters
+## dimmed below.
+func _update_team_hp(container: HBoxContainer, team: int) -> void:
 	for child: Node in container.get_children():
 		child.queue_free()
 
-	for p: BattleParticipant in participants:
+	var front := _flow_service.get_front_participant(team)
+	if front != null:
+		var front_label := Label.new()
+		if front.character_data == null:
+			front_label.text = "Unknown"
+		elif front.is_defeated:
+			front_label.text = "%s: DEFEATED" % front.character_data.name
+			front_label.modulate = Color.GRAY
+		else:
+			front_label.text = "%s: %d/%d" % [front.character_data.name, front.current_hp, front.max_hp]
+			var hp_ratio: float = float(front.current_hp) / float(front.max_hp)
+			if hp_ratio < 0.25:
+				front_label.modulate = Color.RED
+			elif hp_ratio < 0.5:
+				front_label.modulate = Color.YELLOW
+			else:
+				front_label.modulate = Color.WHITE
+		container.add_child(front_label)
+
+	for p: BattleParticipant in _flow_service.get_bench_participants(team):
 		var label := Label.new()
 		if p.character_data == null:
-			label.text = "Unknown"
+			label.text = "Unknown (bench)"
 		elif p.is_defeated:
 			label.text = "%s: DEFEATED" % p.character_data.name
 			label.modulate = Color.GRAY
 		else:
 			label.text = "%s: %d/%d" % [p.character_data.name, p.current_hp, p.max_hp]
-			var hp_ratio: float = float(p.current_hp) / float(p.max_hp)
-			if hp_ratio < 0.25:
-				label.modulate = Color.RED
-			elif hp_ratio < 0.5:
-				label.modulate = Color.YELLOW
-			else:
-				label.modulate = Color.WHITE
+			label.modulate = Color(0.6, 0.6, 0.6)
 		container.add_child(label)
 
 
@@ -406,5 +480,5 @@ func _update_log_display() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
-		if _is_selecting_target:
-			_on_cancel_target_selection()
+		if _is_selecting_switch:
+			_on_cancel_switch_selection()
