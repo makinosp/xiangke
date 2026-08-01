@@ -53,12 +53,6 @@ func set_focus(control: Control) -> void:
 		_set_focus(index)
 
 
-## Clears the current focus group.
-func clear_focus_group() -> void:
-	focus_group.clear()
-	focused_index = 0
-
-
 ## Applies visual highlighting to the focused control and resets others.
 func _set_focus(index: int) -> void:
 	for i in focus_group.size():

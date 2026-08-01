@@ -118,26 +118,6 @@ func validate_all(
 	return result
 
 
-## Validates a single character.
-func validate_character(
-		character: CharacterData,
-		characters: Dictionary,
-		moves: Dictionary) -> Array[ValidationError]:
-	return _validate_character(character, characters, moves)
-
-
-## Validates a single move.
-func validate_move(move: MoveData, moves: Dictionary) -> Array[ValidationError]:
-	return _validate_move(move, moves)
-
-
-## Validates the type chart.
-func validate_type_chart() -> Array[ValidationError]:
-	var result = ValidationResult.new()
-	_validate_type_chart(result)
-	return result.errors
-
-
 # --- Private validation methods ---
 
 ## Implements character validation.

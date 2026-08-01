@@ -49,7 +49,3 @@ extends Resource
 ## Returns true if this move has a stat modification effect.
 func has_stat_mod() -> bool:
 	return stat_mod_stat >= 0 and stat_mod_stage != 0
-
-## Returns true if this move deals damage.
-func is_damaging() -> bool:
-	return power > 0

@@ -8,7 +8,6 @@ extends Control
 @onready var enemy_hp_container: HBoxContainer = $EnemyHPContainer
 
 var _flow_service: BattleFlowService = null
-var _selected_move: MoveData = null
 var _is_selecting_switch: bool = false
 
 
@@ -164,7 +163,6 @@ func _show_switch_selection() -> void:
 
 
 func _on_move_selected(move_data: MoveData) -> void:
-	_selected_move = move_data
 	_is_selecting_switch = false
 	# No target selection: the move always hits the opponent's front character.
 	var result := _flow_service.execute_player_action(move_data)
@@ -175,7 +173,6 @@ func _on_move_selected(move_data: MoveData) -> void:
 
 
 func _on_switch_selected() -> void:
-	_selected_move = null
 	_show_switch_selection()
 
 
@@ -350,64 +347,6 @@ func _select_best_move(participant: BattleParticipant) -> MoveData:
 			best_move = move_data
 
 	return best_move
-
-
-func _on_turn_started(participant: BattleParticipant) -> void:
-	status_label.text = "%s is acting..." % participant.character_data.name
-	_update_hp_displays()
-
-
-func _on_action_executed(result: Dictionary, source: BattleParticipant, target: BattleParticipant) -> void:
-	_update_hp_displays()
-	_update_log_display()
-	if not result.get("log_message", "").is_empty():
-		status_label.text = result["log_message"]
-
-	var dmg: int = result.get("damage_dealt", 0)
-	if dmg > 0:
-		_tween_damage_feedback(target, dmg, Color.RED)
-	var heal: int = result.get("healing_done", 0)
-	if heal > 0:
-		_tween_damage_feedback(target, heal, Color.GREEN_YELLOW)
-	var recoil: int = result.get("recoil_damage", 0)
-	if recoil > 0:
-		_tween_damage_feedback(source, recoil, Color.ORANGE_RED)
-
-
-## Provides visual tween animation feedback for damage/healing.
-## Temporarily flashes the HP label with the given color.
-func _tween_damage_feedback(participant: BattleParticipant, amount: int, flash_color: Color) -> void:
-	# Find the HP label for this participant
-	var hp_labels: Array[Label] = []
-	hp_labels.append_array(_find_hp_labels(player_hp_container, participant))
-	hp_labels.append_array(_find_hp_labels(enemy_hp_container, participant))
-
-	for label: Label in hp_labels:
-		var original_color := label.modulate
-		label.modulate = flash_color
-		var tween := create_tween()
-		tween.set_ease(Tween.EASE_OUT)
-		tween.tween_property(label, "modulate", original_color, 0.4)
-		tween.play()
-
-
-## Searches an HP container for a label matching the given participant.
-static func _find_hp_labels(container: HBoxContainer, participant: BattleParticipant) -> Array[Label]:
-	var result: Array[Label] = []
-	if participant.character_data == null:
-		return result
-	var target_name: String = participant.character_data.name
-	for child in container.get_children():
-		var label := child as Label
-		if label != null and label.text.begins_with(target_name):
-			result.append(label)
-	return result
-
-
-func _on_participant_defeated(participant: BattleParticipant) -> void:
-	status_label.text = "%s is defeated!" % participant.character_data.name
-	_update_hp_displays()
-	_update_log_display()
 
 
 func _on_battle_ended(status: int) -> void:

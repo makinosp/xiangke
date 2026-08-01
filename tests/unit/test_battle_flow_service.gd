@@ -48,7 +48,6 @@ func test_rust_battle_system_class_available() -> int:
 
 func after_all() -> void:
 	if _service != null:
-		_service.stop_battle()
 		_service.free()
 		_service = null
 
