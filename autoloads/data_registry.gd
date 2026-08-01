@@ -9,9 +9,6 @@ var _characters: Dictionary = {}
 ## Dictionary of all loaded moves keyed by ID.
 var _moves: Dictionary = {}
 
-## Whether data has been loaded into the registry.
-var _is_loaded: bool = false
-
 
 ## Called when the node enters the tree. Automatically loads all data.
 func _ready() -> void:
@@ -28,7 +25,6 @@ func load_all() -> void:
 	data_loader.free()
 	_characters = data["characters"]
 	_moves = data["moves"]
-	_is_loaded = true
 
 	# Run validation and log results
 	var validator = DataValidator.new()
@@ -39,19 +35,6 @@ func load_all() -> void:
 	else:
 		print("DataRegistry: All data loaded and validated successfully.")
 		print("  Characters: %d | Moves: %d" % [_characters.size(), _moves.size()])
-
-
-## Reloads all data from disk. Useful for hot-reloading during development.
-func reload() -> void:
-	_is_loaded = false
-	_characters.clear()
-	_moves.clear()
-	load_all()
-
-
-## Returns true if data has been loaded into the registry.
-func is_loaded() -> bool:
-	return _is_loaded
 
 
 ## Retrieves a character by ID.
@@ -98,42 +81,6 @@ func get_all_moves() -> Dictionary:
 	return _moves.duplicate()
 
 
-## Returns the number of loaded characters.
-func get_character_count() -> int:
-	return _characters.size()
-
-
-## Returns the number of loaded moves.
-func get_move_count() -> int:
-	return _moves.size()
-
-
 ## Checks if a character with the given ID exists.
 func has_character(id: String) -> bool:
 	return _characters.has(id)
-
-
-## Checks if a move with the given ID exists.
-func has_move(id: String) -> bool:
-	return _moves.has(id)
-
-
-## Resolves type effectiveness for a move against a character.
-## Convenience method combining TypeChart with character data.
-##
-## Parameters:
-##   move_id: The move ID to resolve.
-##   defender_id: The defending character's ID.
-##
-## Returns:
-##   The effectiveness multiplier, or -1.0 if move or character not found.
-func get_type_effectiveness_against(move_id: String, defender_id: String) -> float:
-	var move := get_move(move_id)
-	if move == null:
-		return -1.0
-	var defender := get_character(defender_id)
-	if defender == null:
-		return -1.0
-	var type_chart = TypeChart.new()
-	return type_chart.resolve_type_effectiveness(
-			move.type, defender.type, defender.secondary_type)

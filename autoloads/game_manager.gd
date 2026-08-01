@@ -13,11 +13,6 @@ enum GameState {
 	RESULT ## Battle result screen is active.
 }
 
-## Emitted when the game state changes.
-signal game_state_changed(new_state: GameState)
-## Emitted when a scene transition is requested.
-signal transition_requested(from_state: GameState, to_state: GameState)
-
 ## Currently active game state.
 var current_state: GameState = GameState.TITLE
 
@@ -52,9 +47,7 @@ func transition_to_state(target_state: GameState) -> bool:
 			])
 		return false
 
-	emit_signal("transition_requested", current_state, target_state)
 	current_state = target_state
-	emit_signal("game_state_changed", current_state)
 	_process_state(current_state)
 	return true
 

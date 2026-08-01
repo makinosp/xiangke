@@ -10,89 +10,11 @@ use xiangke_battle::flow::{
 use xiangke_battle::manager;
 use xiangke_battle::participant::{BattleParticipant, Team};
 use xiangke_battle::state::{BattleState, MAX_TURNS, Status};
+use xiangke_battle::test_utils::{make_fighter, make_status_configs, make_strike};
 
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
-use xiangke_core::status::StatusEffectData;
 use xiangke_core::types::{DamageCategory, EffectType, Stat, TypeElement};
-
-/// Helper to create a character with one damaging move.
-fn make_fighter(
-    id: &str,
-    name: &str,
-    element: TypeElement,
-    hp: u32,
-    atk: u32,
-    def: u32,
-    spd: u32,
-) -> CharacterData {
-    CharacterData {
-        id: id.into(),
-        name: name.into(),
-        element,
-        secondary_element: None,
-        base_stats: Stats {
-            hp,
-            attack: atk,
-            defense: def,
-            speed: spd,
-            intelligence: 50,
-            spirit: 50,
-        },
-        moves: vec![format!("{}_strike", id)],
-        description: "".into(),
-    }
-}
-
-/// Helper to create a damaging physical move.
-fn make_strike(id: &str, element: TypeElement, power: u32, accuracy: u32) -> MoveData {
-    MoveData {
-        id: format!("{}_strike", id),
-        name: format!("{} Strike", id),
-        element,
-        power,
-        accuracy,
-        effect: EffectType::None,
-        effect_chance: 0,
-        stat_mod_stat: None,
-        stat_mod_stage: 0,
-        hit_count: 1,
-        recoil: 0,
-        healing: 0,
-        damage_category: DamageCategory::Physical,
-        description: "".into(),
-    }
-}
-
-/// Build status effect configs matching BattleState defaults.
-fn make_status_configs() -> HashMap<EffectType, StatusEffectData> {
-    let mut configs = HashMap::new();
-    configs.insert(
-        EffectType::Burn,
-        StatusEffectData {
-            status_type: EffectType::Burn,
-            damage_per_turn: 1.0 / 16.0,
-            ..Default::default()
-        },
-    );
-    configs.insert(
-        EffectType::Poison,
-        StatusEffectData {
-            status_type: EffectType::Poison,
-            damage_per_turn: 1.0 / 8.0,
-            ..Default::default()
-        },
-    );
-    configs.insert(
-        EffectType::Confusion,
-        StatusEffectData {
-            status_type: EffectType::Confusion,
-            damage_per_turn: 0.0,
-            ..Default::default()
-        },
-    );
-    configs
-}
 
 /// Executes an AI-selected action against the current battle state.
 /// Handles both Attack (calculates damage) and Switch (swaps front flags).
@@ -209,7 +131,7 @@ fn test_full_battle_3v3_player_advantage() {
         // Process start-of-turn effects
         {
             let p = &mut state.participants[active_idx];
-            let _logs = process_end_of_turn(p, &state.status_effect_configs, &mut rng);
+            let _logs = process_end_of_turn(p, &state.status_effect_configs);
         }
 
         // AI selects action
@@ -348,7 +270,7 @@ fn test_battle_1v1_victory() {
         // End-of-turn effects
         {
             let p = &mut state.participants[active_idx];
-            let _logs = process_end_of_turn(p, &state.status_effect_configs, &mut rng);
+            let _logs = process_end_of_turn(p, &state.status_effect_configs);
         }
 
         // AI action
@@ -442,7 +364,7 @@ fn test_battle_draw_by_turn_limit() {
 
         {
             let p = &mut state.participants[active_idx];
-            let _logs = process_end_of_turn(p, &state.status_effect_configs, &mut rng);
+            let _logs = process_end_of_turn(p, &state.status_effect_configs);
         }
 
         if let Some(action) = ai.select_action(&state, active_idx) {
@@ -470,7 +392,6 @@ fn test_battle_draw_by_turn_limit() {
 /// Verify Burn deals 1/16 max HP per turn via process_end_of_turn.
 #[test]
 fn test_status_burn_dot() {
-    let mut rng = StdRng::seed_from_u64(1);
     let configs = make_status_configs();
     let mut p = BattleParticipant::new(
         make_fighter("burn_test", "BurnTest", TypeElement::Fire, 160, 50, 50, 50),
@@ -482,7 +403,7 @@ fn test_status_burn_dot() {
     p.apply_status(EffectType::Burn);
     assert!(p.has_status(EffectType::Burn));
 
-    let logs = process_end_of_turn(&mut p, &configs, &mut rng);
+    let logs = process_end_of_turn(&mut p, &configs);
 
     // 1/16 of 160 = 10
     assert_eq!(p.current_hp, 150, "Burn should deal 1/16 max HP as DOT");
@@ -496,7 +417,6 @@ fn test_status_burn_dot() {
 /// Verify Poison deals 1/8 max HP per turn (2x Burn ratio).
 #[test]
 fn test_status_poison_dot() {
-    let mut rng = StdRng::seed_from_u64(2);
     let configs = make_status_configs();
     let mut p = BattleParticipant::new(
         make_fighter(
@@ -516,7 +436,7 @@ fn test_status_poison_dot() {
     p.apply_status(EffectType::Poison);
     assert!(p.has_status(EffectType::Poison));
 
-    let logs = process_end_of_turn(&mut p, &configs, &mut rng);
+    let logs = process_end_of_turn(&mut p, &configs);
 
     // 1/8 of 160 = 20
     assert_eq!(p.current_hp, 140, "Poison should deal 1/8 max HP as DOT");
@@ -1030,7 +950,7 @@ fn test_asymmetric_team_1v2() {
 
         {
             let p = &mut state.participants[active_idx];
-            let _logs = process_end_of_turn(p, &state.status_effect_configs, &mut rng);
+            let _logs = process_end_of_turn(p, &state.status_effect_configs);
         }
 
         if let Some(action) = ai.select_action(&state, active_idx)

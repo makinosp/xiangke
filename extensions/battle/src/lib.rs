@@ -21,5 +21,9 @@ pub mod manager;
 /// Battle flow orchestration.
 pub mod flow;
 
+/// Shared test helpers (hidden from public docs).
+#[doc(hidden)]
+pub mod test_utils;
+
 #[cfg(test)]
 mod proptests;

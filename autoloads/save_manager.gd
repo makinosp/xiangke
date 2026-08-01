@@ -10,8 +10,6 @@ const SAVE_VERSION: int = 1
 
 ## Emitted when save data is loaded or reset.
 signal save_loaded(save_data: Dictionary)
-## Emitted when save data is written to disk.
-signal save_written()
 
 ## Currently loaded save data dictionary.
 var current_data: Dictionary = {}
@@ -85,13 +83,6 @@ func save_game(data: Dictionary = {}) -> void:
 		return
 
 	current_data = data
-	emit_signal("save_written")
-
-
-## Resets all save data to defaults and writes to disk.
-func reset_to_defaults() -> void:
-	current_data = _create_default_save()
-	save_game(current_data)
 
 
 ## Returns the default save data dictionary.

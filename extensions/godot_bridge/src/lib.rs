@@ -22,7 +22,7 @@ use xiangke_battle::participant::{BattleParticipant, Team};
 use xiangke_battle::state::{BattleState, Status};
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
-use xiangke_core::status::StatusEffectData;
+use xiangke_core::status::default_configs;
 use xiangke_core::types::{DamageCategory, EffectType, TypeElement};
 
 type Dict = VarDictionary;
@@ -171,34 +171,13 @@ fn result_dict(r: &action::ActionResult) -> Dict {
     d
 }
 
-/// Builds default status effect configs for start/end-of-turn processing.
-fn default_status_configs() -> HashMap<EffectType, StatusEffectData> {
-    let mut m = HashMap::new();
-    m.insert(
-        EffectType::Burn,
-        StatusEffectData {
-            status_type: EffectType::Burn,
-            damage_per_turn: 1.0 / 16.0,
-            ..Default::default()
-        },
-    );
-    m.insert(
-        EffectType::Poison,
-        StatusEffectData {
-            status_type: EffectType::Poison,
-            damage_per_turn: 1.0 / 8.0,
-            ..Default::default()
-        },
-    );
-    m.insert(
-        EffectType::Confusion,
-        StatusEffectData {
-            status_type: EffectType::Confusion,
-            damage_per_turn: 1.0 / 16.0,
-            ..Default::default()
-        },
-    );
-    m
+/// Converts a list of log messages into a Godot Array.
+fn logs_to_arr(logs: Vec<String>) -> Arr {
+    let mut arr = Arr::new();
+    for msg in logs {
+        arr.push(msg.to_string());
+    }
+    arr
 }
 
 #[derive(GodotClass)]
@@ -583,13 +562,8 @@ impl RustBattleSystem {
             Some(r) => r,
             None => return Arr::new(),
         };
-        let configs = default_status_configs();
-        let logs = flow::process_start_of_turn(participant, &configs, rng);
-        let mut arr = Arr::new();
-        for msg in logs {
-            arr.push(msg.to_string());
-        }
-        arr
+        let configs = default_configs();
+        logs_to_arr(flow::process_start_of_turn(participant, &configs, rng))
     }
 
     /// Processes end-of-turn effects for a participant (e.g. Burn/Poison damage-over-time).
@@ -605,17 +579,8 @@ impl RustBattleSystem {
             Some(p) => p,
             None => return Arr::new(),
         };
-        let rng = match self.rng.as_mut() {
-            Some(r) => r,
-            None => return Arr::new(),
-        };
-        let configs = default_status_configs();
-        let logs = flow::process_end_of_turn(participant, &configs, rng);
-        let mut arr = Arr::new();
-        for msg in logs {
-            arr.push(msg.to_string());
-        }
-        arr
+        let configs = default_configs();
+        logs_to_arr(flow::process_end_of_turn(participant, &configs))
     }
 
     /// Returns whether the participant at the given global index is defeated.

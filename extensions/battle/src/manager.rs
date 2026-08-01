@@ -120,19 +120,9 @@ pub fn auto_replace(state: &mut BattleState, team: Team) -> bool {
 /// Uses the participant order in the state; the first entry of each team
 /// (lowest slot) becomes the front character.
 fn mark_initial_fronts(state: &mut BattleState) {
-    let mut player_set = false;
-    let mut enemy_set = false;
-    for p in &mut state.participants {
-        match p.team {
-            Team::Player if !player_set => {
-                p.is_front = true;
-                player_set = true;
-            }
-            Team::Enemy if !enemy_set => {
-                p.is_front = true;
-                enemy_set = true;
-            }
-            _ => {}
+    for team in [Team::Player, Team::Enemy] {
+        if let Some(idx) = state.participants.iter().position(|p| p.team == team) {
+            state.participants[idx].is_front = true;
         }
     }
 }
@@ -157,20 +147,13 @@ pub fn advance_to_next_turn(
     state: &mut BattleState,
     rng: &mut impl Rng,
 ) -> Result<(), BattleError> {
-    // Ensure we have a valid turn queue
-    if state.turn_queue.is_empty() || state.turn_queue_index >= state.turn_queue.len() {
-        start_new_round(state, rng)?;
-    }
-
-    // Move to next candidate in queue
+    // Move to the next candidate in the queue, starting a new round if exhausted.
     state.turn_queue_index += 1;
-
-    // If we've exhausted the queue, start a new round
     if state.turn_queue_index >= state.turn_queue.len() {
         start_new_round(state, rng)?;
     }
 
-    // Find the next active participant
+    // Find the next active participant.
     while state.turn_queue_index < state.turn_queue.len() {
         let idx = state.turn_queue[state.turn_queue_index];
         if idx < state.participants.len() {
@@ -184,18 +167,14 @@ pub fn advance_to_next_turn(
         state.turn_queue_index += 1;
     }
 
-    // No active participants found, start a new round
-    match start_new_round(state, rng) {
-        Ok(()) => {
-            if state.turn_queue.is_empty() {
-                return Err(BattleError::NoActiveParticipants);
-            }
-            state.active_participant = Some(state.turn_queue[0]);
-            state.turn_count += 1;
-            Ok(())
-        }
-        Err(e) => Err(e),
+    // Queue fully scanned without finding an active participant: start a fresh round.
+    start_new_round(state, rng)?;
+    if state.turn_queue.is_empty() {
+        return Err(BattleError::NoActiveParticipants);
     }
+    state.active_participant = Some(state.turn_queue[0]);
+    state.turn_count += 1;
+    Ok(())
 }
 
 /// Initializes the battle by setting up the first round and selecting the first active participant.
@@ -224,36 +203,11 @@ pub fn start_battle(state: &mut BattleState, rng: &mut impl Rng) -> Result<(), B
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::participant::{BattleParticipant, Team};
+    use crate::participant::Team;
+    use crate::test_utils::make_participant_with_speed as make_participant;
     use rand::SeedableRng;
     use rand::rngs::StdRng;
     use std::collections::HashMap;
-    use xiangke_core::character::{CharacterData, Stats};
-    use xiangke_core::types::TypeElement;
-
-    fn make_participant(team: Team, hp: u32, speed: u32) -> BattleParticipant {
-        BattleParticipant::new(
-            CharacterData {
-                id: "test".into(),
-                name: "Test".into(),
-                element: TypeElement::Wood,
-                secondary_element: None,
-                base_stats: Stats {
-                    hp,
-                    attack: 50,
-                    defense: 50,
-                    speed,
-                    intelligence: 50,
-                    spirit: 50,
-                },
-                moves: vec![],
-                description: "".into(),
-            },
-            team,
-            0,
-        )
-        .unwrap()
-    }
 
     fn make_state(players: usize, enemies: usize) -> BattleState {
         let mut participants = Vec::new();

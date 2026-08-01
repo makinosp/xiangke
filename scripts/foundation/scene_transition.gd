@@ -11,9 +11,6 @@ extends CanvasLayer
 ## AnimationPlayer reference for playing fade animations.
 @export var animation_player: AnimationPlayer
 
-## Emitted when a scene transition animation completes.
-signal transition_complete(scene_path: String)
-
 ## Whether a transition is currently in progress.
 var _is_transitioning: bool = false
 
@@ -24,23 +21,15 @@ func _ready() -> void:
 
 
 ## Executes a scene transition with fade-out/in animation.
-##
-## Parameters:
-##   scene_path: res:// path to the target scene file.
-##   config: Optional configuration overrides.
-func transition_to(scene_path: String, config: TransitionConfig = null) -> void:
+func transition_to(scene_path: String) -> void:
 	if _is_transitioning:
 		push_warning("SceneTransition: A transition is already in progress")
 		return
 
 	_is_transitioning = true
 
-	# Apply configuration overrides if provided
 	var duration := transition_duration
 	var color := fade_color
-	if config != null:
-		duration = config.duration if config.duration > 0.0 else transition_duration
-		color = config.fade_color
 
 	# Validate scene path
 	if not scene_path.begins_with("res://"):
@@ -60,7 +49,6 @@ func transition_to(scene_path: String, config: TransitionConfig = null) -> void:
 	if err != OK:
 		push_error("SceneTransition: Failed to load scene: %s (error %d)" % [scene_path, err])
 		_is_transitioning = false
-		emit_signal("transition_complete", scene_path)
 		return
 
 	# Wait one frame for the new scene to initialize
@@ -75,14 +63,6 @@ func transition_to(scene_path: String, config: TransitionConfig = null) -> void:
 	# Finish transition
 	hide()
 	_is_transitioning = false
-	emit_signal("transition_complete", scene_path)
-
-
-## Configures the transition parameters.
-func configure(config: TransitionConfig) -> void:
-	if config.duration > 0.0:
-		transition_duration = config.duration
-	fade_color = config.fade_color
 
 
 ## Plays a fade-out animation (screen to solid color).

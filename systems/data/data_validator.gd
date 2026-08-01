@@ -12,10 +12,14 @@ class ValidationError:
 	var code: String
 	var message: String
 	var context: String
+
+	## Creates a validation error with rule code, message, and optional context.
 	func _init(p_code: String, p_message: String, p_context: String = ""):
 		code = p_code
 		message = p_message
 		context = p_context
+
+	## Formats the error as "[code] message" or "[code] message: context".
 	func _to_string() -> String:
 		if context.is_empty():
 			return "[%s] %s" % [code, message]
@@ -26,10 +30,14 @@ class ValidationWarning:
 	var code: String
 	var message: String
 	var context: String
+
+	## Creates a validation warning with rule code, message, and optional context.
 	func _init(p_code: String, p_message: String, p_context: String = ""):
 		code = p_code
 		message = p_message
 		context = p_context
+
+	## Formats the warning as "[code] message" or "[code] message: context".
 	func _to_string() -> String:
 		if context.is_empty():
 			return "[%s] %s" % [code, message]
@@ -74,13 +82,7 @@ class ValidationResult:
 
 
 ## Validates all data (characters, moves, type chart) and returns a summary.
-##
-## Parameters:
-##   characters: Dictionary of CharacterData keyed by ID.
-##   moves: Dictionary of MoveData keyed by ID.
-##
-## Returns:
-##   ValidationResult with all errors, warnings, and summary.
+## Returns a ValidationResult with all errors, warnings, and counts.
 func validate_all(
 		characters: Dictionary,
 		moves: Dictionary) -> ValidationResult:
@@ -116,35 +118,16 @@ func validate_all(
 	return result
 
 
-## Validates a single character against business rules CR-1 through CR-4.
-func validate_character(
-		character: CharacterData,
-		characters: Dictionary,
-		moves: Dictionary) -> Array[ValidationError]:
-	return _validate_character(character, characters, moves)
-
-
-## Validates a single move against business rules MR-1 through MR-7.
-func validate_move(move: MoveData, moves: Dictionary) -> Array[ValidationError]:
-	return _validate_move(move, moves)
-
-
-## Validates the type chart against business rules TR-1 through TR-3.
-func validate_type_chart() -> Array[ValidationError]:
-	var result = ValidationResult.new()
-	_validate_type_chart(result)
-	return result.errors
-
-
 # --- Private validation methods ---
 
+## Implements character validation.
 func _validate_character(
 		character: CharacterData,
 		_characters: Dictionary,
 		_moves: Dictionary) -> Array[ValidationError]:
 	var errors: Array[ValidationError] = []
 
-	# CR-1: Character Identity
+	# Character Identity
 	if not DataValidationUtils.is_valid_id_format(character.id):
 		errors.append(ValidationError.new(
 				"CR-1", "Invalid ID format (must be lowercase snake_case)",
@@ -153,7 +136,7 @@ func _validate_character(
 		errors.append(ValidationError.new(
 				"CR-1", "Name must be 1-20 characters", character.id))
 
-	# CR-2: Character Stats
+	# Character Stats
 	var stat_names = ["hp", "attack", "defense", "speed",
 			"intelligence", "spirit"]
 	var stat_values = [character.hp, character.attack, character.defense,
@@ -174,7 +157,7 @@ func _validate_character(
 				"CR-2", "Stat sum %d exceeds maximum 3000" % character.get_stat_sum(),
 				character.id))
 
-	# CR-3: Character Type Assignment
+	# Character Type Assignment
 	if not DataValidationUtils.is_valid_type(character.type):
 		errors.append(ValidationError.new(
 				"CR-3", "Invalid primary type: %d" % character.type,
@@ -189,7 +172,7 @@ func _validate_character(
 					"CR-3", "Secondary type same as primary (%d)" % character.type,
 					character.id))
 
-	# CR-4: Character Move Assignment
+	# Character Move Assignment
 	if character.moves.size() != 4:
 		errors.append(ValidationError.new(
 				"CR-4", "Must have exactly 4 moves, got %d" % character.moves.size(),
@@ -212,10 +195,11 @@ func _validate_character(
 	return errors
 
 
+## Implements move validation.
 func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError]:
 	var errors: Array[ValidationError] = []
 
-	# MR-1: Move Identity
+	# Move Identity
 	if not DataValidationUtils.is_valid_id_format(move.id):
 		errors.append(ValidationError.new(
 				"MR-1", "Invalid ID format (must be lowercase snake_case)",
@@ -224,7 +208,7 @@ func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError
 		errors.append(ValidationError.new(
 				"MR-1", "Name must be 1-20 characters", move.id))
 
-	# MR-2: Move Power and Accuracy
+	# Move Power and Accuracy
 	if not DataValidationUtils.is_in_range(move.power, 0, 255):
 		errors.append(ValidationError.new(
 				"MR-2", "Power must be in range [0, 255], got %d" % move.power,
@@ -234,7 +218,7 @@ func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError
 				"MR-2", "Accuracy must be in range [1, 100], got %d" % move.accuracy,
 				move.id))
 
-	# MR-3: Move Effect
+	# Move Effect
 	if not DataValidationUtils.is_valid_effect_type(move.effect):
 		errors.append(ValidationError.new(
 				"MR-3", "Invalid effect type: %d" % move.effect, move.id))
@@ -251,7 +235,7 @@ func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError
 				"MR-3", "Effect chance must be > 0 when effect is not None",
 				move.id))
 
-	# MR-4: Move Stat Modification
+	# Move Stat Modification
 	if move.has_stat_mod():
 		if not DataValidationUtils.is_valid_stat(move.stat_mod_stat):
 			errors.append(ValidationError.new(
@@ -262,13 +246,13 @@ func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError
 					"MR-4", "Stat mod stage must be in range [-3, 3], got %d" % move.stat_mod_stage,
 					move.id))
 
-	# MR-5: Move Multi-Hit
+	# Move Multi-Hit
 	if not DataValidationUtils.is_in_range(move.hit_count, 1, 5):
 		errors.append(ValidationError.new(
 				"MR-5", "Hit count must be in range [1, 5], got %d" % move.hit_count,
 				move.id))
 
-	# MR-6: Move Recoil
+	# Move Recoil
 	if not DataValidationUtils.is_in_range(move.recoil, 0, 100):
 		errors.append(ValidationError.new(
 				"MR-6", "Recoil must be in range [0, 100], got %d" % move.recoil,
@@ -277,7 +261,7 @@ func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError
 		errors.append(ValidationError.new(
 				"MR-6", "Recoil requires power > 0", move.id))
 
-	# MR-7: Move Healing
+	# Move Healing
 	if not DataValidationUtils.is_in_range(move.healing, 0, 100):
 		errors.append(ValidationError.new(
 				"MR-7", "Healing must be in range [0, 100], got %d" % move.healing,
@@ -286,10 +270,11 @@ func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError
 	return errors
 
 
+## Implements type chart validation.
 func _validate_type_chart(result: ValidationResult) -> void:
 	var chart = TypeChart.TYPE_CHART
 
-	# TR-1: Type Validity — chart must be 7x7
+	# Type Validity — chart must be 7x7
 	if chart.size() != 7:
 		result.add_error("TR-1",
 				"Type chart must have 7 rows, got %d" % chart.size())
@@ -300,7 +285,7 @@ func _validate_type_chart(result: ValidationResult) -> void:
 					"Type chart row %d must have 7 columns, got %d" % [
 							i, chart[i].size()])
 
-	# TR-2: Type Effectiveness Constraints
+	# Type Effectiveness Constraints
 	# Diagonal must not be 2.0 or 0.0
 	for i in range(7):
 		if chart[i][i] == 2.0:
@@ -333,7 +318,7 @@ func _validate_type_chart(result: ValidationResult) -> void:
 			result.add_error("TR-2",
 					"Type %d must have neutral effectiveness against Yin" % i)
 
-	# TR-3: Five Elements Cycle Compliance
+	# Five Elements Cycle Compliance
 	# Each 五行 type must be super effective against exactly one other (2.0)
 	for defender in range(5):
 		var super_effective_count = 0

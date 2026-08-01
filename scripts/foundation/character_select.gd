@@ -79,7 +79,7 @@ func _setup_preview_colors() -> void:
 func _load_characters() -> void:
 	var corps_ids: Array[String] = GameManager.corps_roster.corps_characters
 	for char_id in corps_ids:
-		var char_data := DataRegistry.get_character(char_id) as CharacterData
+		var char_data := DataRegistry.get_character(char_id)
 		if char_data == null:
 			continue
 
@@ -104,7 +104,7 @@ func _load_opponent_display() -> void:
 		child.queue_free()
 
 	for char_id in opponent_ids:
-		var char_data := DataRegistry.get_character(char_id) as CharacterData
+		var char_data := DataRegistry.get_character(char_id)
 		if char_data == null:
 			continue
 
@@ -132,7 +132,7 @@ func _on_character_pressed(char_id: String) -> void:
 
 ## Called when hovering over a character to show stats preview.
 func _on_character_hovered(char_id: String) -> void:
-	var char_data := DataRegistry.get_character(char_id) as CharacterData
+	var char_data := DataRegistry.get_character(char_id)
 	if char_data == null:
 		return
 
@@ -149,7 +149,7 @@ func _on_character_hovered(char_id: String) -> void:
 	var move_labels := [preview_move_1, preview_move_2, preview_move_3, preview_move_4]
 	for i in range(4):
 		if i < char_data.moves.size():
-			var move := DataRegistry.get_move(char_data.moves[i]) as MoveData
+			var move := DataRegistry.get_move(char_data.moves[i])
 			if move != null:
 				move_labels[i].text = "%s (%s)" % [move.name, TypeEnums.Type.keys()[move.type]]
 				move_labels[i].show()

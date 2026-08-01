@@ -5,6 +5,7 @@ use rand::Rng;
 use xiangke_core::status::StatusEffectData;
 use xiangke_core::types::EffectType;
 use xiangke_core::types::TypeChart;
+use xiangke_core::types::TypeElement;
 
 use crate::manager::{find_front_index, living_bench_indices};
 use crate::participant::BattleParticipant;
@@ -43,6 +44,19 @@ const SWITCH_HP_RATIO: f64 = 0.3;
 /// Type-effectiveness threshold that counts as a disadvantage.
 const SWITCH_TYPE_THRESHOLD: f64 = 0.5;
 
+/// Computes the type effectiveness of a move element against a defender's element(s).
+fn move_effectiveness_against(
+    type_chart: &TypeChart,
+    move_element: TypeElement,
+    defender: &BattleParticipant,
+) -> f64 {
+    let def_secondary = defender
+        .character_data
+        .secondary_element
+        .unwrap_or(defender.character_data.element);
+    type_chart.effectiveness_dual(move_element, defender.character_data.element, def_secondary)
+}
+
 /// A basic AI that targets the opponent's front character and switches when
 /// the front is at a disadvantage.
 pub struct BasicAi;
@@ -63,10 +77,6 @@ impl BasicAi {
         let attacker = &state.participants[attacker_index];
         let defender = &state.participants[defender_index];
         let type_chart = TypeChart::default();
-        let def_secondary = defender
-            .character_data
-            .secondary_element
-            .unwrap_or(defender.character_data.element);
         let mut best: f64 = 0.0;
         for move_id in &attacker.character_data.moves {
             let Some(mv) = state.move_lookup.get(move_id) else {
@@ -75,23 +85,13 @@ impl BasicAi {
             if mv.power == 0 {
                 continue;
             }
-            let eff = type_chart.effectiveness_dual(
-                mv.element,
-                defender.character_data.element,
-                def_secondary,
-            );
+            let eff = move_effectiveness_against(&type_chart, mv.element, defender);
             best = best.max(eff);
         }
         best
     }
 
-    fn score_move(
-        &self,
-        state: &BattleState,
-        move_id: &str,
-        _attacker_index: usize,
-        target_index: usize,
-    ) -> f64 {
+    fn score_move(&self, state: &BattleState, move_id: &str, target_index: usize) -> f64 {
         let Some(mv) = state.move_lookup.get(move_id) else {
             return -1.0;
         };
@@ -100,15 +100,7 @@ impl BasicAi {
         }
         let defender = &state.participants[target_index];
         let type_chart = TypeChart::default();
-        let def_secondary = defender
-            .character_data
-            .secondary_element
-            .unwrap_or(defender.character_data.element);
-        let effectiveness = type_chart.effectiveness_dual(
-            mv.element,
-            defender.character_data.element,
-            def_secondary,
-        );
+        let effectiveness = move_effectiveness_against(&type_chart, mv.element, defender);
         mv.power as f64 * effectiveness * mv.accuracy as f64 / 100.0
     }
 }
@@ -161,7 +153,7 @@ impl AiStrategy for BasicAi {
             if mv.healing > 0 {
                 continue;
             }
-            let score = self.score_move(state, move_id, participant_index, target_index);
+            let score = self.score_move(state, move_id, target_index);
             if score > 0.0 && (best_move.is_none() || score > best_move.as_ref().unwrap().1) {
                 best_move = Some((move_id.clone(), score));
             }
@@ -218,7 +210,6 @@ const DOT_EFFECTS: [EffectType; 2] = [EffectType::Burn, EffectType::Poison];
 pub fn process_end_of_turn(
     participant: &mut BattleParticipant,
     configs: &HashMap<EffectType, StatusEffectData>,
-    _rng: &mut impl Rng,
 ) -> Vec<String> {
     let mut logs = Vec::new();
     for &effect in &DOT_EFFECTS {
@@ -240,73 +231,21 @@ pub fn process_end_of_turn(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::participant::Team;
+    use crate::test_utils::{make_participant, make_status_configs};
     use rand::SeedableRng;
     use rand::rngs::StdRng;
     use std::collections::HashMap;
-    use xiangke_core::character::{CharacterData, Stats};
     use xiangke_core::moves::MoveData;
-    use xiangke_core::status::StatusEffectData;
-    use xiangke_core::types::{DamageCategory, TypeElement};
-
-    fn default_configs() -> HashMap<EffectType, StatusEffectData> {
-        let mut m = HashMap::new();
-        m.insert(
-            EffectType::Burn,
-            StatusEffectData {
-                status_type: EffectType::Burn,
-                damage_per_turn: 1.0 / 16.0,
-                ..Default::default()
-            },
-        );
-        m.insert(
-            EffectType::Poison,
-            StatusEffectData {
-                status_type: EffectType::Poison,
-                damage_per_turn: 1.0 / 8.0,
-                ..Default::default()
-            },
-        );
-        m.insert(
-            EffectType::Confusion,
-            StatusEffectData {
-                status_type: EffectType::Confusion,
-                damage_per_turn: 1.0 / 16.0,
-                ..Default::default()
-            },
-        );
-        m
-    }
-
-    fn make_participant(team: Team, hp: u32) -> BattleParticipant {
-        BattleParticipant::new(
-            CharacterData {
-                id: "test".into(),
-                name: "Test".into(),
-                element: TypeElement::Wood,
-                secondary_element: None,
-                base_stats: Stats {
-                    hp,
-                    attack: 50,
-                    defense: 50,
-                    speed: 50,
-                    intelligence: 50,
-                    spirit: 50,
-                },
-                moves: vec!["fire_strike".into()],
-                description: "".into(),
-            },
-            team,
-            0,
-        )
-        .unwrap()
-    }
+    use xiangke_core::types::DamageCategory;
 
     fn make_state() -> BattleState {
-        let participants = vec![
+        let mut participants = vec![
             make_participant(Team::Player, 100),
             make_participant(Team::Enemy, 100),
         ];
+        for p in &mut participants {
+            p.character_data.moves = vec!["fire_strike".into()];
+        }
         let mut move_lookup: HashMap<String, Box<MoveData>> = HashMap::new();
         move_lookup.insert(
             "fire_strike".into(),
@@ -338,7 +277,7 @@ mod tests {
     fn test_confusion_damage() {
         let mut p = make_participant(Team::Player, 100);
         p.apply_status(EffectType::Confusion);
-        let configs = default_configs();
+        let configs = make_status_configs();
         let mut rng = StdRng::seed_from_u64(42);
         let logs = process_start_of_turn(&mut p, &configs, &mut rng);
         if !logs.is_empty() {
@@ -351,9 +290,8 @@ mod tests {
     fn test_dot_damage() {
         let mut p = make_participant(Team::Player, 100);
         p.apply_status(EffectType::Burn);
-        let configs = default_configs();
-        let mut rng = StdRng::seed_from_u64(42);
-        let logs = process_end_of_turn(&mut p, &configs, &mut rng);
+        let configs = make_status_configs();
+        let logs = process_end_of_turn(&mut p, &configs);
         assert!(!logs.is_empty());
         assert!(p.current_hp < 100);
     }
@@ -454,7 +392,7 @@ mod tests {
     #[test]
     fn test_process_start_of_turn_no_confusion() {
         let mut p = make_participant(Team::Player, 100);
-        let configs = default_configs();
+        let configs = make_status_configs();
         let mut rng = StdRng::seed_from_u64(42);
         let logs = process_start_of_turn(&mut p, &configs, &mut rng);
         assert!(logs.is_empty());
@@ -464,9 +402,8 @@ mod tests {
     #[test]
     fn test_process_end_of_turn_no_dot() {
         let mut p = make_participant(Team::Player, 100);
-        let configs = default_configs();
-        let mut rng = StdRng::seed_from_u64(42);
-        let logs = process_end_of_turn(&mut p, &configs, &mut rng);
+        let configs = make_status_configs();
+        let logs = process_end_of_turn(&mut p, &configs);
         assert!(logs.is_empty());
     }
 

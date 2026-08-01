@@ -46,37 +46,22 @@ pub struct ActionResult {
     pub log_message: String,
 }
 
-impl ActionResult {
-    fn miss(target_index: usize, attacker_name: &str, move_name: &str) -> Self {
-        Self {
-            damage_dealt: 0,
-            target_index,
-            hit: false,
-            is_critical: false,
-            type_effectiveness: 1.0,
-            is_super_effective: false,
-            is_not_very_effective: false,
-            is_immune: false,
-            status_applied: None,
-            status_resisted: false,
-            recoil_damage: 0,
-            heal_amount: 0,
-            raw_damage: 0,
-            log_message: format!("{attacker_name} used {move_name} but it missed!"),
-        }
-    }
+/// Rolls a percentage check: returns `true` if a random value in [0, 100)
+/// is less than the given percentage threshold.
+fn roll_percent(percent: u32, rng: &mut impl Rng) -> bool {
+    rng.r#gen::<f64>() * 100.0 < percent as f64
 }
 
 /// Checks whether a move hits based on its accuracy stat and a random roll.
 /// Returns `true` if the generated value is less than the accuracy.
 pub fn check_accuracy(accuracy: u32, rng: &mut impl Rng) -> bool {
-    rng.r#gen::<f64>() * 100.0 < accuracy as f64
+    roll_percent(accuracy, rng)
 }
 
 /// Checks whether a secondary effect triggers based on its chance and a random roll.
 /// Returns `true` if the generated value is less than the effect chance.
 pub fn check_effect_chance(chance: u32, rng: &mut impl Rng) -> bool {
-    rng.r#gen::<f64>() * 100.0 < chance as f64
+    roll_percent(chance, rng)
 }
 
 /// Returns `true` if the attacker's element matches the move's element (Same-Type Attack Bonus).
@@ -132,10 +117,7 @@ fn calculate_raw_damage(
             defender.effective_spirit(),
         ),
     };
-    let effective_def = effective_def.max(1.0);
-    let raw_damage = ((effective_atk * mv.power as f64 * calc::DAMAGE_MULTIPLIER) / effective_def)
-        .ceil()
-        .max(1.0) as u32;
+    let raw_damage = calc::calculate_raw_damage(effective_atk, mv.power, effective_def);
 
     let def_secondary = defender
         .character_data
@@ -259,12 +241,11 @@ pub fn calculate_damage(
             final_damage = 0;
         }
 
-        result.raw_damage = raw_damage.raw_damage;
-        result.type_effectiveness = raw_damage.type_effectiveness;
-        result.is_super_effective = raw_damage.is_super_effective;
-        result.is_not_very_effective = raw_damage.is_not_very_effective;
-        result.is_immune = raw_damage.is_immune;
-        result.is_critical = is_critical;
+        result = ActionResult {
+            target_index,
+            is_critical,
+            ..ActionResult::from(raw_damage)
+        };
 
         result.damage_dealt = defender.take_damage(final_damage);
 
@@ -301,6 +282,7 @@ pub fn calculate_damage(
 }
 
 impl ActionResult {
+    /// Creates an `ActionResult` for a damaging move.
     fn new(target_index: usize) -> Self {
         Self {
             damage_dealt: 0,
@@ -316,6 +298,47 @@ impl ActionResult {
             recoil_damage: 0,
             heal_amount: 0,
             raw_damage: 0,
+            log_message: String::new(),
+        }
+    }
+
+    /// Creates a miss result with a formatted log message.
+    fn miss(target_index: usize, attacker_name: &str, move_name: &str) -> Self {
+        Self {
+            damage_dealt: 0,
+            target_index,
+            hit: false,
+            is_critical: false,
+            type_effectiveness: 1.0,
+            is_super_effective: false,
+            is_not_very_effective: false,
+            is_immune: false,
+            status_applied: None,
+            status_resisted: false,
+            recoil_damage: 0,
+            heal_amount: 0,
+            raw_damage: 0,
+            log_message: format!("{attacker_name} used {move_name} but it missed!"),
+        }
+    }
+}
+
+impl From<RawDamage> for ActionResult {
+    fn from(raw: RawDamage) -> Self {
+        Self {
+            damage_dealt: 0,
+            target_index: 0,
+            hit: true,
+            is_critical: false,
+            type_effectiveness: raw.type_effectiveness,
+            is_super_effective: raw.is_super_effective,
+            is_not_very_effective: raw.is_not_very_effective,
+            is_immune: raw.is_immune,
+            status_applied: None,
+            status_resisted: false,
+            recoil_damage: 0,
+            heal_amount: 0,
+            raw_damage: raw.raw_damage,
             log_message: String::new(),
         }
     }

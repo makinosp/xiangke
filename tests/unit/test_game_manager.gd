@@ -4,7 +4,6 @@
 extends "res://tests/test_base.gd"
 
 var _game_manager = null
-var _emitted_signal: bool = false
 
 
 ## A lightweight GameManager subclass that suppresses scene changes.
@@ -23,7 +22,6 @@ class TestGameManager:
 
 func before_each() -> void:
 	_game_manager = TestGameManager.new_instance()
-	_emitted_signal = false
 
 
 func test_initial_state_is_title() -> int:
@@ -90,21 +88,6 @@ func test_skip_battle_from_select_invalid() -> int:
 	return assert_eq(
 		_game_manager.transition_to_state(_game_manager.GameState.RESULT),
 		false, "CHARACTER_SELECT -> RESULT (skip BATTLE) should be invalid")
-
-
-func test_title_to_corps_creation_emits_signal() -> int:
-	_game_manager.transition_requested.connect(_on_transition_requested)
-	_game_manager.current_state = _game_manager.GameState.TITLE
-	var result = _game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION)
-
-	var err := OK
-	err = assert_eq(result, true, "Transition should succeed"); if err: return err
-	err = assert_eq(_emitted_signal, true, "Signal should be emitted"); if err: return err
-	return OK
-
-
-func _on_transition_requested(from_state: int, to_state: int) -> void:
-	_emitted_signal = true
 
 
 func test_get_scene_for_state() -> int:

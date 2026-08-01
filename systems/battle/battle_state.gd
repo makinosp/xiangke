@@ -5,6 +5,5 @@ enum Status {
 	ACTIVE,
 	VICTORY,
 	DEFEAT,
-	DRAW,
-	ESCAPED
+	DRAW
 }

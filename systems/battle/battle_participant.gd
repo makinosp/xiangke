@@ -16,21 +16,16 @@ var is_front: bool
 var stat_stages: Array[int]
 var active_status_effects: Array[int]
 
+## Creates a BattleParticipant from a dictionary (deserializes from Rust).
 static func from_dict(data: Dictionary) -> BattleParticipant:
-	var p := BattleParticipant.new()
-	p.character_data = DataRegistry.get_character(data["id"])
-	p.current_hp = data.get("current_hp", 0)
-	p.max_hp = data.get("max_hp", 1)
-	p.team = data.get("team", Team.ENEMY)
-	p.slot_index = data.get("slot_index", 0)
-	p.is_defeated = data.get("is_defeated", false)
-	p.is_front = data.get("is_front", false)
-	var raw_stages: Array = data.get("stat_stages", [])
-	p.stat_stages = []
-	for s in raw_stages:
-		p.stat_stages.append(s)
-	var raw_effects: Array = data.get("active_status_effects", [])
-	p.active_status_effects = []
-	for e in raw_effects:
-		p.active_status_effects.append(e)
-	return p
+	var participant := BattleParticipant.new()
+	participant.character_data = DataRegistry.get_character(data["id"])
+	participant.current_hp = data.get("current_hp", 0)
+	participant.max_hp = data.get("max_hp", 1)
+	participant.team = data.get("team", Team.ENEMY)
+	participant.slot_index = data.get("slot_index", 0)
+	participant.is_defeated = data.get("is_defeated", false)
+	participant.is_front = data.get("is_front", false)
+	participant.stat_stages.assign(data.get("stat_stages", []))
+	participant.active_status_effects.assign(data.get("active_status_effects", []))
+	return participant

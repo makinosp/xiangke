@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use xiangke_core::moves::MoveData;
-use xiangke_core::status::{BURN_DAMAGE_RATIO, POISON_DAMAGE_RATIO, StatusEffectData};
+use xiangke_core::status::{StatusEffectData, default_configs};
 use xiangke_core::types::EffectType;
 
 use crate::participant::{BattleParticipant, Team};
@@ -20,8 +20,6 @@ pub enum Status {
     Defeat,
     /// Battle ended in a draw (turn limit reached).
     Draw,
-    /// Battle was escaped from.
-    Escaped,
 }
 
 /// Maximum number of turns before the battle ends in a draw.
@@ -62,8 +60,6 @@ pub enum BattleError {
 /// The complete state of a battle, including participants, turn queue, and log.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BattleState {
-    /// Unique battle identifier.
-    pub battle_id: String,
     /// All participants in the battle.
     pub participants: Vec<BattleParticipant>,
     /// Total number of turns elapsed.
@@ -107,25 +103,9 @@ impl BattleState {
                 "Must have at least 1 enemy participant".into(),
             ));
         }
-        let mut status_effect_configs = HashMap::new();
-        for &effect in &[EffectType::Burn, EffectType::Poison, EffectType::Confusion] {
-            status_effect_configs.insert(
-                effect,
-                StatusEffectData {
-                    status_type: effect,
-                    damage_per_turn: match effect {
-                        EffectType::Poison => POISON_DAMAGE_RATIO,
-                        EffectType::Burn => BURN_DAMAGE_RATIO,
-                        EffectType::Confusion => 0.0,
-                        _ => 0.0,
-                    },
-                    ..Default::default()
-                },
-            );
-        }
+        let status_effect_configs = default_configs();
 
         Ok(Self {
-            battle_id: String::new(),
             participants,
             turn_count: 0,
             round_count: 0,
@@ -154,6 +134,14 @@ impl BattleState {
         self.participants.iter().filter(|p| !p.is_defeated)
     }
 
+    /// Returns `true` when every participant on the given team is defeated.
+    fn team_all_defeated(&self, team: Team) -> bool {
+        self.participants
+            .iter()
+            .filter(|p| p.team == team)
+            .all(|p| p.is_defeated)
+    }
+
     /// Evaluates the current battle outcome and returns the appropriate [`Status`].
     ///
     /// Checks enemy defeat → Victory, player defeat → Defeat, turn limit → Draw.
@@ -161,20 +149,10 @@ impl BattleState {
         if self.battle_status != Status::Active {
             return self.battle_status;
         }
-        let all_enemies_defeated = self
-            .participants
-            .iter()
-            .filter(|p| p.team == Team::Enemy)
-            .all(|p| p.is_defeated);
-        if all_enemies_defeated {
+        if self.team_all_defeated(Team::Enemy) {
             return Status::Victory;
         }
-        let all_players_defeated = self
-            .participants
-            .iter()
-            .filter(|p| p.team == Team::Player)
-            .all(|p| p.is_defeated);
-        if all_players_defeated {
+        if self.team_all_defeated(Team::Player) {
             return Status::Defeat;
         }
         if self.turn_count >= MAX_TURNS {
@@ -233,34 +211,8 @@ impl BattleState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::participant::Team;
-    use xiangke_core::character::{CharacterData, Stats};
+    use crate::test_utils::make_participant;
     use xiangke_core::moves::MoveData;
-    use xiangke_core::types::{EffectType, TypeElement};
-
-    fn make_participant(team: Team, hp: u32) -> BattleParticipant {
-        BattleParticipant::new(
-            CharacterData {
-                id: "test".into(),
-                name: "Test".into(),
-                element: TypeElement::Wood,
-                secondary_element: None,
-                base_stats: Stats {
-                    hp,
-                    attack: 50,
-                    defense: 50,
-                    speed: 50,
-                    intelligence: 50,
-                    spirit: 50,
-                },
-                moves: vec![],
-                description: "".into(),
-            },
-            team,
-            0,
-        )
-        .unwrap()
-    }
 
     fn empty_move_lookup() -> HashMap<String, Box<MoveData>> {
         HashMap::new()

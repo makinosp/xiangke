@@ -20,16 +20,6 @@ static func is_in_range(value: int, min_val: int, max_val: int) -> bool:
 	return value >= min_val and value <= max_val
 
 
-## Validates that all IDs in a collection are unique.
-static func has_unique_ids(ids: Array) -> bool:
-	var seen = {}
-	for id in ids:
-		if seen.has(id):
-			return false
-		seen[id] = true
-	return true
-
-
 ## Validates that a value is a valid Type enum value (0-6).
 static func is_valid_type(value: int) -> bool:
 	return value >= 0 and value <= 6
@@ -38,11 +28,6 @@ static func is_valid_type(value: int) -> bool:
 ## Validates that a value is a valid EffectType enum value (0-5).
 static func is_valid_effect_type(value: int) -> bool:
 	return value >= 0 and value <= 5
-
-
-## Validates that a value is a valid DamageCategory enum value (0-1).
-static func is_valid_damage_category(value: int) -> bool:
-	return value >= 0 and value <= 1
 
 
 ## Validates that a value is a valid Stat enum value (0-4).

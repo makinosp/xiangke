@@ -57,6 +57,39 @@ impl StatusEffectData {
     }
 }
 
+/// Builds the default status effect configuration map.
+///
+/// Used by battle initialization and the Godot bridge so that Burn, Poison,
+/// and Confusion are configured consistently everywhere.
+pub fn default_configs() -> std::collections::HashMap<EffectType, StatusEffectData> {
+    let mut m = std::collections::HashMap::new();
+    m.insert(
+        EffectType::Burn,
+        StatusEffectData {
+            status_type: EffectType::Burn,
+            damage_per_turn: BURN_DAMAGE_RATIO,
+            ..Default::default()
+        },
+    );
+    m.insert(
+        EffectType::Poison,
+        StatusEffectData {
+            status_type: EffectType::Poison,
+            damage_per_turn: POISON_DAMAGE_RATIO,
+            ..Default::default()
+        },
+    );
+    m.insert(
+        EffectType::Confusion,
+        StatusEffectData {
+            status_type: EffectType::Confusion,
+            damage_per_turn: 0.0,
+            ..Default::default()
+        },
+    );
+    m
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
