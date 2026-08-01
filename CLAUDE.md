@@ -1,1 +1,0 @@
-.vendor/aidlc-workflows/aidlc-rules/aws-aidlc-rules/core-workflow.md
