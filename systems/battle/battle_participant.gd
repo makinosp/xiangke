@@ -16,6 +16,7 @@ var is_front: bool
 var stat_stages: Array[int]
 var active_status_effects: Array[int]
 
+## Creates a BattleParticipant from a dictionary (deserializes from Rust).
 static func from_dict(data: Dictionary) -> BattleParticipant:
 	var participant := BattleParticipant.new()
 	participant.character_data = DataRegistry.get_character(data["id"])
@@ -27,10 +28,10 @@ static func from_dict(data: Dictionary) -> BattleParticipant:
 	participant.is_front = data.get("is_front", false)
 	var raw_stages: Array = data.get("stat_stages", [])
 	participant.stat_stages = []
-	for s in raw_stages:
-		participant.stat_stages.append(s)
+	for stage in raw_stages:
+		participant.stat_stages.append(stage)
 	var raw_effects: Array = data.get("active_status_effects", [])
 	participant.active_status_effects = []
-	for e in raw_effects:
-		participant.active_status_effects.append(e)
+	for effect in raw_effects:
+		participant.active_status_effects.append(effect)
 	return participant
