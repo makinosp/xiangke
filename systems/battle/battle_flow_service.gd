@@ -54,8 +54,8 @@ func _build_participants(chars: Array[CharacterData], team: BattleParticipant.Te
 
 
 func execute_player_action(move: MoveData) -> Dictionary:
-	var move_dict := _build_move_dict(move)
-	return _rust_system.execute_player_action(move_dict)
+	var move_payload := _serialize_move(move)
+	return _rust_system.execute_player_action(move_payload)
 
 
 ## Switches the team's front character with a living benched participant.
@@ -201,7 +201,7 @@ func _build_char_array(chars: Array[CharacterData]) -> Array:
 	return character_dicts
 
 
-func _build_move_dict(move: MoveData) -> Dictionary:
+func _serialize_move(move: MoveData) -> Dictionary:
 	return {
 		"id": move.id,
 		"name": move.name,
@@ -223,8 +223,8 @@ func _build_move_dict(move: MoveData) -> Dictionary:
 func _build_move_lookup() -> Dictionary:
 	var lookup := {}
 	for move_id in DataRegistry.get_all_moves():
-		var move := DataRegistry.get_move(move_id) as MoveData
+		var move := DataRegistry.get_move(move_id)
 		if move == null:
 			continue
-		lookup[move_id] = _build_move_dict(move)
+		lookup[move_id] = _serialize_move(move)
 	return lookup
