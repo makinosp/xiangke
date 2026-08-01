@@ -6,18 +6,30 @@ use xiangke_core::status::StatusEffectData;
 use xiangke_core::types::EffectType;
 use xiangke_core::types::TypeChart;
 
+use crate::manager::{find_front_index, living_bench_indices};
 use crate::participant::BattleParticipant;
+use crate::participant::Team;
 use crate::state::BattleState;
 
 /// The action selected by an AI strategy.
 #[derive(Debug, Clone)]
-pub struct AIAction {
-    /// ID of the move to use.
-    pub move_id: String,
-    /// Target participant index.
-    pub target_index: usize,
-    /// Heuristic score for this action (higher = preferred).
-    pub score: f64,
+pub enum AIAction {
+    /// Attack with the given move against a target participant.
+    Attack {
+        /// ID of the move to use.
+        move_id: String,
+        /// Target participant index.
+        target_index: usize,
+        /// Heuristic score for this action (higher = preferred).
+        score: f64,
+    },
+    /// Switch the front character with a benched participant.
+    Switch {
+        /// Index of the benched participant to bring in.
+        bench_index: usize,
+        /// Heuristic score for this action (higher = preferred).
+        score: f64,
+    },
 }
 
 /// Trait for AI decision-making strategies.
@@ -26,7 +38,13 @@ pub trait AiStrategy {
     fn select_action(&self, state: &BattleState, participant_index: usize) -> Option<AIAction>;
 }
 
-/// A basic AI that targets the weakest enemy with the best-scoring move.
+/// Threshold below which the AI considers switching due to low HP.
+const SWITCH_HP_RATIO: f64 = 0.3;
+/// Type-effectiveness threshold that counts as a disadvantage.
+const SWITCH_TYPE_THRESHOLD: f64 = 0.5;
+
+/// A basic AI that targets the opponent's front character and switches when
+/// the front is at a disadvantage.
 pub struct BasicAi;
 
 impl BasicAi {
@@ -35,21 +53,36 @@ impl BasicAi {
         Self
     }
 
-    fn find_weakest_enemy(&self, state: &BattleState, self_index: usize) -> Option<usize> {
-        let self_team = state.participants.get(self_index).map(|p| p.team);
-        state
-            .participants
-            .iter()
-            .enumerate()
-            .filter(|(_, p)| !p.is_defeated && (self_team != Some(p.team)))
-            .min_by(|(_, a), (_, b)| {
-                let ratio_a = a.current_hp as f64 / a.max_hp as f64;
-                let ratio_b = b.current_hp as f64 / b.max_hp as f64;
-                ratio_a
-                    .partial_cmp(&ratio_b)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            })
-            .map(|(i, _)| i)
+    /// Computes the type effectiveness of the attacker's best move against the defender.
+    fn best_effectiveness(
+        &self,
+        state: &BattleState,
+        attacker_index: usize,
+        defender_index: usize,
+    ) -> f64 {
+        let attacker = &state.participants[attacker_index];
+        let defender = &state.participants[defender_index];
+        let type_chart = TypeChart::default();
+        let def_secondary = defender
+            .character_data
+            .secondary_element
+            .unwrap_or(defender.character_data.element);
+        let mut best: f64 = 0.0;
+        for move_id in &attacker.character_data.moves {
+            let Some(mv) = state.move_lookup.get(move_id) else {
+                continue;
+            };
+            if mv.power == 0 {
+                continue;
+            }
+            let eff = type_chart.effectiveness_dual(
+                mv.element,
+                defender.character_data.element,
+                def_secondary,
+            );
+            best = best.max(eff);
+        }
+        best
     }
 
     fn score_move(
@@ -93,17 +126,32 @@ impl AiStrategy for BasicAi {
             return None;
         }
 
-        let target = self.find_weakest_enemy(state, participant_index);
-        let self_team = state.participants.get(participant_index).map(|p| p.team);
-        let target_index = match target {
-            Some(idx) => idx,
-            None => state
-                .participants
-                .iter()
-                .enumerate()
-                .find(|(_, p)| !p.is_defeated && (self_team != Some(p.team)))
-                .map(|(i, _)| i)?,
+        let self_team = attacker.team;
+        let enemy_team = match self_team {
+            Team::Player => Team::Enemy,
+            Team::Enemy => Team::Player,
         };
+
+        // The only valid target is the opponent's front character.
+        let target_index = find_front_index(state, enemy_team)?;
+
+        // Decide whether to switch: low front HP or type disadvantage.
+        let hp_ratio = attacker.current_hp as f64 / attacker.max_hp as f64;
+        let our_eff = self.best_effectiveness(state, participant_index, target_index);
+        let should_switch =
+            hp_ratio < SWITCH_HP_RATIO || (our_eff > 0.0 && our_eff <= SWITCH_TYPE_THRESHOLD);
+
+        if should_switch {
+            let bench = living_bench_indices(state, self_team);
+            if let Some(&bench_index) = bench.first() {
+                let bench_eff = self.best_effectiveness(state, bench_index, target_index);
+                // Only switch if the bench character is not worse off.
+                if bench_eff >= our_eff {
+                    let score = (1.0 - hp_ratio) * 10.0 + bench_eff;
+                    return Some(AIAction::Switch { bench_index, score });
+                }
+            }
+        }
 
         let mut best_move: Option<(String, f64)> = None;
         for move_id in &attacker.character_data.moves {
@@ -120,14 +168,14 @@ impl AiStrategy for BasicAi {
         }
 
         match best_move {
-            Some((move_id, score)) => Some(AIAction {
+            Some((move_id, score)) => Some(AIAction::Attack {
                 move_id,
                 target_index,
                 score,
             }),
             None => {
                 let fallback = attacker.character_data.moves.first()?;
-                Some(AIAction {
+                Some(AIAction::Attack {
                     move_id: fallback.clone(),
                     target_index,
                     score: 0.0,
@@ -279,7 +327,11 @@ mod tests {
                 description: "".into(),
             }),
         );
-        BattleState::new(participants, move_lookup).unwrap()
+        let mut state = BattleState::new(participants, move_lookup).unwrap();
+        // Mark both teams' first participant as front.
+        state.participants[0].is_front = true;
+        state.participants[1].is_front = true;
+        state
     }
 
     #[test]
@@ -307,12 +359,16 @@ mod tests {
     }
 
     #[test]
-    fn test_ai_selects_weakest() {
-        let mut state = make_state();
-        state.participants[0].take_damage(50);
+    fn test_ai_targets_front() {
+        let state = make_state();
         let ai = BasicAi::new();
-        let weakest = ai.find_weakest_enemy(&state, 1);
-        assert_eq!(weakest, Some(0));
+        // Enemy (index 1) should always target the player's front (index 0).
+        let action = ai.select_action(&state, 1);
+        let action = action.unwrap();
+        match action {
+            AIAction::Attack { target_index, .. } => assert_eq!(target_index, 0),
+            AIAction::Switch { .. } => panic!("expected attack"),
+        }
     }
 
     #[test]
@@ -323,8 +379,13 @@ mod tests {
         let action = ai.select_action(&state, 1);
         assert!(action.is_some());
         let action = action.unwrap();
-        assert_eq!(action.move_id, "fire_strike");
-        assert!(action.score > 0.0);
+        match action {
+            AIAction::Attack { move_id, score, .. } => {
+                assert_eq!(move_id, "fire_strike");
+                assert!(score > 0.0);
+            }
+            AIAction::Switch { .. } => panic!("expected attack"),
+        }
     }
 
     #[test]
@@ -336,13 +397,19 @@ mod tests {
     }
 
     #[test]
-    fn test_find_weakest_enemy() {
+    fn test_ai_switches_on_low_hp() {
         let mut state = make_state();
-        state.participants[0].take_damage(70);
         state.participants.push(make_participant(Team::Enemy, 100));
+        // Enemy front (index 1) is at low HP.
+        state.participants[1].take_damage(90);
+        state.participants[1].character_data.moves = vec!["fire_strike".into()];
+        state.participants[2].character_data.moves = vec!["fire_strike".into()];
         let ai = BasicAi::new();
-        let weakest = ai.find_weakest_enemy(&state, 1);
-        assert_eq!(weakest, Some(0));
+        let action = ai.select_action(&state, 1);
+        match action {
+            Some(AIAction::Switch { bench_index, .. }) => assert_eq!(bench_index, 2),
+            other => panic!("expected switch, got {other:?}"),
+        }
     }
 
     #[test]
@@ -365,17 +432,13 @@ mod tests {
         state.participants[1].character_data.moves = vec!["heal".into(), "fire_strike".into()];
         let ai = BasicAi::new();
         let action = ai.select_action(&state, 1).unwrap();
-        assert_ne!(action.move_id, "heal");
-        assert!(action.score > 0.0);
-    }
-
-    #[test]
-    fn test_ai_dynamic_team() {
-        let mut state = make_state();
-        state.participants[0].take_damage(100);
-        let ai = BasicAi::new();
-        let action = ai.select_action(&state, 1);
-        assert!(action.is_none());
+        match action {
+            AIAction::Attack { move_id, score, .. } => {
+                assert_ne!(move_id, "heal");
+                assert!(score > 0.0);
+            }
+            AIAction::Switch { .. } => panic!("expected attack"),
+        }
     }
 
     #[test]
@@ -413,12 +476,51 @@ mod tests {
         state.participants.push(make_participant(Team::Enemy, 100));
         state.participants[0].take_damage(30);
         state.participants[2].take_damage(60);
+        // Give the enemy front a Metal move (2.0x vs Wood front) so it attacks.
+        let mv = state.move_lookup.get("fire_strike").unwrap();
+        let mut metal_strike = mv.as_ref().clone();
+        metal_strike.element = TypeElement::Metal;
+        state
+            .move_lookup
+            .insert("metal_strike".into(), Box::new(metal_strike));
+        state.participants[1].character_data.moves = vec!["metal_strike".into()];
         let ai = BasicAi::new();
-        // Enemy (index 0 and 2) - pick the one with lowest HP ratio
-        // Index 2 has taken 60 damage = 40/100 = 0.4 ratio
-        // Index 0 has taken 30 damage = 70/100 = 0.7 ratio
-        // Index 2 is weaker
-        let weakest = ai.find_weakest_enemy(&state, 1);
-        assert!(weakest.is_some());
+        // The enemy front (index 1) still only targets the player's front (index 0),
+        // never the benched enemy at index 2.
+        let action = ai.select_action(&state, 1);
+        match action {
+            Some(AIAction::Attack { target_index, .. }) => assert_eq!(target_index, 0),
+            other => panic!("expected attack, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_ai_attacks_when_not_at_disadvantage() {
+        let mut state = make_state();
+        // Give the enemy front a Metal-type move so it has an advantage over the
+        // Wood player front, preventing a switch and forcing an attack.
+        let mv = state.move_lookup.get("fire_strike").unwrap();
+        let mut metal_strike = mv.as_ref().clone();
+        metal_strike.element = TypeElement::Metal;
+        state
+            .move_lookup
+            .insert("metal_strike".into(), Box::new(metal_strike));
+        state.participants[1].character_data.moves = vec!["metal_strike".into()];
+        let ai = BasicAi::new();
+        let action = ai.select_action(&state, 1);
+        match action {
+            Some(AIAction::Attack { .. }) => {}
+            other => panic!("expected attack, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_ai_no_target_when_fronts_defeated() {
+        let mut state = make_state();
+        state.participants[0].take_damage(100);
+        state.participants[1].take_damage(100);
+        let ai = BasicAi::new();
+        let action = ai.select_action(&state, 1);
+        assert!(action.is_none());
     }
 }

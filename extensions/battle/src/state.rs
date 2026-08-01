@@ -223,6 +223,7 @@ impl BattleState {
         for p in &mut self.participants {
             p.current_hp = p.max_hp;
             p.is_defeated = false;
+            p.is_front = false;
             p.active_status_effects = 0;
             p.reset_stat_stages();
         }

@@ -4,7 +4,9 @@ use rand::SeedableRng;
 use rand::rngs::StdRng;
 
 use xiangke_battle::action::calculate_damage;
-use xiangke_battle::flow::{AiStrategy, BasicAi, process_end_of_turn, process_start_of_turn};
+use xiangke_battle::flow::{
+    AIAction, AiStrategy, BasicAi, process_end_of_turn, process_start_of_turn,
+};
 use xiangke_battle::manager;
 use xiangke_battle::participant::{BattleParticipant, Team};
 use xiangke_battle::state::{BattleState, MAX_TURNS, Status};
@@ -92,6 +94,63 @@ fn make_status_configs() -> HashMap<EffectType, StatusEffectData> {
     configs
 }
 
+/// Executes an AI-selected action against the current battle state.
+/// Handles both Attack (calculates damage) and Switch (swaps front flags).
+/// After an attack, if the opponent's front is defeated, a replacement is
+/// automatically brought in. Returns the resulting log message if an action
+/// was applied.
+fn apply_ai_action(
+    state: &mut BattleState,
+    active_idx: usize,
+    action: AIAction,
+    rng: &mut StdRng,
+) -> Option<String> {
+    match action {
+        AIAction::Attack {
+            move_id,
+            target_index,
+            ..
+        } => {
+            let mv = state.move_lookup.get(&move_id)?;
+            let result = if active_idx < target_index {
+                let (left, right) = state.participants.split_at_mut(target_index);
+                calculate_damage(&mut left[active_idx], &mut right[0], mv, target_index, rng)
+            } else {
+                let (left, right) = state.participants.split_at_mut(active_idx);
+                calculate_damage(
+                    &mut right[0],
+                    &mut left[target_index],
+                    mv,
+                    target_index,
+                    rng,
+                )
+            };
+            let log = match result {
+                Ok(r) if r.damage_dealt > 0 || r.hit => Some(r.log_message.clone()),
+                _ => None,
+            };
+            // If the target (opponent front) was defeated, auto-replace it.
+            let attacker_team = state.participants[active_idx].team;
+            let opponent_team = match attacker_team {
+                Team::Player => Team::Enemy,
+                Team::Enemy => Team::Player,
+            };
+            if state.participants[target_index].is_defeated {
+                manager::auto_replace(state, opponent_team);
+            }
+            log
+        }
+        AIAction::Switch { bench_index, .. } => {
+            let team = state.participants[active_idx].team;
+            if manager::execute_switch(state, team, bench_index).is_ok() {
+                Some("AI switched characters".to_string())
+            } else {
+                None
+            }
+        }
+    }
+}
+
 /// Full 3v3 battle simulation: player team (Wood) vs enemy team (Fire).
 /// Wood→Fire = 1.25 (generating), so player has advantage.
 #[test]
@@ -154,24 +213,10 @@ fn test_full_battle_3v3_player_advantage() {
         }
 
         // AI selects action
-        let action = ai.select_action(&state, active_idx);
-        if let Some(action) = action
-            && let Some(mv) = state.move_lookup.get(&action.move_id)
+        if let Some(action) = ai.select_action(&state, active_idx)
+            && let Some(log) = apply_ai_action(&mut state, active_idx, action, &mut rng)
         {
-            let target = action.target_index;
-            // Use split_at_mut for safe dual mutable borrow
-            let result = if active_idx < target {
-                let (left, right) = state.participants.split_at_mut(target);
-                calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
-            } else {
-                let (left, right) = state.participants.split_at_mut(active_idx);
-                calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
-            };
-            if let Ok(ref result) = result
-                && (result.damage_dealt > 0 || result.hit)
-            {
-                state.add_log(result.log_message.clone());
-            }
+            state.add_log(log);
         }
 
         // Check if battle ended
@@ -308,21 +353,9 @@ fn test_battle_1v1_victory() {
 
         // AI action
         if let Some(action) = ai.select_action(&state, active_idx)
-            && let Some(mv) = state.move_lookup.get(&action.move_id)
+            && let Some(log) = apply_ai_action(&mut state, active_idx, action, &mut rng)
         {
-            let target = action.target_index;
-            let result = if active_idx < target {
-                let (left, right) = state.participants.split_at_mut(target);
-                calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
-            } else {
-                let (left, right) = state.participants.split_at_mut(active_idx);
-                calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
-            };
-            if let Ok(ref result) = result
-                && (result.damage_dealt > 0 || result.hit)
-            {
-                state.add_log(result.log_message.clone());
-            }
+            state.add_log(log);
         }
 
         let status = state.evaluate_status();
@@ -412,17 +445,8 @@ fn test_battle_draw_by_turn_limit() {
             let _logs = process_end_of_turn(p, &state.status_effect_configs, &mut rng);
         }
 
-        if let Some(action) = ai.select_action(&state, active_idx)
-            && let Some(mv) = state.move_lookup.get(&action.move_id)
-        {
-            let target = action.target_index;
-            let _result = if active_idx < target {
-                let (left, right) = state.participants.split_at_mut(target);
-                calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
-            } else {
-                let (left, right) = state.participants.split_at_mut(active_idx);
-                calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
-            };
+        if let Some(action) = ai.select_action(&state, active_idx) {
+            let _ = apply_ai_action(&mut state, active_idx, action, &mut rng);
         }
 
         let status = state.evaluate_status();
@@ -966,7 +990,7 @@ fn test_asymmetric_team_1v2() {
         70,
     )];
     // Enemies: Metal element (weak to Wood)
-    let enemy_chars = vec![
+    let enemy_chars = [
         make_fighter("e1", "E1", TypeElement::Metal, 60, 30, 20, 50),
         make_fighter("e2", "E2", TypeElement::Metal, 60, 30, 20, 50),
     ];
@@ -1010,21 +1034,9 @@ fn test_asymmetric_team_1v2() {
         }
 
         if let Some(action) = ai.select_action(&state, active_idx)
-            && let Some(mv) = state.move_lookup.get(&action.move_id)
+            && let Some(log) = apply_ai_action(&mut state, active_idx, action, &mut rng)
         {
-            let target = action.target_index;
-            let result = if active_idx < target {
-                let (left, right) = state.participants.split_at_mut(target);
-                calculate_damage(&mut left[active_idx], &mut right[0], mv, target, &mut rng)
-            } else {
-                let (left, right) = state.participants.split_at_mut(active_idx);
-                calculate_damage(&mut right[0], &mut left[target], mv, target, &mut rng)
-            };
-            if let Ok(ref result) = result
-                && (result.damage_dealt > 0 || result.hit)
-            {
-                state.add_log(result.log_message.clone());
-            }
+            state.add_log(log);
         }
 
         let status = state.evaluate_status();

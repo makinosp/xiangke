@@ -445,7 +445,7 @@ mod tests {
     fn test_effect_type_all_variants() {
         for (i, e) in EffectType::ALL.iter().enumerate() {
             let repr = i as u8;
-            assert_eq!(e.clone() as u8, repr);
+            assert_eq!(*e as u8, repr);
             assert_eq!(EffectType::from_repr(repr), Some(*e));
         }
         assert_eq!(EffectType::from_repr(99), None);
