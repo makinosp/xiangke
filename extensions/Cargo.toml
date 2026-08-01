@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["core", "battle", "godot_bridge"]
+members = ["core", "battle", "godot_bridge", "tools/xiangke_checker"]
 
 [workspace.package]
 edition = "2024"

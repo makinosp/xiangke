@@ -115,16 +115,18 @@ Or press `F5` in the Godot editor.
 
 ## 🔨 Development Commands
 
-| Command                        | Description                               |
-| ------------------------------ | ----------------------------------------- |
-| `just build-rust`              | Build Rust GDExtension for native (debug) |
-| `just build-rust-wasm`         | Build Rust GDExtension for Web (WASM)     |
-| `just build-rust-wasm-release` | Build WASM in release mode with size opt  |
-| `just check-rust-wasm`         | Quick-check WASM compilation              |
-| `just test-rust`               | Run Rust unit tests (200 tests)           |
-| `just check-rust`              | Run `cargo check` on Rust workspace       |
-| `just run`                     | Build Rust + launch Godot                 |
-| `just inspect`                 | Headless Godot validation (no errors)     |
+| Command                             | Description                               |
+| ----------------------------------- | ----------------------------------------- |
+| `just build-rust`                   | Build Rust GDExtension for native (debug) |
+| `just build-rust-wasm`              | Build Rust GDExtension for Web (WASM)     |
+| `just build-rust-wasm-release`      | Build WASM in release mode with size opt  |
+| `just check-rust-wasm`              | Quick-check WASM compilation              |
+| `just test-rust`                    | Run Rust unit tests (200 tests)           |
+| `just check-rust`                   | Run `cargo check` on Rust workspace       |
+| `just run`                          | Build Rust + launch Godot                 |
+| `just inspect`                      | Headless Godot validation (no errors)     |
+| `just verify-data`                  | Export .tres + validate against Rust core |
+| `just verify-data UPDATE_FIXTURE=1` | Regenerate integration test fixture       |
 
 ## 🧩 OpenSpec Workflow
 
