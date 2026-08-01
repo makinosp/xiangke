@@ -3,36 +3,10 @@ use rand::SeedableRng;
 
 use std::collections::HashMap;
 
-use xiangke_core::character::{CharacterData, Stats};
-use xiangke_core::types::TypeElement;
-
 use crate::manager;
-use crate::participant::{BattleParticipant, Team};
+use crate::participant::Team;
 use crate::state::BattleState;
-
-fn make_participant(team: Team, hp: u32, speed: u32) -> BattleParticipant {
-    BattleParticipant::new(
-        CharacterData {
-            id: "test".into(),
-            name: "Proptest Fighter".into(),
-            element: TypeElement::Wood,
-            secondary_element: None,
-            base_stats: Stats {
-                hp,
-                attack: 50,
-                defense: 50,
-                speed,
-                intelligence: 50,
-                spirit: 50,
-            },
-            moves: vec![],
-            description: "".into(),
-        },
-        team,
-        0,
-    )
-    .unwrap()
-}
+use crate::test_utils::make_participant_with_speed as make_participant;
 
 #[test]
 fn test_participant_initialization_hp() {
