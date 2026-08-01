@@ -1,6 +1,11 @@
 {
   "name": "xiangke",
   "private": true,
+  "scripts": {
+    "spec:validate": "openspec validate --all --no-interactive",
+    "spec:update": "openspec update",
+    "spec:doctor": "openspec doctor"
+  },
   "devDependencies": {
     "@fission-ai/openspec": "^1.6.0"
   }

@@ -126,6 +126,25 @@ Or press `F5` in the Godot editor.
 | `just run`                     | Build Rust + launch Godot                 |
 | `just inspect`                 | Headless Godot validation (no errors)     |
 
+## 🧩 OpenSpec Workflow
+
+This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec) for
+spec-driven development. Change plans live in `openspec/changes/` and agreed
+requirements in `openspec/specs/`. The workflow is driven by the `/opsx:*` slash
+commands (`/opsx:propose` → `/opsx:apply` → `/opsx:archive`), backed by skills
+in `.github/skills/`.
+
+The most common CLI operations are wrapped as npm scripts:
+
+| Command                 | Description                                      |
+| ----------------------- | ------------------------------------------------ |
+| `npm run spec:validate` | Validate all changes and specs (non-interactive) |
+| `npm run spec:update`   | Refresh agent skills & instructions              |
+| `npm run spec:doctor`   | Diagnose the OpenSpec setup                      |
+
+Other CLI operations (e.g. `list`, `status`, `show`) can be run directly with
+`npx openspec <command>`; add `--json` for machine-readable output.
+
 ## 🎯 How to Play
 
 1. Select your general from the roster
