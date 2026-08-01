@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "zhang_liao"
+name = "張遼"
+type = 3
+secondary_type = -1
+hp = 125
+attack = 115
+defense = 95
+speed = 105
+intelligence = 75
+spirit = 85
+moves = PackedStringArray("metal_slash", "iron_cleave", "fire_strike", "war_cry")
+description = "Wei's most feared general. Routed Sun Quan's army at Hefei and stopped a thousand warriors with eight hundred of his own."

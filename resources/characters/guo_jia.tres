@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "guo_jia"
+name = "郭嘉"
+type = 4
+secondary_type = -1
+hp = 110
+attack = 65
+defense = 50
+speed = 105
+intelligence = 120
+spirit = 100
+moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "earth_barrier")
+description = "Cao Cao's sharpest strategist. Died young, but his foresight won the north before he left."

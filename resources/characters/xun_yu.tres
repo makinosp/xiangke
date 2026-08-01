@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "xun_yu"
+name = "荀彧"
+type = 5
+secondary_type = -1
+hp = 115
+attack = 60
+defense = 60
+speed = 80
+intelligence = 115
+spirit = 110
+moves = PackedStringArray("war_cry", "flame_burst", "wood_heal", "earth_barrier")
+description = "The architect of Wei's civil administration. Often called the true pillar of Cao Cao's rise."

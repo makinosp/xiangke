@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "lu_xun"
+name = "陸遜"
+type = 1
+secondary_type = -1
+hp = 125
+attack = 85
+defense = 65
+speed = 95
+intelligence = 118
+spirit = 105
+moves = PackedStringArray("flame_burst", "fire_strike", "water_surge", "wood_heal")
+description = "The quiet fire of Wu. Burned Liu Bei's army to ash at Yiling and outsmarted Wei for a decade."

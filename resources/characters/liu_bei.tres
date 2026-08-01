@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "liu_bei"
+name = "劉備"
+type = 0
+secondary_type = -1
+hp = 120
+attack = 85
+defense = 90
+speed = 90
+intelligence = 100
+spirit = 100
+moves = PackedStringArray("wood_heal", "metal_slash", "earth_barrier", "war_cry")
+description = "The benevolent founder of Shu. Won hearts across the land with his kindness and ambition to restore the Han."

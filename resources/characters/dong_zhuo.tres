@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "dong_zhuo"
+name = "董卓"
+type = 2
+secondary_type = -1
+hp = 150
+attack = 100
+defense = 90
+speed = 60
+intelligence = 75
+spirit = 95
+moves = PackedStringArray("iron_cleave", "metal_slash", "fire_strike", "earth_barrier")
+description = "The tyrant who seized the Han capital. His brutality forged the alliance that would topple him."

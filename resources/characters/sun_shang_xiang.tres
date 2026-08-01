@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "sun_shang_xiang"
+name = "孫尚香"
+type = 1
+secondary_type = -1
+hp = 100
+attack = 110
+defense = 82
+speed = 118
+intelligence = 82
+spirit = 88
+moves = PackedStringArray("fire_strike", "flame_burst", "metal_slash", "war_cry")
+description = "Sun Quan's martial sister, betrothed to Liu Bei. As fierce with a blade as any general."

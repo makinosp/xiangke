@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "wei_yan"
+name = "魏延"
+type = 1
+secondary_type = -1
+hp = 115
+attack = 110
+defense = 90
+speed = 100
+intelligence = 70
+spirit = 80
+moves = PackedStringArray("fire_strike", "flame_burst", "iron_cleave", "war_cry")
+description = "A fierce and proud Shu general. His talents were overshadowed by mistrust and a fiery temper."

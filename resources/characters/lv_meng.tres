@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "lv_meng"
+name = "呂蒙"
+type = 4
+secondary_type = -1
+hp = 115
+attack = 95
+defense = 90
+speed = 90
+intelligence = 105
+spirit = 90
+moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "earth_barrier")
+description = "The scholar-general of Wu. Slain by Guan Yu's ghost, but his scheme took the enemy's head first."
