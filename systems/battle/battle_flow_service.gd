@@ -40,17 +40,17 @@ func start_battle(
 
 func _build_participants(chars: Array[CharacterData], team: BattleParticipant.Team) -> void:
 	for i in chars.size():
-		var cd := chars[i].duplicate() as CharacterData
-		var p := BattleParticipant.new()
-		p.character_data = cd
-		p.current_hp = cd.hp
-		p.max_hp = cd.hp
-		p.team = team
-		p.slot_index = i
-		p.is_defeated = false
-		p.stat_stages = [0, 0, 0, 0, 0]
-		p.active_status_effects = []
-		_battle_participants.append(p)
+		var character_data := chars[i].duplicate() as CharacterData
+		var participant := BattleParticipant.new()
+		participant.character_data = character_data
+		participant.current_hp = character_data.hp
+		participant.max_hp = character_data.hp
+		participant.team = team
+		participant.slot_index = i
+		participant.is_defeated = false
+		participant.stat_stages = [0, 0, 0, 0, 0]
+		participant.active_status_effects = []
+		_battle_participants.append(participant)
 
 
 func execute_player_action(move: MoveData) -> Dictionary:
@@ -67,19 +67,19 @@ func execute_switch(team: int, bench_index: int) -> bool:
 ## Returns the front participant of the given team (0 = player, 1 = enemy),
 ## or null if the team has no living front character.
 func get_front_participant(team: int) -> BattleParticipant:
-	var dict := _rust_system.get_front_participant(team)
-	if dict.is_empty():
+	var participant_dict := _rust_system.get_front_participant(team)
+	if participant_dict.is_empty():
 		return null
-	return BattleParticipant.from_dict(dict)
+	return BattleParticipant.from_dict(participant_dict)
 
 
 ## Returns the living benched participants of the given team (0 = player,
 ## 1 = enemy).
 func get_bench_participants(team: int) -> Array[BattleParticipant]:
 	var result: Array[BattleParticipant] = []
-	var arr := _rust_system.get_bench_participants(team)
-	for i in arr.size():
-		result.append(BattleParticipant.from_dict(arr[i]))
+	var bench_participant_dicts := _rust_system.get_bench_participants(team)
+	for i in bench_participant_dicts.size():
+		result.append(BattleParticipant.from_dict(bench_participant_dicts[i]))
 	return result
 
 
@@ -97,25 +97,25 @@ func advance_turn() -> bool:
 
 func get_player_participants() -> Array[BattleParticipant]:
 	var result: Array[BattleParticipant] = []
-	var arr := _rust_system.get_player_participants()
-	for i in arr.size():
-		result.append(BattleParticipant.from_dict(arr[i]))
+	var player_participant_dicts := _rust_system.get_player_participants()
+	for i in player_participant_dicts.size():
+		result.append(BattleParticipant.from_dict(player_participant_dicts[i]))
 	return result
 
 
 func get_enemy_participants() -> Array[BattleParticipant]:
 	var result: Array[BattleParticipant] = []
-	var arr := _rust_system.get_enemy_participants()
-	for i in arr.size():
-		result.append(BattleParticipant.from_dict(arr[i]))
+	var enemy_participant_dicts := _rust_system.get_enemy_participants()
+	for i in enemy_participant_dicts.size():
+		result.append(BattleParticipant.from_dict(enemy_participant_dicts[i]))
 	return result
 
 
 func get_active_participant() -> BattleParticipant:
-	var dict := _rust_system.get_active_participant()
-	if dict.is_empty():
+	var participant_dict := _rust_system.get_active_participant()
+	if participant_dict.is_empty():
 		return null
-	return BattleParticipant.from_dict(dict)
+	return BattleParticipant.from_dict(participant_dict)
 
 
 func get_active_participant_index() -> int:
@@ -124,9 +124,9 @@ func get_active_participant_index() -> int:
 
 func get_recent_log(count: int) -> PackedStringArray:
 	var result := PackedStringArray()
-	var arr := _rust_system.get_recent_log(count)
-	for i in arr.size():
-		result.append(arr[i])
+	var log_messages := _rust_system.get_recent_log(count)
+	for i in log_messages.size():
+		result.append(log_messages[i])
 	return result
 
 
@@ -140,25 +140,25 @@ func evaluate_battle_status() -> int:
 
 func process_start_of_turn(participant_index: int) -> PackedStringArray:
 	var logs := PackedStringArray()
-	var arr := _rust_system.process_start_of_turn(participant_index)
-	for i in arr.size():
-		logs.append(arr[i])
+	var turn_logs := _rust_system.process_start_of_turn(participant_index)
+	for i in turn_logs.size():
+		logs.append(turn_logs[i])
 	return logs
 
 
 func process_end_of_turn(participant_index: int) -> PackedStringArray:
 	var logs := PackedStringArray()
-	var arr := _rust_system.process_end_of_turn(participant_index)
-	for i in arr.size():
-		logs.append(arr[i])
+	var turn_logs := _rust_system.process_end_of_turn(participant_index)
+	for i in turn_logs.size():
+		logs.append(turn_logs[i])
 	return logs
 
 
 func get_participant(index: int) -> BattleParticipant:
-	var dict := _rust_system.get_participant(index)
-	if dict.is_empty():
+	var participant_dict := _rust_system.get_participant(index)
+	if participant_dict.is_empty():
 		return null
-	return BattleParticipant.from_dict(dict)
+	return BattleParticipant.from_dict(participant_dict)
 
 
 func get_participant_count() -> int:
@@ -182,23 +182,23 @@ func add_log_message(message: String) -> void:
 
 
 func _build_char_array(chars: Array[CharacterData]) -> Array:
-	var arr: Array = []
-	for c in chars:
-		arr.append({
-			"id": c.id,
-			"name": c.name,
-			"type": c.type,
-			"secondary_type": c.secondary_type,
-			"hp": c.hp,
-			"attack": c.attack,
-			"defense": c.defense,
-			"speed": c.speed,
-			"intelligence": c.intelligence,
-			"spirit": c.spirit,
-			"moves": Array(c.moves),
-			"description": c.description,
+	var character_dicts: Array = []
+	for character_data in chars:
+		character_dicts.append({
+			"id": character_data.id,
+			"name": character_data.name,
+			"type": character_data.type,
+			"secondary_type": character_data.secondary_type,
+			"hp": character_data.hp,
+			"attack": character_data.attack,
+			"defense": character_data.defense,
+			"speed": character_data.speed,
+			"intelligence": character_data.intelligence,
+			"spirit": character_data.spirit,
+			"moves": Array(character_data.moves),
+			"description": character_data.description,
 		})
-	return arr
+	return character_dicts
 
 
 func _build_move_dict(move: MoveData) -> Dictionary:
