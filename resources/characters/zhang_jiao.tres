@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "zhang_jiao"
+name = "張角"
+type = 6
+secondary_type = -1
+hp = 95
+attack = 75
+defense = 85
+speed = 80
+intelligence = 115
+spirit = 105
+moves = PackedStringArray("flame_burst", "water_surge", "wood_heal", "war_cry")
+description = "The 'Great Teacher' of the Yellow Turbans. His rebellion shook the Han to its foundations."

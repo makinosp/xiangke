@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "sun_ce"
+name = "孫策"
+type = 1
+secondary_type = -1
+hp = 120
+attack = 118
+defense = 90
+speed = 107
+intelligence = 70
+spirit = 85
+moves = PackedStringArray("flame_burst", "fire_strike", "iron_cleave", "war_cry")
+description = "The 'Little Conqueror.' With a thousand men he carved out the foundation of Wu in a single campaign."

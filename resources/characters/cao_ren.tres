@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "cao_ren"
+name = "曹仁"
+type = 2
+secondary_type = -1
+hp = 130
+attack = 85
+defense = 120
+speed = 70
+intelligence = 75
+spirit = 95
+moves = PackedStringArray("iron_cleave", "earth_barrier", "metal_slash", "wood_heal")
+description = "The unbreakable shield of Wei. Held Fan Castle against Guan Yu's siege with a skeleton garrison."

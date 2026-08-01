@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "chen_gong"
+name = "陳宮"
+type = 4
+secondary_type = -1
+hp = 95
+attack = 70
+defense = 85
+speed = 90
+intelligence = 110
+spirit = 105
+moves = PackedStringArray("water_surge", "wood_heal", "earth_barrier", "war_cry")
+description = "A strategist of shifting loyalty. Served Cao Cao, then Lü Bu, and died refusing to beg for life."

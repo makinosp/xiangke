@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/character_data.gd" id="1_char"]
+
+[resource]
+script = ExtResource("1_char")
+id = "dian_wei"
+name = "典韋"
+type = 2
+secondary_type = -1
+hp = 140
+attack = 112
+defense = 112
+speed = 85
+intelligence = 55
+spirit = 96
+moves = PackedStringArray("iron_cleave", "metal_slash", "earth_barrier", "war_cry")
+description = "Cao Cao's first bodyguard. His twin halberds fell dozens of enemies before he died covering his lord's escape."
