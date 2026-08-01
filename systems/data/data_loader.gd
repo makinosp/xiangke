@@ -1,5 +1,5 @@
 ## Data loader that discovers and loads .tres resource files.
-## Implements graceful degradation with placeholder fallback (NFR pattern RP-1).
+## Implements graceful degradation with placeholder fallback.
 extends Node
 
 class_name DataLoader
@@ -57,9 +57,7 @@ static func create_placeholder_move(id: String) -> MoveData:
 
 
 ## Discovers all character IDs by scanning the characters directory.
-##
-## Returns:
-##   PackedStringArray of character IDs (filenames without extension).
+## Returns filenames without the .tres extension.
 func discover_characters() -> PackedStringArray:
 	var ids: PackedStringArray = _discover_ids_in_dir(CHARACTERS_DIR)
 	# Include DLC characters if directory exists
@@ -72,9 +70,7 @@ func discover_characters() -> PackedStringArray:
 
 
 ## Discovers all move IDs by scanning the moves directory.
-##
-## Returns:
-##   PackedStringArray of move IDs (filenames without extension).
+## Returns filenames without the .tres extension.
 func discover_moves() -> PackedStringArray:
 	var ids: PackedStringArray = _discover_ids_in_dir(MOVES_DIR)
 	# Include DLC moves if directory exists
@@ -87,12 +83,7 @@ func discover_moves() -> PackedStringArray:
 
 
 ## Loads a single character by ID with graceful degradation.
-##
-## Parameters:
-##   id: The character ID to load.
-##
-## Returns:
-##   CharacterData if found and valid, placeholder CharacterData if missing or corrupted.
+## Falls back to a placeholder CharacterData if missing or corrupted.
 func load_character(id: String) -> CharacterData:
 	var path := CHARACTERS_DIR + id + RESOURCE_EXTENSION
 	if not ResourceLoader.exists(path):
@@ -111,12 +102,7 @@ func load_character(id: String) -> CharacterData:
 
 
 ## Loads a single move by ID with graceful degradation.
-##
-## Parameters:
-##   id: The move ID to load.
-##
-## Returns:
-##   MoveData if found and valid, placeholder MoveData if missing or corrupted.
+## Falls back to a placeholder MoveData if missing or corrupted.
 func load_move(id: String) -> MoveData:
 	var path := MOVES_DIR + id + RESOURCE_EXTENSION
 	if not ResourceLoader.exists(path):
@@ -135,9 +121,7 @@ func load_move(id: String) -> MoveData:
 
 
 ## Loads all characters from the characters directory.
-##
-## Returns:
-##   Dictionary of CharacterData keyed by character ID.
+## Returns a Dictionary of CharacterData keyed by character ID.
 func load_all_characters() -> Dictionary:
 	var characters := {}
 	var ids := discover_characters()
@@ -147,9 +131,7 @@ func load_all_characters() -> Dictionary:
 
 
 ## Loads all moves from the moves directory.
-##
-## Returns:
-##   Dictionary of MoveData keyed by move ID.
+## Returns a Dictionary of MoveData keyed by move ID.
 func load_all_moves() -> Dictionary:
 	var moves := {}
 	var ids := discover_moves()
@@ -159,9 +141,7 @@ func load_all_moves() -> Dictionary:
 
 
 ## Loads all data (characters and moves) into a single structure.
-##
-## Returns:
-##   Dictionary with "characters" and "moves" keys containing respective dictionaries.
+## Returns a Dictionary with "characters" and "moves" keys.
 func load_all() -> Dictionary:
 	return {
 		"characters": load_all_characters(),

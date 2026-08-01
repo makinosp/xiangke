@@ -28,9 +28,7 @@ func _init() -> void:
 
 
 ## Starts a new battle with the given player and enemy characters.
-## @param player_chars Array of player CharacterData.
-## @param enemy_chars Array of enemy CharacterData.
-## @return True if battle started successfully.
+## Returns true if the battle started successfully.
 func start_battle(
 		player_chars: Array[CharacterData],
 		enemy_chars: Array[CharacterData]) -> bool:
