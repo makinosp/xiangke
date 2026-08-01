@@ -32,57 +32,25 @@ func start_battle(
 	if not started:
 		return false
 
-	for i in enemy_chars.size():
-		var cd := CharacterData.new()
-		cd.id = enemy_chars[i].id
-		cd.name = enemy_chars[i].name
-		cd.type = enemy_chars[i].type
-		cd.secondary_type = enemy_chars[i].secondary_type
-		cd.hp = enemy_chars[i].hp
-		cd.attack = enemy_chars[i].attack
-		cd.defense = enemy_chars[i].defense
-		cd.speed = enemy_chars[i].speed
-		cd.intelligence = enemy_chars[i].intelligence
-		cd.spirit = enemy_chars[i].spirit
-		cd.moves = enemy_chars[i].moves
-		cd.description = enemy_chars[i].description
-		var p := BattleParticipant.new()
-		p.character_data = cd
-		p.current_hp = cd.hp
-		p.max_hp = cd.hp
-		p.team = BattleParticipant.Team.ENEMY
-		p.slot_index = i
-		p.is_defeated = false
-		p.stat_stages = [0, 0, 0, 0, 0]
-		p.active_status_effects = []
-		_battle_participants.append(p)
-
-	for i in player_chars.size():
-		var cd := CharacterData.new()
-		cd.id = player_chars[i].id
-		cd.name = player_chars[i].name
-		cd.type = player_chars[i].type
-		cd.secondary_type = player_chars[i].secondary_type
-		cd.hp = player_chars[i].hp
-		cd.attack = player_chars[i].attack
-		cd.defense = player_chars[i].defense
-		cd.speed = player_chars[i].speed
-		cd.intelligence = player_chars[i].intelligence
-		cd.spirit = player_chars[i].spirit
-		cd.moves = player_chars[i].moves
-		cd.description = player_chars[i].description
-		var p := BattleParticipant.new()
-		p.character_data = cd
-		p.current_hp = cd.hp
-		p.max_hp = cd.hp
-		p.team = BattleParticipant.Team.PLAYER
-		p.slot_index = i
-		p.is_defeated = false
-		p.stat_stages = [0, 0, 0, 0, 0]
-		p.active_status_effects = []
-		_battle_participants.append(p)
+	_build_participants(enemy_chars, BattleParticipant.Team.ENEMY)
+	_build_participants(player_chars, BattleParticipant.Team.PLAYER)
 
 	return true
+
+
+func _build_participants(chars: Array[CharacterData], team: BattleParticipant.Team) -> void:
+	for i in chars.size():
+		var cd := chars[i].duplicate() as CharacterData
+		var p := BattleParticipant.new()
+		p.character_data = cd
+		p.current_hp = cd.hp
+		p.max_hp = cd.hp
+		p.team = team
+		p.slot_index = i
+		p.is_defeated = false
+		p.stat_stages = [0, 0, 0, 0, 0]
+		p.active_status_effects = []
+		_battle_participants.append(p)
 
 
 func execute_player_action(move: MoveData) -> Dictionary:
