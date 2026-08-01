@@ -1,48 +1,4 @@
-# Rust Bridge Specification
-
-## Purpose
-
-Define the Rust GDExtension bridge layer that exposes core battle logic to
-GDScript via three crates in a Cargo workspace.
-
-## Requirements
-
-### Requirement: Crate Architecture
-
-The system SHALL organize Rust code into three crates: `xiangke-core` (shared
-domain types), `xiangke-battle` (battle mechanics), and `xiangke-godot-bridge`
-(GDExtension entry point).
-
-#### Scenario: Workspace compilation
-
-- **WHEN** `cargo build --workspace` is run
-- **THEN** all three crates compile successfully
-- **AND** `xiangke-godot-bridge` produces a shared library
-  (`.dylib`/`.so`/`.dll`)
-
-### Requirement: Core Types
-
-The `xiangke-core` crate SHALL define TypeElement enum (7 types), EffectType
-enum (6 effects), DamageCategory enum (2 categories), Stat enum (5 stats),
-TypeChart struct (7×7 matrix), CharacterData, MoveData, StatusEffectData, damage
-calculation functions, and validation functions.
-
-#### Scenario: Type enum roundtrip
-
-- **WHEN** a TypeElement value is converted to `u8` and back
-- **THEN** the original value is preserved
-
-#### Scenario: Type chart lookup
-
-- **WHEN** `TypeChart::effectiveness(attack, defense)` is called
-- **THEN** the correct multiplier from the 7×7 matrix is returned
-- **AND** row index = defender, column index = attacker
-
-#### Scenario: Damage calculation
-
-- **WHEN** `calculate_raw_damage(power, offense, defense, type_mult, variance)`
-  is called
-- **THEN** the result is `power × (offense / defense) × type_mult × variance`
+## MODIFIED Requirements
 
 ### Requirement: Battle Mechanics
 
@@ -136,14 +92,3 @@ serialization, and battle log access.
 
 - **WHEN** GDScript calls get_front_participant/get_bench_participants
 - **THEN** the front participant and living benched participants are returned
-
-### Requirement: Test Coverage
-
-The Rust crates SHALL maintain comprehensive test coverage: 55+ tests for core,
-45+ tests for battle, 3+ tests for bridge.
-
-#### Scenario: Test execution
-
-- **WHEN** `cargo test --workspace` is run
-- **THEN** all 103+ tests pass
-- **AND** there are 0 failures

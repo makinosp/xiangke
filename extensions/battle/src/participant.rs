@@ -37,6 +37,8 @@ pub struct BattleParticipant {
     pub slot_index: u32,
     /// Whether this participant has been defeated (HP == 0).
     pub is_defeated: bool,
+    /// Whether this participant is currently the team's front character.
+    pub is_front: bool,
     /// Current stat stage modifiers for each stat.
     pub stat_stages: [i32; Stat::COUNT],
     /// Bitfield of active status effects.
@@ -61,6 +63,7 @@ impl BattleParticipant {
             team,
             slot_index: slot,
             is_defeated: false,
+            is_front: false,
             stat_stages: [0; Stat::COUNT],
             active_status_effects: 0,
         })

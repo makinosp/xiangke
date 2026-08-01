@@ -134,6 +134,7 @@ fn part_dict(p: &BattleParticipant) -> Dict {
     d.set("team", p.team as i64);
     d.set("slot_index", p.slot_index);
     d.set("is_defeated", p.is_defeated);
+    d.set("is_front", p.is_front);
     let mut stages = Arr::new();
     for s in &p.stat_stages {
         stages.push(*s as i64);
@@ -271,9 +272,13 @@ impl RustBattleSystem {
         }
     }
 
-    /// Executes a player's chosen move against a target participant.
+    /// Executes the player's chosen move against the enemy's front participant.
+    ///
+    /// Resolves the opponent's current front character as the target. If the
+    /// action defeats the enemy front, the first living benched enemy
+    /// automatically replaces it.
     #[func]
-    fn execute_player_action(&mut self, move_data: Dict, target_index: i64) -> Dict {
+    fn execute_player_action(&mut self, move_data: Dict) -> Dict {
         let default = Dict::new();
         let attacker_idx = match self
             .battle_state
@@ -283,13 +288,6 @@ impl RustBattleSystem {
             Some(i) => i,
             None => return default,
         };
-        let ti = target_index as usize;
-        {
-            let state = self.battle_state.as_ref().unwrap();
-            if ti >= state.participants.len() {
-                return default;
-            }
-        }
         let mv = match dict_move(&move_data) {
             Some(m) => m,
             None => return default,
@@ -300,15 +298,35 @@ impl RustBattleSystem {
         };
         let state = self.battle_state.as_mut().unwrap();
 
-        let result = if attacker_idx <= ti {
-            let (left, right) = state.participants.split_at_mut(ti);
-            match action::calculate_damage(&mut left[attacker_idx], &mut right[0], &mv, ti, rng) {
+        let target_index = match manager::find_front_index(state, Team::Enemy) {
+            Some(i) => i,
+            None => return default,
+        };
+        if target_index >= state.participants.len() {
+            return default;
+        }
+
+        let result = if attacker_idx <= target_index {
+            let (left, right) = state.participants.split_at_mut(target_index);
+            match action::calculate_damage(
+                &mut left[attacker_idx],
+                &mut right[0],
+                &mv,
+                target_index,
+                rng,
+            ) {
                 Ok(r) => r,
                 Err(_) => return default,
             }
         } else {
             let (left, right) = state.participants.split_at_mut(attacker_idx);
-            match action::calculate_damage(&mut right[0], &mut left[ti], &mv, ti, rng) {
+            match action::calculate_damage(
+                &mut right[0],
+                &mut left[target_index],
+                &mv,
+                target_index,
+                rng,
+            ) {
                 Ok(r) => r,
                 Err(_) => return default,
             }
@@ -317,7 +335,92 @@ impl RustBattleSystem {
         if !result.log_message.is_empty() {
             state.add_log(result.log_message.clone());
         }
+
+        // If the enemy front was defeated, automatically bring in a replacement.
+        if state.participants[target_index].is_defeated {
+            manager::auto_replace(state, Team::Enemy);
+        }
+
         result_dict(&result)
+    }
+
+    /// Executes a switch for the given team: swap the team's front with a
+    /// living benched participant. Team: 0 = player, 1 = enemy.
+    /// Returns true on success.
+    #[func]
+    fn execute_switch(&mut self, team: i64, bench_index: i64) -> bool {
+        let state = match self.battle_state.as_mut() {
+            Some(s) => s,
+            None => return false,
+        };
+        let team = match team {
+            0 => Team::Player,
+            _ => Team::Enemy,
+        };
+        manager::execute_switch(state, team, bench_index as usize).is_ok()
+    }
+
+    /// Automatically promotes the first living benched participant of a team to
+    /// the front when that team has no living front character.
+    /// Team: 0 = player, 1 = enemy. Returns true if a replacement entered.
+    #[func]
+    fn auto_replace_participant(&mut self, team: i64) -> bool {
+        let state = match self.battle_state.as_mut() {
+            Some(s) => s,
+            None => return false,
+        };
+        let team = match team {
+            0 => Team::Player,
+            _ => Team::Enemy,
+        };
+        manager::auto_replace(state, team)
+    }
+
+    /// Returns the front participant of the given team (0 = player, 1 = enemy),
+    /// or an empty Dictionary if none exists.
+    #[func]
+    fn get_front_participant(&self, team: i64) -> Dict {
+        let state = match self.battle_state.as_ref() {
+            Some(s) => s,
+            None => return Dict::new(),
+        };
+        let team = match team {
+            0 => Team::Player,
+            _ => Team::Enemy,
+        };
+        match manager::find_front_index(state, team) {
+            Some(idx) => {
+                // Report the global participant index so GDScript can pass it
+                // back to execute_switch()/etc.
+                let mut d = part_dict(&state.participants[idx]);
+                d.set("slot_index", idx as i64);
+                d
+            }
+            None => Dict::new(),
+        }
+    }
+
+    /// Returns an Array of living benched participant Dictionaries for the team
+    /// (0 = player, 1 = enemy).
+    #[func]
+    fn get_bench_participants(&self, team: i64) -> Arr {
+        let mut arr = Arr::new();
+        let state = match self.battle_state.as_ref() {
+            Some(s) => s,
+            None => return arr,
+        };
+        let team = match team {
+            0 => Team::Player,
+            _ => Team::Enemy,
+        };
+        for idx in manager::living_bench_indices(state, team) {
+            // Report the global participant index so GDScript can pass it
+            // back to execute_switch()/etc.
+            let mut d = part_dict(&state.participants[idx]);
+            d.set("slot_index", idx as i64);
+            arr.push(&d);
+        }
+        arr
     }
 
     /// Advances the turn queue to the next active participant.
@@ -612,5 +715,12 @@ mod tests {
         assert_eq!(Status::Victory as i64, 1);
         assert_eq!(Status::Defeat as i64, 2);
         assert_eq!(Status::Draw as i64, 3);
+    }
+
+    /// Verify the team-to-integer mapping used by front/bench bridge queries.
+    #[test]
+    fn test_team_mapping() {
+        assert_eq!(Team::Player as i64, 0);
+        assert_eq!(Team::Enemy as i64, 1);
     }
 }

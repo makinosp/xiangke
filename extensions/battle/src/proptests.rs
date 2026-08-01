@@ -91,6 +91,7 @@ fn test_battle_runs_turns() {
         }
         let mut state = BattleState::new(participants, HashMap::new()).unwrap();
         let mut rng = rand::rngs::StdRng::seed_from_u64(42);
+        manager::start_battle(&mut state, &mut rng).unwrap();
         for _ in 0..20 {
             if state.evaluate_status() != crate::state::Status::Active {
                 break;

@@ -12,6 +12,7 @@ var max_hp: int
 var team: int
 var slot_index: int
 var is_defeated: bool
+var is_front: bool
 var stat_stages: Array[int]
 var active_status_effects: Array[int]
 
@@ -23,6 +24,7 @@ static func from_dict(data: Dictionary) -> BattleParticipant:
 	p.team = data.get("team", Team.ENEMY)
 	p.slot_index = data.get("slot_index", 0)
 	p.is_defeated = data.get("is_defeated", false)
+	p.is_front = data.get("is_front", false)
 	var raw_stages: Array = data.get("stat_stages", [])
 	p.stat_stages = []
 	for s in raw_stages:
