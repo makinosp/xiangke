@@ -10,6 +10,7 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://tests/unit/test_ui_focus_manager.gd",
 	"res://tests/unit/test_type_enums.gd",
 	"res://tests/unit/test_type_chart.gd",
+	"res://tests/unit/test_battle_flow_service.gd",
 ]
 
 ## Total counters
