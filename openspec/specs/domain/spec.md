@@ -11,8 +11,8 @@ rules for the turn-based command battle game.
 
 The system SHALL define 7 element types (Wood, Fire, Earth, Metal, Water, Yang,
 Yin), 6 effect types (None, Burn, Poison, Confusion, Chain, Charm), 2 damage
-categories (Physical, Arts), and 5 stats (Attack, Defense, Speed, Intelligence,
-Spirit).
+categories (Physical, Arts), and 6 stats (HP, Attack, Defense, Speed,
+Intelligence, Spirit).
 
 #### Scenario: Type enum values
 
