@@ -16,11 +16,13 @@ use godot::prelude::*;
 use rand::SeedableRng;
 use rand::rngs::StdRng;
 use xiangke_battle::action;
+use xiangke_battle::flow;
 use xiangke_battle::manager;
 use xiangke_battle::participant::{BattleParticipant, Team};
 use xiangke_battle::state::{BattleState, Status};
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
+use xiangke_core::status::StatusEffectData;
 use xiangke_core::types::{DamageCategory, EffectType, TypeElement};
 
 type Dict = VarDictionary;
@@ -166,6 +168,36 @@ fn result_dict(r: &action::ActionResult) -> Dict {
     d.set("log_message", r.log_message.clone());
     d.set("raw_damage", r.raw_damage as i64);
     d
+}
+
+/// Builds default status effect configs for start/end-of-turn processing.
+fn default_status_configs() -> HashMap<EffectType, StatusEffectData> {
+    let mut m = HashMap::new();
+    m.insert(
+        EffectType::Burn,
+        StatusEffectData {
+            status_type: EffectType::Burn,
+            damage_per_turn: 1.0 / 16.0,
+            ..Default::default()
+        },
+    );
+    m.insert(
+        EffectType::Poison,
+        StatusEffectData {
+            status_type: EffectType::Poison,
+            damage_per_turn: 1.0 / 8.0,
+            ..Default::default()
+        },
+    );
+    m.insert(
+        EffectType::Confusion,
+        StatusEffectData {
+            status_type: EffectType::Confusion,
+            damage_per_turn: 1.0 / 16.0,
+            ..Default::default()
+        },
+    );
+    m
 }
 
 #[derive(GodotClass)]
@@ -408,6 +440,81 @@ impl RustBattleSystem {
         }
     }
 
+    /// Returns the name of the participant at the given global index.
+    #[func]
+    fn get_participant_name(&self, index: i64) -> String {
+        let state = match self.battle_state.as_ref() {
+            Some(s) => s,
+            None => return String::new(),
+        };
+        let idx = index as usize;
+        if idx < state.participants.len() {
+            state.participants[idx].character_data.name.clone()
+        } else {
+            String::new()
+        }
+    }
+
+    /// Appends a log message to the battle log.
+    #[func]
+    fn add_log_message(&mut self, message: String) {
+        if let Some(state) = self.battle_state.as_mut() {
+            state.add_log(message);
+        }
+    }
+
+    /// Processes start-of-turn effects for a participant (e.g. confusion self-damage).
+    /// Returns log messages as an Array.
+    #[func]
+    fn process_start_of_turn(&mut self, participant_index: i64) -> Arr {
+        let idx = participant_index as usize;
+        let state = match self.battle_state.as_mut() {
+            Some(s) => s,
+            None => return Arr::new(),
+        };
+        let participant = match state.participants.get_mut(idx) {
+            Some(p) => p,
+            None => return Arr::new(),
+        };
+        let rng = match self.rng.as_mut() {
+            Some(r) => r,
+            None => return Arr::new(),
+        };
+        let configs = default_status_configs();
+        let logs = flow::process_start_of_turn(participant, &configs, rng);
+        let mut arr = Arr::new();
+        for msg in logs {
+            arr.push(msg.to_string());
+        }
+        arr
+    }
+
+    /// Processes end-of-turn effects for a participant (e.g. Burn/Poison damage-over-time).
+    /// Returns log messages as an Array.
+    #[func]
+    fn process_end_of_turn(&mut self, participant_index: i64) -> Arr {
+        let idx = participant_index as usize;
+        let state = match self.battle_state.as_mut() {
+            Some(s) => s,
+            None => return Arr::new(),
+        };
+        let participant = match state.participants.get_mut(idx) {
+            Some(p) => p,
+            None => return Arr::new(),
+        };
+        let rng = match self.rng.as_mut() {
+            Some(r) => r,
+            None => return Arr::new(),
+        };
+        let configs = default_status_configs();
+        let logs = flow::process_end_of_turn(participant, &configs, rng);
+        let mut arr = Arr::new();
+        for msg in logs {
+            arr.push(msg.to_string());
+        }
+        arr
+    }
+
     /// Returns whether the participant at the given global index is defeated.
     #[func]
     fn is_participant_defeated(&self, index: i64) -> bool {
@@ -420,6 +527,11 @@ impl RustBattleSystem {
         }
     }
 }
+
+struct RustBattleExtension;
+
+#[gdextension]
+unsafe impl ExtensionLibrary for RustBattleExtension {}
 
 #[cfg(test)]
 mod tests {
