@@ -10,9 +10,12 @@
 #   source ./emsdk_env.sh
 
 # Build Rust GDExtension for native (macOS/Linux/Windows)
+# On macOS, copying the dylib invalidates its code signature (Godot SIGKILL
+# on launch), so re-sign with ad-hoc identity after the copy.
 build-rust:
     cd extensions && cargo build
     cp extensions/target/debug/libxiangke_godot_bridge.dylib addons/gdext/libxiangke-godot-bridge.macos.debug.dylib
+    codesign --force --sign - addons/gdext/libxiangke-godot-bridge.macos.debug.dylib
 
 # Build Rust GDExtension for Web (WASM/Emscripten)
 # Requires: nightly toolchain, Emscripten SDK, rust-src component
