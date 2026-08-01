@@ -26,12 +26,6 @@ static func from_dict(data: Dictionary) -> BattleParticipant:
 	participant.slot_index = data.get("slot_index", 0)
 	participant.is_defeated = data.get("is_defeated", false)
 	participant.is_front = data.get("is_front", false)
-	var raw_stages: Array = data.get("stat_stages", [])
-	participant.stat_stages = []
-	for stage in raw_stages:
-		participant.stat_stages.append(stage)
-	var raw_effects: Array = data.get("active_status_effects", [])
-	participant.active_status_effects = []
-	for effect in raw_effects:
-		participant.active_status_effects.append(effect)
+	participant.stat_stages.assign(data.get("stat_stages", []))
+	participant.active_status_effects.assign(data.get("active_status_effects", []))
 	return participant
