@@ -135,12 +135,12 @@ fn main() -> ExitCode {
             continue;
         }
         // The base_stats object has its own key set.
-        if let Some(stats) = c.get("base_stats") {
-            if let Some(issue) = check_keys(stats, &STATS_KEYS, "base_stats", &id) {
-                result.add_error("SCHEMA-1", &issue, &id);
-                result.invalid_files += 1;
-                continue;
-            }
+        if let Some(stats) = c.get("base_stats")
+            && let Some(issue) = check_keys(stats, &STATS_KEYS, "base_stats", &id)
+        {
+            result.add_error("SCHEMA-1", &issue, &id);
+            result.invalid_files += 1;
+            continue;
         }
         match serde_json::from_value::<CharacterData>(c.clone()) {
             Ok(parsed) => {
