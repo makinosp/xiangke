@@ -5,11 +5,12 @@ import ../output/table
 import ../output/csv
 import ../output/html
 
-proc runRanking*(characters: seq[CharacterData], format: string, output: string) =
-  ## Display stat total ranking.
+proc runRanking*(characters: seq[CharacterData], format: string,
+                 output: string): bool =
+  ## Display stat total ranking. Returns false when output fails.
   if characters.len == 0:
     echo "No characters found."
-    return
+    return true
 
   # Sort by stat sum descending
   var sortedChars = characters
@@ -29,7 +30,7 @@ proc runRanking*(characters: seq[CharacterData], format: string, output: string)
         $character.stats.hp, $character.stats.attack, $character.stats.defense,
         $character.stats.speed, $character.stats.intelligence, $character.stats.spirit
       ])
-    printCSV(headers, rows)
+    return writeCSV(headers, rows, output)
   
   of "html":
     var html = htmlHeader("Stat Ranking")
@@ -49,9 +50,10 @@ proc runRanking*(characters: seq[CharacterData], format: string, output: string)
     html &= htmlFooter()
     
     if output.len > 0:
-      writeHTML(output, html)
+      return writeHTML(output, html)
     else:
       echo html
+      return true
   
   else: # table
     var table = newTableOutput(
@@ -65,5 +67,9 @@ proc runRanking*(characters: seq[CharacterData], format: string, output: string)
         $character.stats.hp, $character.stats.attack, $character.stats.defense,
         $character.stats.speed, $character.stats.intelligence, $character.stats.spirit
       ])
-    printTable(table)
-    echo "\nTotal: ", characters.len, " characters"
+    if output.len > 0:
+      return writeTableFile(table, output)
+    else:
+      printTable(table)
+      echo "\nTotal: ", characters.len, " characters"
+      return true

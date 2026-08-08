@@ -1,6 +1,7 @@
 ## Common .tres file parser utilities.
 ## Provides functions to extract key=value pairs from Godot .tres resource files.
 import std/[re, strutils, os, algorithm]
+import ../diagnostics
 
 proc getValue*(text, key: string): (string, bool) =
   ## Extract a value for the given key from .tres text content.
@@ -30,12 +31,36 @@ proc parseIntOr*(strValue: string, default: int): int =
   except ValueError:
     return default
 
+proc parseIntChecked*(strValue: string, field, file: string,
+                      diags: var seq[Diagnostic], default: int): int =
+  ## Parse an integer, recording a warning when the value is missing and an
+  ## error when it is invalid. Returns `default` in both cases so a partial
+  ## report can still be produced, but the failure is never silent.
+  if strValue == "":
+    diags.add(newDiagnostic("warning", file, "",
+                            "Missing field '" & field & "', using default " & $default))
+    return default
+  try:
+    return parseInt(strValue)
+  except ValueError:
+    diags.add(newDiagnostic("error", file, "",
+                            "Invalid integer for field '" & field & "': '" & strValue & "'"))
+    return default
+
 proc readTresFile*(path: string): string =
   ## Read a .tres file and return its content.
   ## Returns empty string on error.
   try:
     return readFile(path)
   except IOError:
+    return ""
+
+proc readTresFileDiag*(path: string, diags: var seq[Diagnostic]): string =
+  ## Read a .tres file, recording an error diagnostic on failure.
+  try:
+    return readFile(path)
+  except IOError as e:
+    diags.add(newDiagnostic("error", path, "", "Failed to read file: " & e.msg))
     return ""
 
 proc globTres*(pattern: string): seq[string] =

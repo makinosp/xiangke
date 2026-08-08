@@ -1,5 +1,6 @@
 ## Roster command - character roster table.
 import std/[strutils, tables]
+import ../labels
 import ../parser/character
 import ../parser/move
 import ../output/table
@@ -7,11 +8,11 @@ import ../output/csv
 import ../output/html
 
 proc runRoster*(characters: seq[CharacterData], moves: seq[MoveData],
-                format: string, output: string) =
-  ## Display character roster table.
+                format: string, output: string): bool =
+  ## Display character roster table. Returns false when output fails.
   if characters.len == 0:
     echo "No characters found."
-    return
+    return true
 
   let movePowerMap = getMovePowerMap(moves)
   
@@ -27,14 +28,18 @@ proc runRoster*(characters: seq[CharacterData], moves: seq[MoveData],
           moveStrs.add(moveId & "(" & $movePowerMap[moveId] & ")")
         else:
           moveStrs.add(moveId & "(?)")
+      let secondaryLabel = if character.secondary >= 0:
+        moveTypeLabel(character.secondary)
+      else:
+        ""
       rows.add(@[
-        character.id, character.name, typeLabel(character.`type`, character.secondary),
+        character.id, character.name, moveTypeLabel(character.`type`), secondaryLabel,
         $statSum(character),
         $character.stats.hp, $character.stats.attack, $character.stats.defense,
         $character.stats.speed, $character.stats.intelligence, $character.stats.spirit,
         moveStrs.join(", ")
       ])
-    printCSV(headers, rows)
+    return writeCSV(headers, rows, output)
   
   of "html":
     var html = htmlHeader("Character Roster")
@@ -61,9 +66,10 @@ proc runRoster*(characters: seq[CharacterData], moves: seq[MoveData],
     html &= htmlFooter()
     
     if output.len > 0:
-      writeHTML(output, html)
+      return writeHTML(output, html)
     else:
       echo html
+      return true
   
   else: # table
     var table = newTableOutput(
@@ -77,5 +83,9 @@ proc runRoster*(characters: seq[CharacterData], moves: seq[MoveData],
         $character.stats.hp, $character.stats.attack, $character.stats.defense,
         $character.stats.speed, $character.stats.intelligence, $character.stats.spirit
       ])
-    printTable(table)
-    echo "\nTotal: ", characters.len, " characters"
+    if output.len > 0:
+      return writeTableFile(table, output)
+    else:
+      printTable(table)
+      echo "\nTotal: ", characters.len, " characters"
+      return true

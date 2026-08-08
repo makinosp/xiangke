@@ -2,6 +2,7 @@
 ## Parses CharacterData resources into structured Nim types.
 import std/[strutils]
 import ../constants
+import ../diagnostics
 import tres
 
 type
@@ -35,12 +36,15 @@ proc statSum*(character: CharacterData): int =
   return character.stats.hp + character.stats.attack + character.stats.defense +
          character.stats.speed + character.stats.intelligence + character.stats.spirit
 
-proc parseCharacter*(text: string): CharacterData =
-  ## Parse a single character from .tres text content.
+proc parseCharacterDiag*(text: string, file: string,
+                         diags: var seq[Diagnostic]): CharacterData =
+  ## Parse a single character from .tres text content, recording diagnostics
+  ## for missing or invalid fields instead of silently substituting defaults.
   result = CharacterData()
   
   let (id, idFound) = getValue(text, "id")
   if not idFound:
+    diags.add(newDiagnostic("error", file, "", "Missing required field: id"))
     return result
   result.id = id
 
@@ -48,22 +52,29 @@ proc parseCharacter*(text: string): CharacterData =
   result.name = name
 
   let (typeStr, _) = getValue(text, "type")
-  result.`type` = parseIntOr(typeStr, 0)
+  result.`type` = parseIntChecked(typeStr, "type", file, diags, 0)
 
   let (secStr, secFound) = getValue(text, "secondary_type")
-  result.secondary = if secFound: parseIntOr(secStr, -1) else: -1
+  if secFound:
+    result.secondary = parseIntChecked(secStr, "secondary_type", file, diags, -1)
+  else:
+    result.secondary = -1
+    diags.add(newDiagnostic("warning", file, "",
+                            "Missing field 'secondary_type', using default -1"))
 
   result.stats = Stats(
-    hp: parseIntOr(mustGet(text, "hp"), 0),
-    attack: parseIntOr(mustGet(text, "attack"), 0),
-    defense: parseIntOr(mustGet(text, "defense"), 0),
-    speed: parseIntOr(mustGet(text, "speed"), 0),
-    intelligence: parseIntOr(mustGet(text, "intelligence"), 0),
-    spirit: parseIntOr(mustGet(text, "spirit"), 0),
+    hp: parseIntChecked(mustGet(text, "hp"), "hp", file, diags, 0),
+    attack: parseIntChecked(mustGet(text, "attack"), "attack", file, diags, 0),
+    defense: parseIntChecked(mustGet(text, "defense"), "defense", file, diags, 0),
+    speed: parseIntChecked(mustGet(text, "speed"), "speed", file, diags, 0),
+    intelligence: parseIntChecked(mustGet(text, "intelligence"), "intelligence", file, diags, 0),
+    spirit: parseIntChecked(mustGet(text, "spirit"), "spirit", file, diags, 0),
   )
 
   # Parse moves from PackedStringArray("move1", "move2", ...)
-  let (movesRaw, _) = getValue(text, "moves")
+  let (movesRaw, movesFound) = getValue(text, "moves")
+  if not movesFound:
+    diags.add(newDiagnostic("warning", file, "", "Missing field 'moves', using empty list"))
   if movesRaw.len > 0:
     var movesText = movesRaw
     # Remove PackedStringArray wrapper if present
@@ -86,13 +97,23 @@ proc parseCharacter*(text: string): CharacterData =
       else:
         pos += 1
 
-proc parseCharacters*(globPattern: string): seq[CharacterData] =
+proc parseCharacter*(text: string): CharacterData =
+  ## Lenient parse of a single character; diagnostics are discarded.
+  ## Prefer `parseCharacterDiag` when the caller needs failure visibility.
+  var diags: seq[Diagnostic] = @[]
+  return parseCharacterDiag(text, "", diags)
+
+proc parseCharacters*(globPattern: string):
+    tuple[characters: seq[CharacterData], diagnostics: seq[Diagnostic]] =
   ## Parse all character .tres files matching the glob pattern.
-  result = @[]
+  ## Returns parsed characters plus aggregated load/parse diagnostics so
+  ## missing or corrupted files are never silently dropped.
+  result.characters = @[]
+  result.diagnostics = @[]
   for path in globTres(globPattern):
-    let text = readTresFile(path)
+    let text = readTresFileDiag(path, result.diagnostics)
     if text.len == 0:
       continue
-    let character = parseCharacter(text)
+    let character = parseCharacterDiag(text, path, result.diagnostics)
     if character.id.len > 0:
-      result.add(character)
+      result.characters.add(character)

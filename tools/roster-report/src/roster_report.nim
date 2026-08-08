@@ -2,6 +2,7 @@
 ## Provides subcommands to analyze and report on .tres resource files.
 import std/[parseopt, os]
 import constants
+import diagnostics
 import parser/[character, move]
 import commands/[roster, types, moves, anomalies, ranking, radar]
 
@@ -20,6 +21,7 @@ Commands:
 Options:
   --format=<fmt>   Output format: table (default), csv, html
   --dir=<path>     Resource directory (default: ../../resources)
+  --output=<path>  Write the report to a file (table/csv/html)
   --help           Show this help message
   --version        Show version
 
@@ -81,25 +83,32 @@ proc main() =
     echo "Error: Resource directory not found: ", dir
     quit(1)
 
-  # Parse data
-  let characters = parseCharacters(dir / "characters" / "*.tres")
-  let movesData = parseMoves(dir / "moves" / "*.tres")
-  # let statusEffects = parseStatusEffects(dir / "status_effects" / "*.tres")
+  # Parse data, collecting load/parse diagnostics for missing or corrupted
+  # files instead of silently dropping them.
+  let (characters, charDiags) = parseCharacters(dir / "characters" / "*.tres")
+  let (movesData, moveDiags) = parseMoves(dir / "moves" / "*.tres")
+  let diagnostics = charDiags & moveDiags
+
+  # Report load/parse diagnostics before running the command so failures are
+  # visible even when a partial report is still produced.
+  printDiagnostics(diagnostics)
 
   # Dispatch command
+  var failed = false
   case cmd
   of "roster":
-    runRoster(characters, movesData, format, output)
+    failed = not runRoster(characters, movesData, format, output)
   of "types":
-    runTypes(characters, format, output)
+    failed = not runTypes(characters, format, output)
   of "moves":
-    runMoves(movesData, format, output)
+    failed = not runMoves(movesData, format, output)
   of "anomalies":
-    runAnomalies(characters, movesData, format, output)
+    let (reportOk, errorCount) = runAnomalies(characters, movesData, format, output)
+    failed = not reportOk or errorCount > 0
   of "ranking":
-    runRanking(characters, format, output)
+    failed = not runRanking(characters, format, output)
   of "radar":
-    runRadar(characters, format, output)
+    failed = not runRadar(characters, format, output)
   of "":
     echo "Error: No command specified."
     echo "Run with --help for usage information."
@@ -107,6 +116,11 @@ proc main() =
   else:
     echo "Error: Unknown command: ", cmd
     echo "Run with --help for usage information."
+    quit(1)
+
+  # Exit non-zero on any data load/parse error or output failure so callers
+  # never mistake a partial report for a successful one.
+  if failed or hasErrors(diagnostics):
     quit(1)
 
 when isMainModule:

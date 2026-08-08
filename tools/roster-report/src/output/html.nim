@@ -79,10 +79,13 @@ proc htmlSection*(title: string, content: string): string =
   ## Wrap content in a section with a heading.
   return "<h2>" & escapeHTML(title) & "</h2>\n" & content
 
-proc writeHTML*(filename: string, html: string) =
-  ## Write HTML content to a file.
+proc writeHTML*(filename: string, html: string): bool =
+  ## Write HTML content to a file. Returns false on failure.
+  ## Status messages go to stderr so stdout stays machine-readable.
   try:
     writeFile(filename, html)
-    echo "HTML report written to: ", filename
+    stderr.writeLine("HTML report written to: ", filename)
+    return true
   except IOError:
-    echo "Error: Cannot write to file: ", filename
+    stderr.writeLine("Error: Cannot write to file: ", filename)
+    return false

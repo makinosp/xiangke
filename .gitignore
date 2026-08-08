@@ -27,6 +27,8 @@ addons/gdext/*.dll
 # Nim build artifacts
 tools/roster-report/build/
 tools/roster-report/tests/test_parser
+tools/roster-report/tests/test_output
+tools/roster-report/tests/test_anomalies
 tools/roster-report/src/roster_report
 tools/roster-report/src/main
 

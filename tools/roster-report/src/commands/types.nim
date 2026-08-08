@@ -5,11 +5,12 @@ import ../output/table
 import ../output/csv
 import ../output/html
 
-proc runTypes*(characters: seq[CharacterData], format: string, output: string) =
-  ## Display type distribution analysis.
+proc runTypes*(characters: seq[CharacterData], format: string,
+               output: string): bool =
+  ## Display type distribution analysis. Returns false when output fails.
   if characters.len == 0:
     echo "No characters found."
-    return
+    return true
 
   var
     primary: array[TYPE_COUNT, int]
@@ -32,7 +33,7 @@ proc runTypes*(characters: seq[CharacterData], format: string, output: string) =
     for typeIdx in 0..<TYPE_COUNT:
       let avg = if typeCounts[typeIdx] > 0: typeSums[typeIdx] div typeCounts[typeIdx] else: 0
       rows.add(@[TYPE_LABELS[typeIdx], $primary[typeIdx], $secondary[typeIdx], $avg])
-    printCSV(headers, rows)
+    return writeCSV(headers, rows, output)
   
   of "html":
     var html = htmlHeader("Type Distribution")
@@ -48,12 +49,12 @@ proc runTypes*(characters: seq[CharacterData], format: string, output: string) =
     html &= htmlFooter()
     
     if output.len > 0:
-      writeHTML(output, html)
+      return writeHTML(output, html)
     else:
       echo html
+      return true
   
   else: # table
-    echo "=== Type distribution (primary / with secondary) ==="
     var table = newTableOutput(
       @["Type", "Primary", "Secondary", "Avg Sum"],
       @[8, 8, 10, 8]
@@ -61,5 +62,10 @@ proc runTypes*(characters: seq[CharacterData], format: string, output: string) =
     for typeIdx in 0..<TYPE_COUNT:
       let avg = if typeCounts[typeIdx] > 0: typeSums[typeIdx] div typeCounts[typeIdx] else: 0
       table.addRow(@[TYPE_LABELS[typeIdx], $primary[typeIdx], $secondary[typeIdx], $avg])
-    printTable(table)
-    echo "\nTotal: ", characters.len, " characters"
+    if output.len > 0:
+      return writeTableFile(table, output)
+    else:
+      echo "=== Type distribution (primary / with secondary) ==="
+      printTable(table)
+      echo "\nTotal: ", characters.len, " characters"
+      return true

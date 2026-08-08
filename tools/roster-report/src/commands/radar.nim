@@ -4,11 +4,12 @@ import ../parser/character
 import ../chart/radar
 import ../output/html
 
-proc runRadar*(characters: seq[CharacterData], format: string, output: string) =
-  ## Display radar chart for character stats.
+proc runRadar*(characters: seq[CharacterData], format: string,
+               output: string): bool =
+  ## Display radar chart for character stats. Returns false when output fails.
   if characters.len == 0:
     echo "No characters found."
-    return
+    return true
 
   # Calculate average stats
   var avgStats: array[STAT_COUNT, float]
@@ -45,6 +46,7 @@ proc runRadar*(characters: seq[CharacterData], format: string, output: string) =
   html &= htmlFooter()
   
   if output.len > 0:
-    writeHTML(output, html)
+    return writeHTML(output, html)
   else:
     echo html
+    return true

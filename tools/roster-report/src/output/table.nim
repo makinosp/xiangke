@@ -63,3 +63,15 @@ proc renderTable*(tbl: TableOutput): string =
 proc printTable*(tbl: TableOutput) =
   ## Print the table to stdout.
   echo renderTable(tbl)
+
+proc writeTableFile*(tbl: TableOutput, output: string): bool =
+  ## Write the rendered table to a file. Returns false on failure.
+  ## Status messages go to stderr so stdout stays machine-readable.
+  let rendered = renderTable(tbl)
+  try:
+    writeFile(output, rendered)
+    stderr.writeLine("Table report written to: ", output)
+    return true
+  except IOError:
+    stderr.writeLine("Error: Cannot write to file: ", output)
+    return false
