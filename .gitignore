@@ -24,5 +24,11 @@ addons/gdext/*.dylib
 addons/gdext/*.so
 addons/gdext/*.dll
 
+# Nim build artifacts
+tools/roster-report/build/
+tools/roster-report/tests/test_parser
+tools/roster-report/src/roster_report
+tools/roster-report/src/main
+
 # Node.js dependencies
 node_modules/

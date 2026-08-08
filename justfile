@@ -75,3 +75,11 @@ verify-data:
 		echo "✓ All data valid"; \
 	fi; \
 	rm -f $export_path
+
+# ── Roster report CLI ────────────────────────────────────────
+# Nim-based CLI tool for data analysis and visualization.
+# Usage: just report roster
+#        just report types --format=csv
+#        just report radar --format=html --output=report.html
+report cmd *args:
+    cd tools/roster-report && nim c -r src/roster_report.nim {{cmd}} --dir=../../resources {{args}}
