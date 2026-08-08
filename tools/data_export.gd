@@ -36,7 +36,6 @@ func _ready() -> void:
 	var errors: Array[String] = []
 	var characters: Array = _export_characters(data.get("characters", {}), errors)
 	var moves: Array = _export_moves(data.get("moves", {}), errors)
-
 	if not errors.is_empty():
 		for err in errors:
 			printerr("DataExport: ", err)
@@ -85,7 +84,7 @@ func _export_characters(characters: Dictionary, errors: Array[String]) -> Array:
 		if _is_placeholder_character(c):
 			errors.append("placeholder data substituted for character '" + id + "'")
 			continue
-		result.append(_character_to_dict(c))
+		result.append(_character_to_dict(c, errors))
 	return result
 
 
@@ -99,18 +98,20 @@ func _export_moves(moves: Dictionary, errors: Array[String]) -> Array:
 		if _is_placeholder_move(m):
 			errors.append("placeholder data substituted for move '" + id + "'")
 			continue
-		result.append(_move_to_dict(m))
+		result.append(_move_to_dict(m, errors))
 	return result
 
 
 ## Maps a character resource to the core CharacterData JSON schema.
-func _character_to_dict(c: CharacterData) -> Dictionary:
+func _character_to_dict(c: CharacterData, errors: Array[String]) -> Dictionary:
+	if c.name.contains("\uFFFD"):
+		errors.append("character '" + c.id + "' name contains U+FFFD replacement character (encoding corruption)")
 	return {
 		"id": c.id,
 		"name": c.name,
-		"element": _enum_name(TYPE_NAMES, c.type, "character '" + c.id + "' type"),
+		"element": _enum_name(TYPE_NAMES, c.type, "character '" + c.id + "' type", errors),
 		"secondary_element": _optional_enum_name(TYPE_NAMES, c.secondary_type,
-				"character '" + c.id + "' secondary_type"),
+				"character '" + c.id + "' secondary_type", errors),
 		"base_stats": {
 			"hp": c.hp,
 			"attack": c.attack,
@@ -125,40 +126,44 @@ func _character_to_dict(c: CharacterData) -> Dictionary:
 
 
 ## Maps a move resource to the core MoveData JSON schema.
-func _move_to_dict(m: MoveData) -> Dictionary:
+func _move_to_dict(m: MoveData, errors: Array[String]) -> Dictionary:
+	if m.name.contains("\uFFFD"):
+		errors.append("move '" + m.id + "' name contains U+FFFD replacement character (encoding corruption)")
 	return {
 		"id": m.id,
 		"name": m.name,
-		"element": _enum_name(TYPE_NAMES, m.type, "move '" + m.id + "' type"),
+		"element": _enum_name(TYPE_NAMES, m.type, "move '" + m.id + "' type", errors),
 		"power": m.power,
 		"accuracy": m.accuracy,
-		"effect": _enum_name(EFFECT_NAMES, m.effect, "move '" + m.id + "' effect"),
+		"effect": _enum_name(EFFECT_NAMES, m.effect, "move '" + m.id + "' effect", errors),
 		"effect_chance": m.effect_chance,
 		"stat_mod_stat": _optional_enum_name(STAT_NAMES, m.stat_mod_stat,
-				"move '" + m.id + "' stat_mod_stat"),
+				"move '" + m.id + "' stat_mod_stat", errors),
 		"stat_mod_stage": m.stat_mod_stage,
 		"hit_count": m.hit_count,
 		"recoil": m.recoil,
 		"healing": m.healing,
 		"damage_category": _enum_name(CATEGORY_NAMES, m.damage_category,
-				"move '" + m.id + "' damage_category"),
+				"move '" + m.id + "' damage_category", errors),
 		"description": m.description,
 	}
 
 
 ## Returns the enum name for a value, or "" and records an error if out of range.
-func _enum_name(names: Array[String], value: int, context: String) -> String:
+func _enum_name(names: Array[String], value: int, context: String, errors: Array[String]) -> String:
 	if value < 0 or value >= names.size():
-		printerr("DataExport: enum value ", value, " out of range for ", context)
+		var message := "enum value " + str(value) + " out of range for " + context
+		printerr("DataExport: ", message)
+		errors.append(message)
 		return ""
 	return names[value]
 
 
 ## Returns the enum name or null when the value is -1 (unset).
-func _optional_enum_name(names: Array[String], value: int, context: String):
+func _optional_enum_name(names: Array[String], value: int, context: String, errors: Array[String]):
 	if value < 0:
 		return null
-	return _enum_name(names, value, context)
+	return _enum_name(names, value, context, errors)
 
 
 ## Returns true when a character came from DataLoader's placeholder fallback.

@@ -60,7 +60,7 @@ fn main() -> ExitCode {
     let args: Vec<String> = env::args().skip(1).collect();
 
     if args.len() != 2 || args[0] != "validate" {
-        eprintln!("Usage: xiangke_checker validate <export.json>");
+        eprintln!("Usage: xiangke-checker validate <export.json>");
         return ExitCode::from(2);
     }
 
@@ -203,5 +203,47 @@ fn check_keys(obj: &Value, expected: &[&str], kind: &str, id: &str) -> Option<St
         None
     } else {
         Some(format!("{kind} '{id}' {}", issues.join("; ")))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn check_keys_exact_match_is_ok() {
+        let obj = json!({ "id": "a", "name": "b" });
+        assert_eq!(check_keys(&obj, &["id", "name"], "move", "a"), None);
+    }
+
+    #[test]
+    fn check_keys_reports_unknown_fields() {
+        let obj = json!({ "id": "a", "name": "b", "extra_field": 1 });
+        let issue = check_keys(&obj, &["id", "name"], "move", "a").expect("issue");
+        assert!(issue.contains("unknown field(s): extra_field"), "{issue}");
+        assert!(!issue.contains("missing"), "{issue}");
+    }
+
+    #[test]
+    fn check_keys_reports_missing_fields() {
+        let obj = json!({ "id": "a" });
+        let issue = check_keys(&obj, &["id", "name"], "move", "a").expect("issue");
+        assert!(issue.contains("missing field(s): name"), "{issue}");
+        assert!(!issue.contains("unknown"), "{issue}");
+    }
+
+    #[test]
+    fn check_keys_reports_extra_and_missing_sorted() {
+        let obj = json!({ "id": "a", "zeta": 1 });
+        let issue = check_keys(&obj, &["id", "alpha"], "move", "a").expect("issue");
+        assert!(issue.contains("unknown field(s): zeta"), "{issue}");
+        assert!(issue.contains("missing field(s): alpha"), "{issue}");
+        assert!(issue.find("zeta") < issue.find("alpha"), "{issue}");
+    }
+
+    #[test]
+    fn check_keys_non_object_returns_none() {
+        assert_eq!(check_keys(&json!(42), &["id"], "move", "a"), None);
     }
 }

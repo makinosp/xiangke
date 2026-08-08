@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_move")
 id = "war_cry"
-name = "�声"
+name = "戦声"
 type = 5
 power = 0
 accuracy = 100

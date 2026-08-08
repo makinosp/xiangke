@@ -126,7 +126,7 @@ Or press `F5` in the Godot editor.
 | `just run`                          | Build Rust + launch Godot                 |
 | `just inspect`                      | Headless Godot validation (no errors)     |
 | `just verify-data`                  | Export .tres + validate against Rust core |
-| `just verify-data UPDATE_FIXTURE=1` | Regenerate integration test fixture       |
+| `UPDATE_FIXTURE=1 just verify-data` | Regenerate integration test fixture       |
 
 ## 🧩 OpenSpec Workflow
 

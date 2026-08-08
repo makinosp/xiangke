@@ -57,10 +57,12 @@ run: build-rust
 # ── Data verification ────────────────────────────────────────
 # Export all .tres resources via Godot and validate against Rust core schema/rules.
 # Requires: local Godot install (headless mode).
-# Usage: just verify-data [UPDATE_FIXTURE=1]
+# Usage: just verify-data
+#        UPDATE_FIXTURE=1 just verify-data   (regenerate integration fixture)
 verify-data:
 	set -eu; \
 	export_path=$(mktemp -t xiangke_data.XXXXXX.json); \
+	trap 'rm -f "$export_path"' EXIT; \
 	echo "Exporting resources to $export_path..."; \
 	godot --headless res://tools/data_export.tscn -- --export-path=$export_path; \
 	echo "Validating with Rust checker..."; \
