@@ -1,6 +1,7 @@
 ## Text table output utilities.
 ## Provides functions to format data as aligned text tables.
 import std/[strutils, unicode]
+import ../constants
 
 type
   TableColumn* = object
@@ -18,7 +19,7 @@ proc newTableOutput*(headers: seq[string], widths: seq[int]): TableOutput =
   for colIdx in 0..<headers.len:
     result.columns.add(TableColumn(
       header: headers[colIdx],
-      width: if colIdx < widths.len: widths[colIdx] else: 10,
+      width: if colIdx < widths.len: widths[colIdx] else: DEFAULT_COLUMN_WIDTH,
       align: "left"
     ))
 

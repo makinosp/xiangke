@@ -1,6 +1,7 @@
 ## Roster Report CLI for xiangke game data.
 ## Provides subcommands to analyze and report on .tres resource files.
 import std/[parseopt, os]
+import constants
 import parser/[character, move]
 import commands/[roster, types, moves, anomalies, ranking, radar]
 
@@ -30,7 +31,7 @@ Examples:
 """
 
 proc getVersion(): string =
-  return "0.1.0"
+  return VERSION
 
 proc main() =
   var

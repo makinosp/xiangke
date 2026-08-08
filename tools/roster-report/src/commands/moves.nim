@@ -1,11 +1,9 @@
 ## Moves command - move assignment list.
-import ../parser/character
+import ../constants
 import ../parser/move
 import ../output/table
 import ../output/csv
 import ../output/html
-
-const CATEGORIES = ["Physical", "Arts"]
 
 proc runMoves*(moves: seq[MoveData], format: string, output: string) =
   ## Display move assignment list.
@@ -19,12 +17,12 @@ proc runMoves*(moves: seq[MoveData], format: string, output: string) =
                      "effect_chance", "category", "hit_count", "recoil", "healing"]
     var rows: seq[seq[string]] = @[]
     for moveData in moves:
-      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORIES.len:
-        CATEGORIES[moveData.damageCategory]
+      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORY_LABELS.len:
+        CATEGORY_LABELS[moveData.damageCategory]
       else:
         "?"
       rows.add(@[
-        moveData.id, moveData.name, TYPES[moveData.`type`], $moveData.power, $moveData.accuracy,
+        moveData.id, moveData.name, TYPE_LABELS[moveData.`type`], $moveData.power, $moveData.accuracy,
         $moveData.effect, $moveData.effectChance, catLabel,
         $moveData.hitCount, $moveData.recoil, $moveData.healing
       ])
@@ -38,12 +36,12 @@ proc runMoves*(moves: seq[MoveData], format: string, output: string) =
     let headers = @["ID", "Name", "Type", "Power", "Accuracy", "Effect", "Category"]
     var rows: seq[seq[string]] = @[]
     for moveData in moves:
-      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORIES.len:
-        CATEGORIES[moveData.damageCategory]
+      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORY_LABELS.len:
+        CATEGORY_LABELS[moveData.damageCategory]
       else:
         "?"
       rows.add(@[
-        moveData.id, moveData.name, TYPES[moveData.`type`], $moveData.power, $moveData.accuracy,
+        moveData.id, moveData.name, TYPE_LABELS[moveData.`type`], $moveData.power, $moveData.accuracy,
         $moveData.effect, catLabel
       ])
     html &= htmlTable(headers, rows)
@@ -60,12 +58,12 @@ proc runMoves*(moves: seq[MoveData], format: string, output: string) =
       @[14, 12, 8, 5, 4, 6, 10]
     )
     for moveData in moves:
-      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORIES.len:
-        CATEGORIES[moveData.damageCategory]
+      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORY_LABELS.len:
+        CATEGORY_LABELS[moveData.damageCategory]
       else:
         "?"
       table.addRow(@[
-        moveData.id, moveData.name, TYPES[moveData.`type`], $moveData.power, $moveData.accuracy,
+        moveData.id, moveData.name, TYPE_LABELS[moveData.`type`], $moveData.power, $moveData.accuracy,
         $moveData.effect, catLabel
       ])
     printTable(table)

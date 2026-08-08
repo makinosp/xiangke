@@ -1,4 +1,5 @@
 ## Radar command - generate HTML radar chart.
+import ../constants
 import ../parser/character
 import ../chart/radar
 import ../output/html
@@ -10,7 +11,7 @@ proc runRadar*(characters: seq[CharacterData], format: string, output: string) =
     return
 
   # Calculate average stats
-  var avgStats: array[6, float]
+  var avgStats: array[STAT_COUNT, float]
   for character in characters:
     avgStats[0] += character.stats.hp.float
     avgStats[1] += character.stats.attack.float
@@ -20,7 +21,7 @@ proc runRadar*(characters: seq[CharacterData], format: string, output: string) =
     avgStats[5] += character.stats.spirit.float
   
   let charCount = characters.len.float
-  for statIdx in 0..<6:
+  for statIdx in 0..<STAT_COUNT:
     avgStats[statIdx] /= charCount
 
   # Generate HTML with radar chart

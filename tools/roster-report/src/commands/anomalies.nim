@@ -1,5 +1,6 @@
 ## Anomalies command - detect data anomalies.
 import std/[sets]
+import ../constants
 import ../parser/character
 import ../parser/move
 import ../output/table
@@ -24,59 +25,59 @@ proc detectAnomalies*(characters: seq[CharacterData],
   
   # Check characters
   for character in characters:
-    # Check stat sum limit (max 3000)
+    # Check stat sum limit
     let total = statSum(character)
-    if total > 3000:
+    if total > MAX_STAT_SUM:
       result.add(Anomaly(
         severity: "error",
         entity: character.id,
-        message: "Stat sum exceeds 3000: " & $total
+        message: "Stat sum exceeds " & $MAX_STAT_SUM & ": " & $total
       ))
     
-    # Check individual stat limits (max 500)
-    if character.stats.hp > 500:
+    # Check individual stat limits
+    if character.stats.hp > SOFT_STAT_CAP:
       result.add(Anomaly(
         severity: "warning",
         entity: character.id,
-        message: "HP exceeds 500: " & $character.stats.hp
+        message: "HP exceeds " & $SOFT_STAT_CAP & ": " & $character.stats.hp
       ))
-    if character.stats.attack > 500:
+    if character.stats.attack > SOFT_STAT_CAP:
       result.add(Anomaly(
         severity: "warning",
         entity: character.id,
-        message: "Attack exceeds 500: " & $character.stats.attack
+        message: "Attack exceeds " & $SOFT_STAT_CAP & ": " & $character.stats.attack
       ))
-    if character.stats.defense > 500:
+    if character.stats.defense > SOFT_STAT_CAP:
       result.add(Anomaly(
         severity: "warning",
         entity: character.id,
-        message: "Defense exceeds 500: " & $character.stats.defense
+        message: "Defense exceeds " & $SOFT_STAT_CAP & ": " & $character.stats.defense
       ))
-    if character.stats.speed > 500:
+    if character.stats.speed > SOFT_STAT_CAP:
       result.add(Anomaly(
         severity: "warning",
         entity: character.id,
-        message: "Speed exceeds 500: " & $character.stats.speed
+        message: "Speed exceeds " & $SOFT_STAT_CAP & ": " & $character.stats.speed
       ))
-    if character.stats.intelligence > 500:
+    if character.stats.intelligence > SOFT_STAT_CAP:
       result.add(Anomaly(
         severity: "warning",
         entity: character.id,
-        message: "Intelligence exceeds 500: " & $character.stats.intelligence
+        message: "Intelligence exceeds " & $SOFT_STAT_CAP & ": " & $character.stats.intelligence
       ))
-    if character.stats.spirit > 500:
+    if character.stats.spirit > SOFT_STAT_CAP:
       result.add(Anomaly(
         severity: "warning",
         entity: character.id,
-        message: "Spirit exceeds 500: " & $character.stats.spirit
+        message: "Spirit exceeds " & $SOFT_STAT_CAP & ": " & $character.stats.spirit
       ))
     
-    # Check move count (should be exactly 4)
-    if character.moves.len != 4:
+    # Check move count
+    if character.moves.len != REQUIRED_MOVE_COUNT:
       result.add(Anomaly(
         severity: "error",
         entity: character.id,
-        message: "Move count is " & $character.moves.len & ", expected 4"
+        message: "Move count is " & $character.moves.len & ", expected " & $REQUIRED_MOVE_COUNT
       ))
     
     # Check for undefined move references

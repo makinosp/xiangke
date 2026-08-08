@@ -1,27 +1,24 @@
 ## SVG Radar Chart generator.
 ## Generates radar charts for character stat visualization.
 import std/[strutils, math]
+import ../constants
 import ../parser/character
 
 const
-  CHART_SIZE = 400
-  CENTER = CHART_SIZE / 2
-  RADIUS = 150.0
   STAT_LABELS = ["HP", "ATK", "DEF", "SPD", "INT", "SPR"]
-  MAX_STAT = 200.0  # Normalization value
 
 proc polarToCartesian(cx, cy, radius, angle: float): (float, float) =
   ## Convert polar coordinates to Cartesian.
   let rad = angle * PI / 180.0
   return (cx + radius * cos(rad), cy + radius * sin(rad))
 
-proc generatePolygonPoints*(cx, cy, radius: float, values: array[6, float],
+proc generatePolygonPoints*(cx, cy, radius: float, values: array[STAT_COUNT, float],
                            maxValue: float): string =
   ## Generate SVG polygon points for a radar chart.
   var points: seq[string] = @[]
   
-  for statIdx in 0..<6:
-    let angle = 90.0 + (60.0 * statIdx.float)  # Start from top, go clockwise
+  for statIdx in 0..<STAT_COUNT:
+    let angle = AXIS_START_ANGLE + (AXIS_ANGLE_STEP * statIdx.float)  # Start from top, go clockwise
     let normalizedValue = min(values[statIdx] / maxValue, 1.0)
     let (coordX, coordY) = polarToCartesian(cx, cy, radius * normalizedValue, angle)
     points.add($coordX & "," & $coordY)
@@ -31,8 +28,8 @@ proc generatePolygonPoints*(cx, cy, radius: float, values: array[6, float],
 proc generateAxisLines*(cx, cy, radius: float): string =
   ## Generate SVG lines for radar chart axes.
   var lines = ""
-  for statIdx in 0..<6:
-    let angle = 90.0 + (60.0 * statIdx.float)
+  for statIdx in 0..<STAT_COUNT:
+    let angle = AXIS_START_ANGLE + (AXIS_ANGLE_STEP * statIdx.float)
     let (coordX, coordY) = polarToCartesian(cx, cy, radius, angle)
     lines &= "<line x1=\"" & $cx & "\" y1=\"" & $cy & "\" " &
              "x2=\"" & $coordX & "\" y2=\"" & $coordY & "\" " &
@@ -42,15 +39,15 @@ proc generateAxisLines*(cx, cy, radius: float): string =
 proc generateAxisLabels*(cx, cy, radius: float): string =
   ## Generate SVG text labels for radar chart axes.
   var labels = ""
-  for statIdx in 0..<6:
-    let angle = 90.0 + (60.0 * statIdx.float)
-    let (coordX, coordY) = polarToCartesian(cx, cy, radius + 20, angle)
+  for statIdx in 0..<STAT_COUNT:
+    let angle = AXIS_START_ANGLE + (AXIS_ANGLE_STEP * statIdx.float)
+    let (coordX, coordY) = polarToCartesian(cx, cy, radius + AXIS_LABEL_OFFSET, angle)
     labels &= "<text x=\"" & $coordX & "\" y=\"" & $coordY & "\" " &
               "text-anchor=\"middle\" dominant-baseline=\"middle\" " &
               "font-size=\"12\" fill=\"#666\">" & STAT_LABELS[statIdx] & "</text>\n"
   return labels
 
-proc generateGridCircles*(cx, cy, radius: float, levels: int = 4): string =
+proc generateGridCircles*(cx, cy, radius: float, levels: int = GRID_LEVELS): string =
   ## Generate concentric grid circles.
   var circles = ""
   for level in 1..levels:
@@ -61,13 +58,9 @@ proc generateGridCircles*(cx, cy, radius: float, levels: int = 4): string =
 
 proc getCharacterColor*(index: int): string =
   ## Get a color for a character based on index.
-  let colors = [
-    "#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6",
-    "#1abc9c", "#e67e22", "#34495e", "#e91e63", "#00bcd4"
-  ]
-  return colors[index mod colors.len]
+  return CHARACTER_COLORS[index mod CHARACTER_COLORS.len]
 
-proc generateRadarChart*(avgStats: array[6, float],
+proc generateRadarChart*(avgStats: array[STAT_COUNT, float],
                          characters: seq[CharacterData]): string =
   ## Generate a complete SVG radar chart.
   var svg = "<svg width=\"" & $CHART_SIZE & "\" height=\"" & $CHART_SIZE & "\" " &
@@ -77,22 +70,22 @@ proc generateRadarChart*(avgStats: array[6, float],
   svg &= "<rect width=\"100%\" height=\"100%\" fill=\"white\"/>\n"
   
   # Grid
-  svg &= generateGridCircles(CENTER, CENTER, RADIUS)
+  svg &= generateGridCircles(CHART_CENTER, CHART_CENTER, CHART_RADIUS)
   
   # Axes
-  svg &= generateAxisLines(CENTER, CENTER, RADIUS)
+  svg &= generateAxisLines(CHART_CENTER, CHART_CENTER, CHART_RADIUS)
   
   # Labels
-  svg &= generateAxisLabels(CENTER, CENTER, RADIUS)
+  svg &= generateAxisLabels(CHART_CENTER, CHART_CENTER, CHART_RADIUS)
   
   # Average polygon (blue, semi-transparent)
-  let avgPoints = generatePolygonPoints(CENTER, CENTER, RADIUS, avgStats, MAX_STAT)
+  let avgPoints = generatePolygonPoints(CHART_CENTER, CHART_CENTER, CHART_RADIUS, avgStats, MAX_STAT)
   svg &= "<polygon points=\"" & avgPoints & "\" " &
           "fill=\"rgba(74, 144, 217, 0.3)\" stroke=\"#4a90d9\" stroke-width=\"2\"/>\n"
   
   # Individual character polygons
   for charIdx, character in characters:
-    var charStats: array[6, float]
+    var charStats: array[STAT_COUNT, float]
     charStats[0] = character.stats.hp.float
     charStats[1] = character.stats.attack.float
     charStats[2] = character.stats.defense.float
@@ -101,7 +94,7 @@ proc generateRadarChart*(avgStats: array[6, float],
     charStats[5] = character.stats.spirit.float
     
     let color = getCharacterColor(charIdx)
-    let points = generatePolygonPoints(CENTER, CENTER, RADIUS, charStats, MAX_STAT)
+    let points = generatePolygonPoints(CHART_CENTER, CHART_CENTER, CHART_RADIUS, charStats, MAX_STAT)
     svg &= "<polygon points=\"" & points & "\" " &
             "fill=\"rgba(" & color[1..6] & ", 0.1)\" stroke=\"" & color & "\" stroke-width=\"1\"/>\n"
   

@@ -1,9 +1,8 @@
 ## Character data parser for .tres files.
 ## Parses CharacterData resources into structured Nim types.
 import std/[strutils]
+import ../constants
 import tres
-
-const TYPES* = ["WOOD", "FIRE", "EARTH", "METAL", "WATER", "YANG", "YIN"]
 
 type
   Stats* = object
@@ -25,10 +24,10 @@ type
 proc typeLabel*(primary, secondary: int): string =
   ## Convert type indices to human-readable label.
   var label = "?"
-  if primary >= 0 and primary < TYPES.len:
-    label = TYPES[primary]
-  if secondary >= 0 and secondary < TYPES.len:
-    label &= "+" & TYPES[secondary]
+  if primary >= 0 and primary < TYPE_LABELS.len:
+    label = TYPE_LABELS[primary]
+  if secondary >= 0 and secondary < TYPE_LABELS.len:
+    label &= "+" & TYPE_LABELS[secondary]
   return label
 
 proc statSum*(character: CharacterData): int =
