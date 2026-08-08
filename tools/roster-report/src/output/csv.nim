@@ -9,34 +9,34 @@ proc escapeCSV*(value: string): string =
     return "\"" & value.replace("\"", "\"\"") & "\""
   return value
 
-proc writeCSVRow*(s: Stream, row: seq[string]) =
+proc writeCSVRow*(stream: Stream, row: seq[string]) =
   ## Write a single CSV row to the stream.
   var escapedRow: seq[string] = @[]
   for cell in row:
     escapedRow.add(escapeCSV(cell))
-  s.write(escapedRow.join(",") & "\n")
+  stream.write(escapedRow.join(",") & "\n")
 
 proc writeCSV*(headers: seq[string], rows: seq[seq[string]], output: string = "") =
   ## Write CSV data to stdout or a file.
-  var s: Stream
+  var stream: Stream
   if output.len > 0:
-    s = newFileStream(output, fmWrite)
-    if s == nil:
+    stream = newFileStream(output, fmWrite)
+    if stream == nil:
       echo "Error: Cannot open file for writing: ", output
       return
   else:
-    s = newFileStream(stdout)
+    stream = newFileStream(stdout)
   
   defer:
-    if s != nil:
-      s.close()
+    if stream != nil:
+      stream.close()
   
   # Write header
-  writeCSVRow(s, headers)
+  writeCSVRow(stream, headers)
   
   # Write data rows
   for row in rows:
-    writeCSVRow(s, row)
+    writeCSVRow(stream, row)
 
 proc printCSV*(headers: seq[string], rows: seq[seq[string]]) =
   ## Print CSV data to stdout.

@@ -13,8 +13,8 @@ proc runRanking*(characters: seq[CharacterData], format: string, output: string)
 
   # Sort by stat sum descending
   var sortedChars = characters
-  sortedChars.sort(proc (a, b: CharacterData): int =
-    return statSum(b) - statSum(a)
+  sortedChars.sort(proc (charA, charB: CharacterData): int =
+    return statSum(charB) - statSum(charA)
   )
 
   case format
@@ -22,12 +22,12 @@ proc runRanking*(characters: seq[CharacterData], format: string, output: string)
     let headers = @["rank", "id", "name", "type", "sum",
                      "hp", "attack", "defense", "speed", "intelligence", "spirit"]
     var rows: seq[seq[string]] = @[]
-    for i, c in sortedChars:
+    for rank, character in sortedChars:
       rows.add(@[
-        $(i + 1), c.id, c.name, typeLabel(c.`type`, c.secondary),
-        $statSum(c),
-        $c.stats.hp, $c.stats.attack, $c.stats.defense,
-        $c.stats.speed, $c.stats.intelligence, $c.stats.spirit
+        $(rank + 1), character.id, character.name, typeLabel(character.`type`, character.secondary),
+        $statSum(character),
+        $character.stats.hp, $character.stats.attack, $character.stats.defense,
+        $character.stats.speed, $character.stats.intelligence, $character.stats.spirit
       ])
     printCSV(headers, rows)
   
@@ -38,12 +38,12 @@ proc runRanking*(characters: seq[CharacterData], format: string, output: string)
     
     let headers = @["Rank", "ID", "Name", "Type", "Sum", "HP", "ATK", "DEF", "SPD", "INT", "SPR"]
     var rows: seq[seq[string]] = @[]
-    for i, c in sortedChars:
+    for rank, character in sortedChars:
       rows.add(@[
-        $(i + 1), c.id, c.name, typeLabel(c.`type`, c.secondary),
-        $statSum(c),
-        $c.stats.hp, $c.stats.attack, $c.stats.defense,
-        $c.stats.speed, $c.stats.intelligence, $c.stats.spirit
+        $(rank + 1), character.id, character.name, typeLabel(character.`type`, character.secondary),
+        $statSum(character),
+        $character.stats.hp, $character.stats.attack, $character.stats.defense,
+        $character.stats.speed, $character.stats.intelligence, $character.stats.spirit
       ])
     html &= htmlTable(headers, rows)
     html &= htmlFooter()
@@ -58,12 +58,12 @@ proc runRanking*(characters: seq[CharacterData], format: string, output: string)
       @["Rank", "ID", "Name", "Type", "Sum", "HP", "ATK", "DEF", "SPD", "INT", "SPR"],
       @[4, 18, 6, 12, 4, 3, 3, 3, 3, 3, 3]
     )
-    for i, c in sortedChars:
+    for rank, character in sortedChars:
       table.addRow(@[
-        $(i + 1), c.id, c.name, typeLabel(c.`type`, c.secondary),
-        $statSum(c),
-        $c.stats.hp, $c.stats.attack, $c.stats.defense,
-        $c.stats.speed, $c.stats.intelligence, $c.stats.spirit
+        $(rank + 1), character.id, character.name, typeLabel(character.`type`, character.secondary),
+        $statSum(character),
+        $character.stats.hp, $character.stats.attack, $character.stats.defense,
+        $character.stats.speed, $character.stats.intelligence, $character.stats.spirit
       ])
     printTable(table)
     echo "\nTotal: ", characters.len, " characters"

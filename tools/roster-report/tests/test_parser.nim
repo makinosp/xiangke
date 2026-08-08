@@ -45,20 +45,20 @@ intelligence = 110
 spirit = 105
 moves = PackedStringArray("move1", "move2", "move3", "move4")
 """
-    let c = parseCharacter(text)
-    check c.id == "test_char"
-    check c.name == "テスト"
-    check c.`type` == 6
-    check c.secondary == 4
-    check c.stats.hp == 135
-    check c.stats.attack == 75
-    check c.stats.defense == 80
-    check c.stats.speed == 85
-    check c.stats.intelligence == 110
-    check c.stats.spirit == 105
-    check c.moves.len == 4
-    check c.moves[0] == "move1"
-    check c.moves[3] == "move4"
+    let character = parseCharacter(text)
+    check character.id == "test_char"
+    check character.name == "テスト"
+    check character.`type` == 6
+    check character.secondary == 4
+    check character.stats.hp == 135
+    check character.stats.attack == 75
+    check character.stats.defense == 80
+    check character.stats.speed == 85
+    check character.stats.intelligence == 110
+    check character.stats.spirit == 105
+    check character.moves.len == 4
+    check character.moves[0] == "move1"
+    check character.moves[3] == "move4"
 
   test "typeLabel returns correct labels":
     check typeLabel(0, -1) == "WOOD"
@@ -66,18 +66,18 @@ moves = PackedStringArray("move1", "move2", "move3", "move4")
     check typeLabel(1, -1) == "FIRE"
 
   test "statSum calculates total":
-    let c = CharacterData(
+    let character = CharacterData(
       stats: Stats(hp: 100, attack: 50, defense: 60, speed: 70, intelligence: 80, spirit: 90)
     )
-    check statSum(c) == 450
+    check statSum(character) == 450
 
   test "parseCharacter handles missing secondary_type":
     let text = """
 id = "no_secondary"
 type = 2
 """
-    let c = parseCharacter(text)
-    check c.secondary == -1
+    let character = parseCharacter(text)
+    check character.secondary == -1
 
 suite "move.nim - Move parser":
   test "parseMove extracts all fields":
@@ -97,16 +97,16 @@ recoil = 0
 healing = 0
 damage_category = 0
 """
-    let m = parseMove(text)
-    check m.id == "fire_strike"
-    check m.name == "炎撃"
-    check m.`type` == 1
-    check m.power == 80
-    check m.accuracy == 95
-    check m.effect == 1
-    check m.effectChance == 30
-    check m.hitCount == 1
-    check m.damageCategory == 0
+    let moveData = parseMove(text)
+    check moveData.id == "fire_strike"
+    check moveData.name == "炎撃"
+    check moveData.`type` == 1
+    check moveData.power == 80
+    check moveData.accuracy == 95
+    check moveData.effect == 1
+    check moveData.effectChance == 30
+    check moveData.hitCount == 1
+    check moveData.damageCategory == 0
 
   test "getMovePowerMap creates correct mapping":
     let moves = @[

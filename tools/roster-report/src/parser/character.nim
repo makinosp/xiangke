@@ -31,10 +31,10 @@ proc typeLabel*(primary, secondary: int): string =
     label &= "+" & TYPES[secondary]
   return label
 
-proc statSum*(c: CharacterData): int =
+proc statSum*(character: CharacterData): int =
   ## Calculate total of all stats.
-  return c.stats.hp + c.stats.attack + c.stats.defense +
-         c.stats.speed + c.stats.intelligence + c.stats.spirit
+  return character.stats.hp + character.stats.attack + character.stats.defense +
+         character.stats.speed + character.stats.intelligence + character.stats.spirit
 
 proc parseCharacter*(text: string): CharacterData =
   ## Parse a single character from .tres text content.
@@ -71,21 +71,21 @@ proc parseCharacter*(text: string): CharacterData =
     if movesText.startsWith("PackedStringArray(") and movesText.endsWith(")"):
       movesText = movesText[18..^2]
     # Extract quoted strings using simple parsing
-    var i = 0
-    while i < movesText.len:
-      if movesText[i] == '"':
+    var pos = 0
+    while pos < movesText.len:
+      if movesText[pos] == '"':
         # Found start of quoted string
-        let start = i + 1
-        var endPos = start
+        let startPos = pos + 1
+        var endPos = startPos
         while endPos < movesText.len and movesText[endPos] != '"':
           endPos += 1
         if endPos < movesText.len:
-          result.moves.add(movesText[start..<endPos])
-          i = endPos + 1
+          result.moves.add(movesText[startPos..<endPos])
+          pos = endPos + 1
         else:
           break
       else:
-        i += 1
+        pos += 1
 
 proc parseCharacters*(globPattern: string): seq[CharacterData] =
   ## Parse all character .tres files matching the glob pattern.
@@ -94,6 +94,6 @@ proc parseCharacters*(globPattern: string): seq[CharacterData] =
     let text = readTresFile(path)
     if text.len == 0:
       continue
-    let c = parseCharacter(text)
-    if c.id.len > 0:
-      result.add(c)
+    let character = parseCharacter(text)
+    if character.id.len > 0:
+      result.add(character)

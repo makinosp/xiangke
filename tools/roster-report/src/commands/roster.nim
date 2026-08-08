@@ -20,18 +20,18 @@ proc runRoster*(characters: seq[CharacterData], moves: seq[MoveData],
     let headers = @["id", "name", "type", "secondary", "sum",
                      "hp", "attack", "defense", "speed", "intelligence", "spirit", "moves"]
     var rows: seq[seq[string]] = @[]
-    for c in characters:
+    for character in characters:
       var moveStrs: seq[string] = @[]
-      for m in c.moves:
-        if movePowerMap.hasKey(m):
-          moveStrs.add(m & "(" & $movePowerMap[m] & ")")
+      for moveId in character.moves:
+        if movePowerMap.hasKey(moveId):
+          moveStrs.add(moveId & "(" & $movePowerMap[moveId] & ")")
         else:
-          moveStrs.add(m & "(?)")
+          moveStrs.add(moveId & "(?)")
       rows.add(@[
-        c.id, c.name, typeLabel(c.`type`, c.secondary),
-        $statSum(c),
-        $c.stats.hp, $c.stats.attack, $c.stats.defense,
-        $c.stats.speed, $c.stats.intelligence, $c.stats.spirit,
+        character.id, character.name, typeLabel(character.`type`, character.secondary),
+        $statSum(character),
+        $character.stats.hp, $character.stats.attack, $character.stats.defense,
+        $character.stats.speed, $character.stats.intelligence, $character.stats.spirit,
         moveStrs.join(", ")
       ])
     printCSV(headers, rows)
@@ -43,18 +43,18 @@ proc runRoster*(characters: seq[CharacterData], moves: seq[MoveData],
     
     let headers = @["ID", "Name", "Type", "Sum", "HP", "ATK", "DEF", "SPD", "INT", "SPR", "Moves"]
     var rows: seq[seq[string]] = @[]
-    for c in characters:
+    for character in characters:
       var moveStrs: seq[string] = @[]
-      for m in c.moves:
-        if movePowerMap.hasKey(m):
-          moveStrs.add(m & "(" & $movePowerMap[m] & ")")
+      for moveId in character.moves:
+        if movePowerMap.hasKey(moveId):
+          moveStrs.add(moveId & "(" & $movePowerMap[moveId] & ")")
         else:
-          moveStrs.add(m & "(?)")
+          moveStrs.add(moveId & "(?)")
       rows.add(@[
-        c.id, c.name, typeLabel(c.`type`, c.secondary),
-        $statSum(c),
-        $c.stats.hp, $c.stats.attack, $c.stats.defense,
-        $c.stats.speed, $c.stats.intelligence, $c.stats.spirit,
+        character.id, character.name, typeLabel(character.`type`, character.secondary),
+        $statSum(character),
+        $character.stats.hp, $character.stats.attack, $character.stats.defense,
+        $character.stats.speed, $character.stats.intelligence, $character.stats.spirit,
         moveStrs.join(", ")
       ])
     html &= htmlTable(headers, rows)
@@ -70,12 +70,12 @@ proc runRoster*(characters: seq[CharacterData], moves: seq[MoveData],
       @["ID", "Name", "Type", "Sum", "HP", "ATK", "DEF", "SPD", "INT", "SPR"],
       @[18, 6, 12, 4, 3, 3, 3, 3, 3, 3]
     )
-    for c in characters:
+    for character in characters:
       table.addRow(@[
-        c.id, c.name, typeLabel(c.`type`, c.secondary),
-        $statSum(c),
-        $c.stats.hp, $c.stats.attack, $c.stats.defense,
-        $c.stats.speed, $c.stats.intelligence, $c.stats.spirit
+        character.id, character.name, typeLabel(character.`type`, character.secondary),
+        $statSum(character),
+        $character.stats.hp, $character.stats.attack, $character.stats.defense,
+        $character.stats.speed, $character.stats.intelligence, $character.stats.spirit
       ])
     printTable(table)
     echo "\nTotal: ", characters.len, " characters"

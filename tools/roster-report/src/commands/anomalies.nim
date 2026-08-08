@@ -19,80 +19,80 @@ proc detectAnomalies*(characters: seq[CharacterData],
   
   # Build move ID set for reference checking
   var moveIds = initHashSet[string]()
-  for m in moves:
-    moveIds.incl(m.id)
+  for moveEntry in moves:
+    moveIds.incl(moveEntry.id)
   
   # Check characters
-  for c in characters:
+  for character in characters:
     # Check stat sum limit (max 3000)
-    let total = statSum(c)
+    let total = statSum(character)
     if total > 3000:
       result.add(Anomaly(
         severity: "error",
-        entity: c.id,
+        entity: character.id,
         message: "Stat sum exceeds 3000: " & $total
       ))
     
     # Check individual stat limits (max 500)
-    if c.stats.hp > 500:
+    if character.stats.hp > 500:
       result.add(Anomaly(
         severity: "warning",
-        entity: c.id,
-        message: "HP exceeds 500: " & $c.stats.hp
+        entity: character.id,
+        message: "HP exceeds 500: " & $character.stats.hp
       ))
-    if c.stats.attack > 500:
+    if character.stats.attack > 500:
       result.add(Anomaly(
         severity: "warning",
-        entity: c.id,
-        message: "Attack exceeds 500: " & $c.stats.attack
+        entity: character.id,
+        message: "Attack exceeds 500: " & $character.stats.attack
       ))
-    if c.stats.defense > 500:
+    if character.stats.defense > 500:
       result.add(Anomaly(
         severity: "warning",
-        entity: c.id,
-        message: "Defense exceeds 500: " & $c.stats.defense
+        entity: character.id,
+        message: "Defense exceeds 500: " & $character.stats.defense
       ))
-    if c.stats.speed > 500:
+    if character.stats.speed > 500:
       result.add(Anomaly(
         severity: "warning",
-        entity: c.id,
-        message: "Speed exceeds 500: " & $c.stats.speed
+        entity: character.id,
+        message: "Speed exceeds 500: " & $character.stats.speed
       ))
-    if c.stats.intelligence > 500:
+    if character.stats.intelligence > 500:
       result.add(Anomaly(
         severity: "warning",
-        entity: c.id,
-        message: "Intelligence exceeds 500: " & $c.stats.intelligence
+        entity: character.id,
+        message: "Intelligence exceeds 500: " & $character.stats.intelligence
       ))
-    if c.stats.spirit > 500:
+    if character.stats.spirit > 500:
       result.add(Anomaly(
         severity: "warning",
-        entity: c.id,
-        message: "Spirit exceeds 500: " & $c.stats.spirit
+        entity: character.id,
+        message: "Spirit exceeds 500: " & $character.stats.spirit
       ))
     
     # Check move count (should be exactly 4)
-    if c.moves.len != 4:
+    if character.moves.len != 4:
       result.add(Anomaly(
         severity: "error",
-        entity: c.id,
-        message: "Move count is " & $c.moves.len & ", expected 4"
+        entity: character.id,
+        message: "Move count is " & $character.moves.len & ", expected 4"
       ))
     
     # Check for undefined move references
-    for m in c.moves:
-      if not moveIds.contains(m):
+    for moveId in character.moves:
+      if not moveIds.contains(moveId):
         result.add(Anomaly(
           severity: "error",
-          entity: c.id,
-          message: "References undefined move: " & m
+          entity: character.id,
+          message: "References undefined move: " & moveId
         ))
     
     # Check for at least one damaging move
     var hasDamagingMove = false
-    for mId in c.moves:
-      for m in moves:
-        if m.id == mId and m.power > 0:
+    for moveRef in character.moves:
+      for moveEntry in moves:
+        if moveEntry.id == moveRef and moveEntry.power > 0:
           hasDamagingMove = true
           break
       if hasDamagingMove:
@@ -100,20 +100,20 @@ proc detectAnomalies*(characters: seq[CharacterData],
     if not hasDamagingMove:
       result.add(Anomaly(
         severity: "warning",
-        entity: c.id,
+        entity: character.id,
         message: "No damaging moves"
       ))
 
   # Check for duplicate move IDs
   var seenMoves = initHashSet[string]()
-  for m in moves:
-    if seenMoves.contains(m.id):
+  for moveEntry in moves:
+    if seenMoves.contains(moveEntry.id):
       result.add(Anomaly(
         severity: "error",
-        entity: m.id,
+        entity: moveEntry.id,
         message: "Duplicate move ID"
       ))
-    seenMoves.incl(m.id)
+    seenMoves.incl(moveEntry.id)
 
 proc runAnomalies*(characters: seq[CharacterData], moves: seq[MoveData],
                    format: string, output: string) =
@@ -128,8 +128,8 @@ proc runAnomalies*(characters: seq[CharacterData], moves: seq[MoveData],
   of "csv":
     let headers = @["severity", "entity", "message"]
     var rows: seq[seq[string]] = @[]
-    for a in anomalies:
-      rows.add(@[a.severity, a.entity, a.message])
+    for anomaly in anomalies:
+      rows.add(@[anomaly.severity, anomaly.entity, anomaly.message])
     printCSV(headers, rows)
   
   of "html":
@@ -139,8 +139,8 @@ proc runAnomalies*(characters: seq[CharacterData], moves: seq[MoveData],
     
     let headers = @["Severity", "Entity", "Message"]
     var rows: seq[seq[string]] = @[]
-    for a in anomalies:
-      rows.add(@[a.severity, a.entity, a.message])
+    for anomaly in anomalies:
+      rows.add(@[anomaly.severity, anomaly.entity, anomaly.message])
     html &= htmlTable(headers, rows)
     html &= htmlFooter()
     
@@ -155,7 +155,7 @@ proc runAnomalies*(characters: seq[CharacterData], moves: seq[MoveData],
       @["Severity", "Entity", "Message"],
       @[10, 18, 50]
     )
-    for a in anomalies:
-      table.addRow(@[a.severity, a.entity, a.message])
+    for anomaly in anomalies:
+      table.addRow(@[anomaly.severity, anomaly.entity, anomaly.message])
     printTable(table)
     echo "\nFound ", anomalies.len, " anomalies"

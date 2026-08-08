@@ -59,8 +59,8 @@ proc htmlTable*(headers: seq[string], rows: seq[seq[string]], cssClass: string =
   
   # Header
   html &= "  <thead>\n    <tr>\n"
-  for h in headers:
-    html &= "      <th>" & escapeHTML(h) & "</th>\n"
+  for header in headers:
+    html &= "      <th>" & escapeHTML(header) & "</th>\n"
   html &= "    </tr>\n  </thead>\n"
   
   # Body

@@ -71,12 +71,12 @@ proc parseMoves*(globPattern: string): seq[MoveData] =
     let text = readTresFile(path)
     if text.len == 0:
       continue
-    let m = parseMove(text)
-    if m.id.len > 0:
-      result.add(m)
+    let moveData = parseMove(text)
+    if moveData.id.len > 0:
+      result.add(moveData)
 
 proc getMovePowerMap*(moves: seq[MoveData]): Table[string, int] =
   ## Create a lookup table from move ID to power.
   result = initTable[string, int]()
-  for m in moves:
-    result[m.id] = m.power
+  for moveEntry in moves:
+    result[moveEntry.id] = moveEntry.power

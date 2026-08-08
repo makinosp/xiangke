@@ -11,17 +11,17 @@ proc runRadar*(characters: seq[CharacterData], format: string, output: string) =
 
   # Calculate average stats
   var avgStats: array[6, float]
-  for c in characters:
-    avgStats[0] += c.stats.hp.float
-    avgStats[1] += c.stats.attack.float
-    avgStats[2] += c.stats.defense.float
-    avgStats[3] += c.stats.speed.float
-    avgStats[4] += c.stats.intelligence.float
-    avgStats[5] += c.stats.spirit.float
+  for character in characters:
+    avgStats[0] += character.stats.hp.float
+    avgStats[1] += character.stats.attack.float
+    avgStats[2] += character.stats.defense.float
+    avgStats[3] += character.stats.speed.float
+    avgStats[4] += character.stats.intelligence.float
+    avgStats[5] += character.stats.spirit.float
   
-  let n = characters.len.float
-  for i in 0..<6:
-    avgStats[i] /= n
+  let charCount = characters.len.float
+  for statIdx in 0..<6:
+    avgStats[statIdx] /= charCount
 
   # Generate HTML with radar chart
   var html = htmlHeader("Radar Chart")
@@ -36,9 +36,9 @@ proc runRadar*(characters: seq[CharacterData], format: string, output: string) =
   # Add legend
   html &= "<div class=\"legend\">\n"
   html &= "<div class=\"legend-item\"><span class=\"legend-color\" style=\"background: #4a90d9;\"></span> Average</div>\n"
-  for i, c in characters:
-    let color = getCharacterColor(i)
-    html &= "<div class=\"legend-item\"><span class=\"legend-color\" style=\"background: " & color & ";\"></span> " & escapeHTML(c.name) & "</div>\n"
+  for charIdx, character in characters:
+    let color = getCharacterColor(charIdx)
+    html &= "<div class=\"legend-item\"><span class=\"legend-color\" style=\"background: " & color & ";\"></span> " & escapeHTML(character.name) & "</div>\n"
   html &= "</div>\n"
   
   html &= htmlFooter()

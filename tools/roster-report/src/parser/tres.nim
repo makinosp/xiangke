@@ -9,24 +9,24 @@ proc getValue*(text, key: string): (string, bool) =
   let regex = re(pattern)
   var matches: array[1, string]
   if text.find(regex, matches) >= 0:
-    var v = matches[0].strip()
+    var value = matches[0].strip()
     # Remove surrounding quotes if present
-    if v.len >= 2 and v[0] == '"' and v[^1] == '"':
-      v = v[1..^2]
-    return (v, true)
+    if value.len >= 2 and value[0] == '"' and value[^1] == '"':
+      value = value[1..^2]
+    return (value, true)
   return ("", false)
 
 proc mustGet*(text, key: string): string =
   ## Get value for key, returning empty string if not found.
-  let (v, _) = getValue(text, key)
-  return v
+  let (value, _) = getValue(text, key)
+  return value
 
-proc parseIntOr*(s: string, default: int): int =
+proc parseIntOr*(strValue: string, default: int): int =
   ## Parse string to int, returning default on failure.
-  if s == "":
+  if strValue == "":
     return default
   try:
-    return parseInt(s)
+    return parseInt(strValue)
   except ValueError:
     return default
 

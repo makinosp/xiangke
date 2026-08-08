@@ -16,21 +16,21 @@ proc runTypes*(characters: seq[CharacterData], format: string, output: string) =
     typeSums: array[7, int]
     typeCounts: array[7, int]
 
-  for c in characters:
-    if c.`type` >= 0 and c.`type` < 7:
-      inc primary[c.`type`]
-      typeSums[c.`type`] += statSum(c)
-      inc typeCounts[c.`type`]
-    if c.secondary >= 0 and c.secondary < 7:
-      inc secondary[c.secondary]
+  for character in characters:
+    if character.`type` >= 0 and character.`type` < 7:
+      inc primary[character.`type`]
+      typeSums[character.`type`] += statSum(character)
+      inc typeCounts[character.`type`]
+    if character.secondary >= 0 and character.secondary < 7:
+      inc secondary[character.secondary]
 
   case format
   of "csv":
     let headers = @["type", "primary_count", "secondary_count", "avg_sum"]
     var rows: seq[seq[string]] = @[]
-    for i in 0..<7:
-      let avg = if typeCounts[i] > 0: typeSums[i] div typeCounts[i] else: 0
-      rows.add(@[TYPES[i], $primary[i], $secondary[i], $avg])
+    for typeIdx in 0..<7:
+      let avg = if typeCounts[typeIdx] > 0: typeSums[typeIdx] div typeCounts[typeIdx] else: 0
+      rows.add(@[TYPES[typeIdx], $primary[typeIdx], $secondary[typeIdx], $avg])
     printCSV(headers, rows)
   
   of "html":
@@ -40,9 +40,9 @@ proc runTypes*(characters: seq[CharacterData], format: string, output: string) =
     
     let headers = @["Type", "Primary", "With Secondary", "Avg Stat Sum"]
     var rows: seq[seq[string]] = @[]
-    for i in 0..<7:
-      let avg = if typeCounts[i] > 0: typeSums[i] div typeCounts[i] else: 0
-      rows.add(@[TYPES[i], $primary[i], $secondary[i], $avg])
+    for typeIdx in 0..<7:
+      let avg = if typeCounts[typeIdx] > 0: typeSums[typeIdx] div typeCounts[typeIdx] else: 0
+      rows.add(@[TYPES[typeIdx], $primary[typeIdx], $secondary[typeIdx], $avg])
     html &= htmlTable(headers, rows)
     html &= htmlFooter()
     
@@ -57,8 +57,8 @@ proc runTypes*(characters: seq[CharacterData], format: string, output: string) =
       @["Type", "Primary", "Secondary", "Avg Sum"],
       @[8, 8, 10, 8]
     )
-    for i in 0..<7:
-      let avg = if typeCounts[i] > 0: typeSums[i] div typeCounts[i] else: 0
-      table.addRow(@[TYPES[i], $primary[i], $secondary[i], $avg])
+    for typeIdx in 0..<7:
+      let avg = if typeCounts[typeIdx] > 0: typeSums[typeIdx] div typeCounts[typeIdx] else: 0
+      table.addRow(@[TYPES[typeIdx], $primary[typeIdx], $secondary[typeIdx], $avg])
     printTable(table)
     echo "\nTotal: ", characters.len, " characters"

@@ -15,16 +15,16 @@ type
 proc newTableOutput*(headers: seq[string], widths: seq[int]): TableOutput =
   ## Create a new table output with headers and column widths.
   result = TableOutput(columns: @[], rows: @[])
-  for i in 0..<headers.len:
+  for colIdx in 0..<headers.len:
     result.columns.add(TableColumn(
-      header: headers[i],
-      width: if i < widths.len: widths[i] else: 10,
+      header: headers[colIdx],
+      width: if colIdx < widths.len: widths[colIdx] else: 10,
       align: "left"
     ))
 
-proc addRow*(t: var TableOutput, row: seq[string]) =
+proc addRow*(tbl: var TableOutput, row: seq[string]) =
   ## Add a row to the table.
-  t.rows.add(row)
+  tbl.rows.add(row)
 
 proc formatCell*(value: string, width: int, align: string): string =
   ## Format a cell value with padding.
@@ -33,32 +33,32 @@ proc formatCell*(value: string, width: int, align: string): string =
   else:
     return value.alignLeft(width)
 
-proc renderTable*(t: TableOutput): string =
+proc renderTable*(tbl: TableOutput): string =
   ## Render the table as a formatted string.
   var output = ""
   
   # Header
   var headerLine = ""
-  for col in t.columns:
+  for col in tbl.columns:
     headerLine &= formatCell(col.header, col.width, "left") & " "
   output.add(headerLine.strip() & "\n")
   
   # Separator
   var sepLine = ""
-  for col in t.columns:
+  for col in tbl.columns:
     sepLine &= "-".repeat(col.width) & " "
   output.add(sepLine.strip() & "\n")
   
   # Rows
-  for row in t.rows:
+  for row in tbl.rows:
     var line = ""
-    for i in 0..<t.columns.len:
-      let value = if i < row.len: row[i] else: ""
-      line &= formatCell(value, t.columns[i].width, t.columns[i].align) & " "
+    for colIdx in 0..<tbl.columns.len:
+      let value = if colIdx < row.len: row[colIdx] else: ""
+      line &= formatCell(value, tbl.columns[colIdx].width, tbl.columns[colIdx].align) & " "
     output.add(line.strip() & "\n")
   
   return output
 
-proc printTable*(t: TableOutput) =
+proc printTable*(tbl: TableOutput) =
   ## Print the table to stdout.
-  echo renderTable(t)
+  echo renderTable(tbl)

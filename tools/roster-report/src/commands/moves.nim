@@ -18,15 +18,15 @@ proc runMoves*(moves: seq[MoveData], format: string, output: string) =
     let headers = @["id", "name", "type", "power", "accuracy", "effect",
                      "effect_chance", "category", "hit_count", "recoil", "healing"]
     var rows: seq[seq[string]] = @[]
-    for m in moves:
-      let catLabel = if m.damageCategory >= 0 and m.damageCategory < CATEGORIES.len:
-        CATEGORIES[m.damageCategory]
+    for moveData in moves:
+      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORIES.len:
+        CATEGORIES[moveData.damageCategory]
       else:
         "?"
       rows.add(@[
-        m.id, m.name, TYPES[m.`type`], $m.power, $m.accuracy,
-        $m.effect, $m.effectChance, catLabel,
-        $m.hitCount, $m.recoil, $m.healing
+        moveData.id, moveData.name, TYPES[moveData.`type`], $moveData.power, $moveData.accuracy,
+        $moveData.effect, $moveData.effectChance, catLabel,
+        $moveData.hitCount, $moveData.recoil, $moveData.healing
       ])
     printCSV(headers, rows)
   
@@ -37,14 +37,14 @@ proc runMoves*(moves: seq[MoveData], format: string, output: string) =
     
     let headers = @["ID", "Name", "Type", "Power", "Accuracy", "Effect", "Category"]
     var rows: seq[seq[string]] = @[]
-    for m in moves:
-      let catLabel = if m.damageCategory >= 0 and m.damageCategory < CATEGORIES.len:
-        CATEGORIES[m.damageCategory]
+    for moveData in moves:
+      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORIES.len:
+        CATEGORIES[moveData.damageCategory]
       else:
         "?"
       rows.add(@[
-        m.id, m.name, TYPES[m.`type`], $m.power, $m.accuracy,
-        $m.effect, catLabel
+        moveData.id, moveData.name, TYPES[moveData.`type`], $moveData.power, $moveData.accuracy,
+        $moveData.effect, catLabel
       ])
     html &= htmlTable(headers, rows)
     html &= htmlFooter()
@@ -59,14 +59,14 @@ proc runMoves*(moves: seq[MoveData], format: string, output: string) =
       @["ID", "Name", "Type", "Power", "Acc", "Effect", "Category"],
       @[14, 12, 8, 5, 4, 6, 10]
     )
-    for m in moves:
-      let catLabel = if m.damageCategory >= 0 and m.damageCategory < CATEGORIES.len:
-        CATEGORIES[m.damageCategory]
+    for moveData in moves:
+      let catLabel = if moveData.damageCategory >= 0 and moveData.damageCategory < CATEGORIES.len:
+        CATEGORIES[moveData.damageCategory]
       else:
         "?"
       table.addRow(@[
-        m.id, m.name, TYPES[m.`type`], $m.power, $m.accuracy,
-        $m.effect, catLabel
+        moveData.id, moveData.name, TYPES[moveData.`type`], $moveData.power, $moveData.accuracy,
+        $moveData.effect, catLabel
       ])
     printTable(table)
     echo "\nTotal: ", moves.len, " moves"
