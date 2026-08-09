@@ -80,3 +80,19 @@ during the round it enters.
 - **WHEN** the front character is defeated and no living benched characters
   exist
 - **THEN** the team has no front character and the battle proceeds to win/loss
+  evaluation
+
+### Requirement: State Preservation on Switch
+
+The system SHALL preserve stat stage modifiers and active status effects when a
+character switches to the bench and back.
+
+#### Scenario: Stat stages preserved
+
+- **WHEN** a character with stat stage modifiers switches to the bench
+- **THEN** the modifiers remain when the character returns to the front
+
+#### Scenario: Status effects preserved
+
+- **WHEN** a character with active status effects switches to the bench
+- **THEN** the status effects remain when the character returns to the front
