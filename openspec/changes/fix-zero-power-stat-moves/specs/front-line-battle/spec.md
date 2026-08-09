@@ -1,12 +1,16 @@
 ## Purpose
 
-Extends the front-line battle specification to clarify that non-damaging moves (power = 0) with stat modifications apply to the attacker (SELF) or defender (TARGET) based on the `stat_mod_target` field, and do not target the opponent's front character.
+Extends the front-line battle specification to clarify that non-damaging moves
+(power = 0) with stat modifications apply to the attacker (SELF) or defender
+(TARGET) based on the `stat_mod_target` field, and do not target the opponent's
+front character.
 
 ## MODIFIED Requirements
 
 ### Requirement: Front-targeted Attacks
 
-The system SHALL always target the opponent's front character when a damaging action is performed; players and AI cannot choose a target.
+The system SHALL always target the opponent's front character when a damaging
+action is performed; players and AI cannot choose a target.
 
 #### Scenario: Player action targets front
 
@@ -21,8 +25,10 @@ The system SHALL always target the opponent's front character when a damaging ac
 #### Scenario: Non-damaging move stat modification target
 
 - **WHEN** a non-damaging move (`power = 0`) with `stat_mod_stat` is executed
-- **THEN** the stat modification applies to the user (SELF) or target (TARGET) based on `stat_mod_target`
-- **AND** the move still targets the opponent's front character for accuracy checks
+- **THEN** the stat modification applies to the user (SELF) or target (TARGET)
+  based on `stat_mod_target`
+- **AND** the move still targets the opponent's front character for accuracy
+  checks
 - **AND** if `stat_mod_target = SELF`, the attacker's stat stage is modified
 - **AND** if `stat_mod_target = TARGET`, the defender's stat stage is modified
 
@@ -30,7 +36,8 @@ The system SHALL always target the opponent's front character when a damaging ac
 
 ### Requirement: Non-Damaging Move Effects
 
-The system SHALL apply effects (stat modification, healing, status effect) for non-damaging moves regardless of whether damage is dealt.
+The system SHALL apply effects (stat modification, healing, status effect) for
+non-damaging moves regardless of whether damage is dealt.
 
 #### Scenario: Stat modification on non-damaging move
 
@@ -47,5 +54,6 @@ The system SHALL apply effects (stat modification, healing, status effect) for n
 #### Scenario: Status effect on non-damaging move
 
 - **WHEN** a move with `power = 0` and `effect` set is executed
-- **THEN** the target may be afflicted with the status effect based on `effect_chance`
+- **THEN** the target may be afflicted with the status effect based on
+  `effect_chance`
 - **AND** a log message describing the effect is generated
