@@ -108,8 +108,8 @@ fn dict_move(d: &Dict) -> Option<MoveData> {
     } else {
         DamageCategory::Physical
     };
-    let stat_mod_target = StatModTarget::from_repr(stat_mod_target_val)
-        .unwrap_or(StatModTarget::Self_);
+    let stat_mod_target =
+        StatModTarget::from_repr(stat_mod_target_val).unwrap_or(StatModTarget::Self_);
     Some(MoveData {
         id,
         name,

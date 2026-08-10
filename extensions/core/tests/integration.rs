@@ -49,7 +49,7 @@ fn test_move_serde_roundtrip() {
         effect_chance: 30,
         stat_mod_stat: Some(Stat::Defense),
         stat_mod_stage: -1,
-            stat_mod_target: StatModTarget::Self_,
+        stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 0,
         healing: 0,

@@ -265,7 +265,11 @@ pub fn calculate_damage(
         result.stat_mod_stage = stage_delta;
 
         let direction = if stage_delta > 0 { "rose" } else { "fell" };
-        let intensity = if stage_delta.abs() >= 2 { " sharply" } else { "" };
+        let intensity = if stage_delta.abs() >= 2 {
+            " sharply"
+        } else {
+            ""
+        };
         let log = format!("{target_name}'s {target_stat_name}{intensity} {direction}!");
         if result.log_message.is_empty() {
             result.log_message = log;
@@ -324,10 +328,7 @@ pub fn calculate_damage(
 
     // Fallback: ensure non-damaging moves always have a log message.
     if result.log_message.is_empty() {
-        result.log_message = format!(
-            "{} used {}!",
-            attacker.character_data.name, mv.name,
-        );
+        result.log_message = format!("{} used {}!", attacker.character_data.name, mv.name,);
     }
 
     Ok(result)
