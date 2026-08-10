@@ -237,6 +237,7 @@ mod tests {
     use std::collections::HashMap;
     use xiangke_core::moves::MoveData;
     use xiangke_core::types::DamageCategory;
+    use xiangke_core::types::StatModTarget;
 
     fn make_state() -> BattleState {
         let mut participants = vec![
@@ -259,6 +260,7 @@ mod tests {
                 effect_chance: 0,
                 stat_mod_stat: None,
                 stat_mod_stage: 0,
+                stat_mod_target: StatModTarget::Self_,
                 hit_count: 1,
                 recoil: 0,
                 healing: 0,

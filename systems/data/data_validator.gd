@@ -245,6 +245,10 @@ func _validate_move(move: MoveData, _moves: Dictionary) -> Array[ValidationError
 			errors.append(ValidationError.new(
 					"MR-4", "Stat mod stage must be in range [-3, 3], got %d" % move.stat_mod_stage,
 					move.id))
+		if not DataValidationUtils.is_in_range(move.stat_mod_target, 0, 1):
+			errors.append(ValidationError.new(
+					"MR-4", "Stat mod target must be 0 (SELF) or 1 (TARGET), got %d" % move.stat_mod_target,
+					move.id))
 
 	# Move Multi-Hit
 	if not DataValidationUtils.is_in_range(move.hit_count, 1, 5):

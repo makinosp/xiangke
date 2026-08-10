@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::types::{DamageCategory, EffectType, Stat, TypeElement};
+use crate::types::{DamageCategory, EffectType, Stat, StatModTarget, TypeElement};
 
 /// A move definition: stats, element, effect, and other properties.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -23,6 +23,8 @@ pub struct MoveData {
     pub stat_mod_stat: Option<Stat>,
     /// Stat modification stage change (positive = buff, negative = debuff).
     pub stat_mod_stage: i32,
+    /// Target of the stat modification (SELF or TARGET).
+    pub stat_mod_target: StatModTarget,
     /// Number of hits for multi-hit moves.
     pub hit_count: u32,
     /// Recoil damage percentage of damage dealt.
@@ -39,6 +41,11 @@ impl MoveData {
     /// Returns `true` if this move modifies a stat (buff or debuff).
     pub fn has_stat_mod(&self) -> bool {
         self.stat_mod_stat.is_some() && self.stat_mod_stage != 0
+    }
+
+    /// Returns `true` if this move has a stat modification target set.
+    pub fn has_stat_mod_target(&self) -> bool {
+        self.stat_mod_target != StatModTarget::Self_
     }
 
     /// Returns `true` if this move deals damage (`power > 0`).
@@ -63,6 +70,7 @@ mod tests {
             effect_chance: 20,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -87,6 +95,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 50,
@@ -109,6 +118,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: Some(Stat::Defense),
             stat_mod_stage: 2,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -130,6 +140,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 3,
             recoil: 0,
             healing: 0,
@@ -152,6 +163,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: Some(Stat::Attack),
             stat_mod_stage: -1,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 10,
             healing: 0,
@@ -177,6 +189,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -199,6 +212,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -220,6 +234,7 @@ mod tests {
             effect_chance: 30,
             stat_mod_stat: Some(Stat::Speed),
             stat_mod_stage: 1,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -243,6 +258,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 50,
             healing: 25,
@@ -267,6 +283,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,

@@ -14,7 +14,7 @@ use xiangke_battle::test_utils::{make_fighter, make_status_configs, make_strike}
 
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
-use xiangke_core::types::{DamageCategory, EffectType, Stat, TypeElement};
+use xiangke_core::types::{DamageCategory, EffectType, Stat, StatModTarget, TypeElement};
 
 /// Executes an AI-selected action against the current battle state.
 /// Handles both Attack (calculates damage) and Switch (swaps front flags).
@@ -222,6 +222,7 @@ fn test_battle_1v1_victory() {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -241,6 +242,7 @@ fn test_battle_1v1_victory() {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -340,6 +342,7 @@ fn test_battle_draw_by_turn_limit() {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -514,6 +517,7 @@ fn test_move_recoil() {
         effect_chance: 0,
         stat_mod_stat: None,
         stat_mod_stage: 0,
+        stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 25, // 25% of damage dealt as recoil
         healing: 0,
@@ -566,6 +570,7 @@ fn test_move_healing() {
         effect_chance: 0,
         stat_mod_stat: None,
         stat_mod_stage: 0,
+        stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 0,
         healing: 30, // 30% of max HP
@@ -668,6 +673,7 @@ fn test_move_secondary_status_effect() {
         effect_chance: 100, // Always applies
         stat_mod_stat: None,
         stat_mod_stage: 0,
+        stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 0,
         healing: 0,
@@ -723,6 +729,7 @@ fn test_arts_damage_category() {
         effect_chance: 0,
         stat_mod_stat: None,
         stat_mod_stage: 0,
+        stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 0,
         healing: 0,
@@ -834,6 +841,7 @@ fn test_status_effect_resistance() {
         effect_chance: 100,
         stat_mod_stat: None,
         stat_mod_stage: 0,
+        stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 0,
         healing: 0,
@@ -983,5 +991,93 @@ fn test_asymmetric_team_1v2() {
         state.turn_count < 30,
         "Battle should end within 30 turns (ended at turn {})",
         state.turn_count
+    );
+}
+
+/// Verify stat modification moves apply correctly in a battle flow.
+#[test]
+fn test_stat_mod_move_in_battle() {
+    let mut rng = StdRng::seed_from_u64(42);
+
+    let mut attacker = BattleParticipant::new(
+        make_fighter("buffer", "Buffer", TypeElement::Wood, 200, 100, 50, 50),
+        Team::Player,
+        0,
+    )
+    .unwrap();
+    let mut defender = BattleParticipant::new(
+        make_fighter("target", "Target", TypeElement::Metal, 200, 100, 50, 50),
+        Team::Enemy,
+        0,
+    )
+    .unwrap();
+
+    // Self-buff: +2 Defense
+    let buff_mv = MoveData {
+        id: "iron_wall".into(),
+        name: "Iron Wall".into(),
+        element: TypeElement::Metal,
+        power: 0,
+        accuracy: 100,
+        effect: EffectType::None,
+        effect_chance: 0,
+        stat_mod_stat: Some(Stat::Defense),
+        stat_mod_stage: 2,
+        stat_mod_target: StatModTarget::Self_,
+        hit_count: 1,
+        recoil: 0,
+        healing: 0,
+        damage_category: DamageCategory::Physical,
+        description: "Raises defense".into(),
+    };
+
+    let result = calculate_damage(&mut attacker, &mut defender, &buff_mv, 1, &mut rng).unwrap();
+    assert_eq!(
+        attacker.stat_stage(Stat::Defense),
+        2,
+        "Attacker's Defense should be +2 after self-buff"
+    );
+    assert_eq!(
+        result.stat_mod_applied,
+        Some(Stat::Defense),
+        "Result should record the stat that was modified"
+    );
+    assert!(
+        result.log_message.contains("rose"),
+        "Log should mention the stat rose"
+    );
+    assert!(
+        result.log_message.contains("sharply"),
+        "Log should mention 'sharply' for stage >= 2"
+    );
+
+    // Target-debuff: -1 Attack
+    let debuff_mv = MoveData {
+        id: "war_cry".into(),
+        name: "War Cry".into(),
+        element: TypeElement::Fire,
+        power: 0,
+        accuracy: 100,
+        effect: EffectType::None,
+        effect_chance: 0,
+        stat_mod_stat: Some(Stat::Attack),
+        stat_mod_stage: -1,
+        stat_mod_target: StatModTarget::Target,
+        hit_count: 1,
+        recoil: 0,
+        healing: 0,
+        damage_category: DamageCategory::Physical,
+        description: "Lowers attack".into(),
+    };
+
+    let result2 = calculate_damage(&mut attacker, &mut defender, &debuff_mv, 1, &mut rng).unwrap();
+    assert_eq!(
+        defender.stat_stage(Stat::Attack),
+        -1,
+        "Defender's Attack should be -1 after debuff"
+    );
+    assert!(
+        result2.log_message.contains("fell"),
+        "Log should mention the stat fell"
     );
 }

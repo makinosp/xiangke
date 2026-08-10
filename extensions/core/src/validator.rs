@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::types::{EffectType, Stat, TypeElement};
+use crate::types::{EffectType, Stat, StatModTarget, TypeElement};
 
 /// Maximum length for a move/character ID.
 const MAX_ID_LENGTH: usize = 50;
@@ -427,6 +427,21 @@ pub fn validate_move(data: &crate::moves::MoveData) -> Result<(), Vec<Validation
         }
     }
 
+    // MR-4b: Move Stat Modification Target
+    if data.has_stat_mod() {
+        let valid_target = matches!(
+            data.stat_mod_target,
+            StatModTarget::Self_ | StatModTarget::Target
+        );
+        if !valid_target {
+            errors.push(ValidationError {
+                code: "MR-4".into(),
+                message: format!("Invalid stat mod target: {:?}", data.stat_mod_target),
+                context: data.id.clone(),
+            });
+        }
+    }
+
     // MR-5: Move Multi-Hit
     if !is_in_range(data.hit_count, 1, MAX_HIT_COUNT) {
         errors.push(ValidationError {
@@ -621,6 +636,7 @@ mod tests {
                 effect_chance: 0,
                 stat_mod_stat: None,
                 stat_mod_stage: 0,
+                stat_mod_target: StatModTarget::Self_,
                 hit_count: 1,
                 recoil: 0,
                 healing: 0,
@@ -637,6 +653,7 @@ mod tests {
                 effect_chance: 0,
                 stat_mod_stat: None,
                 stat_mod_stage: 0,
+                stat_mod_target: StatModTarget::Self_,
                 hit_count: 1,
                 recoil: 0,
                 healing: 0,
@@ -653,6 +670,7 @@ mod tests {
                 effect_chance: 0,
                 stat_mod_stat: None,
                 stat_mod_stage: 0,
+                stat_mod_target: StatModTarget::Self_,
                 hit_count: 1,
                 recoil: 0,
                 healing: 30,
@@ -669,6 +687,7 @@ mod tests {
                 effect_chance: 0,
                 stat_mod_stat: Some(Stat::Defense),
                 stat_mod_stage: 2,
+                stat_mod_target: StatModTarget::Self_,
                 hit_count: 1,
                 recoil: 0,
                 healing: 0,

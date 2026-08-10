@@ -39,7 +39,7 @@ const CHARACTER_KEYS: [&str; 7] = [
 const STATS_KEYS: [&str; 6] = ["hp", "attack", "defense", "speed", "intelligence", "spirit"];
 
 /// Expected JSON keys for the core `MoveData` struct.
-const MOVE_KEYS: [&str; 14] = [
+const MOVE_KEYS: [&str; 15] = [
     "id",
     "name",
     "element",
@@ -49,6 +49,7 @@ const MOVE_KEYS: [&str; 14] = [
     "effect_chance",
     "stat_mod_stat",
     "stat_mod_stage",
+    "stat_mod_target",
     "hit_count",
     "recoil",
     "healing",

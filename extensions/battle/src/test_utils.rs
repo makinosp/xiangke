@@ -9,7 +9,7 @@ use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
 use xiangke_core::status::StatusEffectData;
 use xiangke_core::status::default_configs;
-use xiangke_core::types::{DamageCategory, EffectType, TypeElement};
+use xiangke_core::types::{DamageCategory, EffectType, StatModTarget, TypeElement};
 
 use crate::participant::{BattleParticipant, Team};
 
@@ -83,6 +83,7 @@ pub fn make_strike(id: &str, element: TypeElement, power: u32, accuracy: u32) ->
         effect_chance: 0,
         stat_mod_stat: None,
         stat_mod_stage: 0,
+        stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 0,
         healing: 0,

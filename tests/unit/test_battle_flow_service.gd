@@ -223,3 +223,29 @@ func _ensure_player_turn() -> void:
 			return
 		if not _service.advance_turn():
 			return
+
+
+func test_stat_mod_move_updates_participant() -> int:
+	if not _start_3v3():
+		return assert_true(false, "start_battle should succeed")
+	_ensure_player_turn()
+
+	var player_front := _service.get_front_participant(BattleParticipant.Team.PLAYER)
+	var err := OK
+	err = assert_true(player_front != null, "Player front should exist"); if err: return err
+
+	# earth_barrier: power=0, stat_mod_stat=Defense, stat_mod_stage=2, stat_mod_target=SELF
+	var earth_barrier := DataRegistry.get_move("earth_barrier")
+	err = assert_true(earth_barrier != null, "earth_barrier move should exist"); if err: return err
+
+	var result := _service.execute_player_action(earth_barrier)
+	err = assert_true(result.has("log_message"), "Action result should have a log message"); if err: return err
+	err = assert_true(not result["log_message"].is_empty(),
+		"Stat mod move should produce a log message"); if err: return err
+
+	# The player front's stat_stages should reflect the +2 Defense buff.
+	var front_after := _service.get_front_participant(BattleParticipant.Team.PLAYER)
+	err = assert_true(front_after != null, "Player front should still exist"); if err: return err
+	var defense_stage: int = front_after.stat_stages[TypeEnums.Stat.DEFENSE]
+	return assert_eq(defense_stage, 2,
+		"Player front Defense stat stage should be +2 after earth_barrier")
