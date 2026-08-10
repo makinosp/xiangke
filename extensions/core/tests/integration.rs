@@ -2,7 +2,7 @@ use std::fs;
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
 use xiangke_core::status::StatusEffectData;
-use xiangke_core::types::{DamageCategory, EffectType, Stat, TypeElement};
+use xiangke_core::types::{DamageCategory, EffectType, Stat, StatModTarget, TypeElement};
 
 /// JSON serialization roundtrip for CharacterData.
 #[test]
@@ -49,6 +49,7 @@ fn test_move_serde_roundtrip() {
         effect_chance: 30,
         stat_mod_stat: Some(Stat::Defense),
         stat_mod_stage: -1,
+            stat_mod_target: StatModTarget::Self_,
         hit_count: 1,
         recoil: 0,
         healing: 0,

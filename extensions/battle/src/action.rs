@@ -3,7 +3,7 @@ use rand::Rng;
 use xiangke_core::calc;
 use xiangke_core::moves::MoveData;
 use xiangke_core::types::TypeChart;
-use xiangke_core::types::{DamageCategory, EffectType};
+use xiangke_core::types::{DamageCategory, EffectType, Stat, StatModTarget};
 
 use crate::participant::BattleParticipant;
 use crate::state::BattleError;
@@ -42,6 +42,10 @@ pub struct ActionResult {
     pub heal_amount: u32,
     /// Raw damage before any variance/critical modifications.
     pub raw_damage: u32,
+    /// Stat that was modified by this move (if any).
+    pub stat_mod_applied: Option<Stat>,
+    /// Stage change applied to the stat (positive = buff, negative = debuff).
+    pub stat_mod_stage: i32,
     /// Formatted log message describing the action result.
     pub log_message: String,
 }
@@ -93,6 +97,17 @@ fn build_damage_log(
         ));
     }
     parts.join(" ")
+}
+
+/// Returns the display name for a stat, used in log messages.
+fn stat_name(stat: Stat) -> &'static str {
+    match stat {
+        Stat::Attack => "Attack",
+        Stat::Defense => "Defense",
+        Stat::Speed => "Speed",
+        Stat::Intelligence => "Intelligence",
+        Stat::Spirit => "Spirit",
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -230,6 +245,35 @@ pub fn calculate_damage(
 
     let mut result = ActionResult::new(target_index);
 
+    // Apply stat modification (buff/debuff) for non-damaging and damaging moves alike.
+    if mv.has_stat_mod() {
+        let stat = mv.stat_mod_stat.unwrap();
+        let stage_delta = mv.stat_mod_stage;
+        let (target_name, target_stat_name) = match mv.stat_mod_target {
+            StatModTarget::Self_ => {
+                let name = attacker.character_data.name.clone();
+                attacker.apply_stat_stage(stat, stage_delta);
+                (name, stat_name(stat))
+            }
+            StatModTarget::Target => {
+                let name = defender.character_data.name.clone();
+                defender.apply_stat_stage(stat, stage_delta);
+                (name, stat_name(stat))
+            }
+        };
+        result.stat_mod_applied = Some(stat);
+        result.stat_mod_stage = stage_delta;
+
+        let direction = if stage_delta > 0 { "rose" } else { "fell" };
+        let intensity = if stage_delta.abs() >= 2 { " sharply" } else { "" };
+        let log = format!("{target_name}'s {target_stat_name}{intensity} {direction}!");
+        if result.log_message.is_empty() {
+            result.log_message = log;
+        } else {
+            result.log_message = format!("{}\n{log}", result.log_message);
+        }
+    }
+
     if mv.power > 0 {
         let type_chart = TypeChart::default();
         let raw_damage = calculate_raw_damage(attacker, defender, mv, &type_chart);
@@ -278,6 +322,14 @@ pub fn calculate_damage(
     result.status_applied = status_applied;
     result.status_resisted = status_resisted;
 
+    // Fallback: ensure non-damaging moves always have a log message.
+    if result.log_message.is_empty() {
+        result.log_message = format!(
+            "{} used {}!",
+            attacker.character_data.name, mv.name,
+        );
+    }
+
     Ok(result)
 }
 
@@ -298,6 +350,8 @@ impl ActionResult {
             recoil_damage: 0,
             heal_amount: 0,
             raw_damage: 0,
+            stat_mod_applied: None,
+            stat_mod_stage: 0,
             log_message: String::new(),
         }
     }
@@ -318,6 +372,8 @@ impl ActionResult {
             recoil_damage: 0,
             heal_amount: 0,
             raw_damage: 0,
+            stat_mod_applied: None,
+            stat_mod_stage: 0,
             log_message: format!("{attacker_name} used {move_name} but it missed!"),
         }
     }
@@ -339,6 +395,8 @@ impl From<RawDamage> for ActionResult {
             recoil_damage: 0,
             heal_amount: 0,
             raw_damage: raw.raw_damage,
+            stat_mod_applied: None,
+            stat_mod_stage: 0,
             log_message: String::new(),
         }
     }
@@ -410,6 +468,7 @@ mod tests {
             effect_chance: 0,
             stat_mod_stat: None,
             stat_mod_stage: 0,
+            stat_mod_target: StatModTarget::Self_,
             hit_count: 1,
             recoil: 0,
             healing: 0,
@@ -613,6 +672,8 @@ mod tests {
                 recoil_damage: 0,
                 heal_amount: 0,
                 raw_damage: 0,
+                stat_mod_applied: None,
+                stat_mod_stage: 0,
                 log_message: String::new(),
             },
         );
@@ -669,5 +730,53 @@ mod tests {
         let mut mv = make_move();
         mv.element = TypeElement::Water; // Attacker is Fire
         assert!(!has_stab(&atk, &mv));
+    }
+
+    #[test]
+    fn test_stat_mod_self_buff() {
+        let (mut atk, mut def) = make_attacker();
+        let mut mv = make_move();
+        mv.power = 0;
+        mv.stat_mod_stat = Some(Stat::Defense);
+        mv.stat_mod_stage = 2;
+        mv.stat_mod_target = StatModTarget::Self_;
+        let mut rng = StdRng::seed_from_u64(42);
+        let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
+        assert_eq!(atk.stat_stage(Stat::Defense), 2);
+        assert_eq!(result.stat_mod_applied, Some(Stat::Defense));
+        assert_eq!(result.stat_mod_stage, 2);
+        assert!(result.log_message.contains("rose"));
+        assert!(result.log_message.contains("sharply"));
+    }
+
+    #[test]
+    fn test_stat_mod_target_debuff() {
+        let (mut atk, mut def) = make_attacker();
+        let mut mv = make_move();
+        mv.power = 0;
+        mv.stat_mod_stat = Some(Stat::Attack);
+        mv.stat_mod_stage = -1;
+        mv.stat_mod_target = StatModTarget::Target;
+        let mut rng = StdRng::seed_from_u64(42);
+        let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
+        assert_eq!(def.stat_stage(Stat::Attack), -1);
+        assert_eq!(result.stat_mod_applied, Some(Stat::Attack));
+        assert_eq!(result.stat_mod_stage, -1);
+        assert!(result.log_message.contains("fell"));
+    }
+
+    #[test]
+    fn test_non_damaging_move_log_message() {
+        let (mut atk, mut def) = make_attacker();
+        let mut mv = make_move();
+        mv.power = 0;
+        mv.stat_mod_stat = None;
+        mv.stat_mod_stage = 0;
+        mv.healing = 0;
+        mv.effect = EffectType::None;
+        let mut rng = StdRng::seed_from_u64(42);
+        let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
+        assert!(!result.log_message.is_empty());
+        assert!(result.log_message.contains("used"));
     }
 }

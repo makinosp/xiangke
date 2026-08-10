@@ -13,6 +13,7 @@ effect = 0
 effect_chance = 0
 stat_mod_stat = 1
 stat_mod_stage = 2
+stat_mod_target = 0
 hit_count = 1
 recoil = 0
 healing = 0

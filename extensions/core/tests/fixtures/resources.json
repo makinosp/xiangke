@@ -814,7 +814,8 @@
 			"power": 0,
 			"recoil": 0,
 			"stat_mod_stage": 2,
-			"stat_mod_stat": "Defense"
+			"stat_mod_stat": "Defense",
+			"stat_mod_target": "Self_"
 		},
 		{
 			"accuracy": 95,
@@ -830,7 +831,8 @@
 			"power": 80,
 			"recoil": 0,
 			"stat_mod_stage": 0,
-			"stat_mod_stat": null
+			"stat_mod_stat": null,
+			"stat_mod_target": "Self_"
 		},
 		{
 			"accuracy": 80,
@@ -846,7 +848,8 @@
 			"power": 120,
 			"recoil": 33,
 			"stat_mod_stage": 0,
-			"stat_mod_stat": null
+			"stat_mod_stat": null,
+			"stat_mod_target": "Self_"
 		},
 		{
 			"accuracy": 100,
@@ -862,7 +865,8 @@
 			"power": 45,
 			"recoil": 0,
 			"stat_mod_stage": 0,
-			"stat_mod_stat": null
+			"stat_mod_stat": null,
+			"stat_mod_target": "Self_"
 		},
 		{
 			"accuracy": 90,
@@ -878,7 +882,8 @@
 			"power": 90,
 			"recoil": 25,
 			"stat_mod_stage": 0,
-			"stat_mod_stat": null
+			"stat_mod_stat": null,
+			"stat_mod_target": "Self_"
 		},
 		{
 			"accuracy": 100,
@@ -894,7 +899,8 @@
 			"power": 0,
 			"recoil": 0,
 			"stat_mod_stage": 0,
-			"stat_mod_stat": null
+			"stat_mod_stat": null,
+			"stat_mod_target": "Self_"
 		},
 		{
 			"accuracy": 100,
@@ -910,7 +916,8 @@
 			"power": 70,
 			"recoil": 0,
 			"stat_mod_stage": -1,
-			"stat_mod_stat": "Speed"
+			"stat_mod_stat": "Speed",
+			"stat_mod_target": "Self_"
 		},
 		{
 			"accuracy": 100,
@@ -926,7 +933,8 @@
 			"power": 0,
 			"recoil": 0,
 			"stat_mod_stage": 0,
-			"stat_mod_stat": null
+			"stat_mod_stat": null,
+			"stat_mod_target": "Self_"
 		}
 	]
 }

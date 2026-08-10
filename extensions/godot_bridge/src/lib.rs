@@ -23,7 +23,7 @@ use xiangke_battle::state::{BattleState, Status};
 use xiangke_core::character::{CharacterData, Stats};
 use xiangke_core::moves::MoveData;
 use xiangke_core::status::default_configs;
-use xiangke_core::types::{DamageCategory, EffectType, TypeElement};
+use xiangke_core::types::{DamageCategory, EffectType, StatModTarget, TypeElement};
 
 type Dict = VarDictionary;
 type Arr = VarArray;
@@ -84,6 +84,7 @@ fn dict_move(d: &Dict) -> Option<MoveData> {
     let eff_chance = d.get("effect_chance").map(|v| v.to::<i64>()).unwrap_or(0) as u32;
     let stat_mod_stat = d.get("stat_mod_stat").map(|v| v.to::<i64>()).unwrap_or(-1);
     let stat_mod_stage = d.get("stat_mod_stage").map(|v| v.to::<i64>()).unwrap_or(0) as i32;
+    let stat_mod_target_val = d.get("stat_mod_target").map(|v| v.to::<i64>()).unwrap_or(0) as u8;
     let hit_count = d.get("hit_count").map(|v| v.to::<i64>()).unwrap_or(1) as u32;
     let recoil = d.get("recoil").map(|v| v.to::<i64>()).unwrap_or(0) as u32;
     let healing = d.get("healing").map(|v| v.to::<i64>()).unwrap_or(0) as u32;
@@ -107,6 +108,8 @@ fn dict_move(d: &Dict) -> Option<MoveData> {
     } else {
         DamageCategory::Physical
     };
+    let stat_mod_target = StatModTarget::from_repr(stat_mod_target_val)
+        .unwrap_or(StatModTarget::Self_);
     Some(MoveData {
         id,
         name,
@@ -117,6 +120,7 @@ fn dict_move(d: &Dict) -> Option<MoveData> {
         effect_chance: eff_chance,
         stat_mod_stat: stat_mod,
         stat_mod_stage,
+        stat_mod_target,
         hit_count,
         recoil,
         healing,
@@ -168,6 +172,11 @@ fn result_dict(r: &action::ActionResult) -> Dict {
     d.set("recoil_damage", r.recoil_damage as i64);
     d.set("log_message", r.log_message.clone());
     d.set("raw_damage", r.raw_damage as i64);
+    d.set(
+        "stat_mod_applied",
+        r.stat_mod_applied.map(|s| s as i64).unwrap_or(-1),
+    );
+    d.set("stat_mod_stage", r.stat_mod_stage as i64);
     d
 }
 

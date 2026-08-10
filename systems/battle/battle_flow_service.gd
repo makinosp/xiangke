@@ -240,6 +240,7 @@ func _serialize_move(move: MoveData) -> Dictionary:
 		"effect_chance": move.effect_chance,
 		"stat_mod_stat": move.stat_mod_stat,
 		"stat_mod_stage": move.stat_mod_stage,
+		"stat_mod_target": move.stat_mod_target,
 		"hit_count": move.hit_count,
 		"recoil": move.recoil,
 		"healing": move.healing,

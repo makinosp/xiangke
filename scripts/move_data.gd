@@ -31,6 +31,9 @@ extends Resource
 ## Stat stage change per move application (-3 to +3).
 @export var stat_mod_stage: int = 0
 
+## Target of the stat modification (SELF or TARGET).
+@export var stat_mod_target: int = TypeEnums.StatModTarget.SELF
+
 ## Number of hits (1 for single, 2-5 for multi-hit).
 @export var hit_count: int = 1
 
@@ -49,3 +52,7 @@ extends Resource
 ## Returns true if this move has a stat modification effect.
 func has_stat_mod() -> bool:
 	return stat_mod_stat >= 0 and stat_mod_stage != 0
+
+## Returns true if this move targets the defender for stat modification.
+func is_targeted_stat_mod() -> bool:
+	return has_stat_mod() and stat_mod_target == TypeEnums.StatModTarget.TARGET

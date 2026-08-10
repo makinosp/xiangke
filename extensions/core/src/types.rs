@@ -126,6 +126,18 @@ impl Stat {
     }
 }
 
+/// The target of a stat modification effect.
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display, EnumString, FromRepr,
+)]
+#[repr(u8)]
+pub enum StatModTarget {
+    /// The stat modification applies to the move's user (attacker).
+    Self_ = 0,
+    /// The stat modification applies to the target (defender).
+    Target = 1,
+}
+
 /// The type effectiveness chart — a 7×7 matrix of multipliers.
 ///
 /// Rows = defender element, Columns = attacker element.

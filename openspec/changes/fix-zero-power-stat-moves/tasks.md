@@ -1,62 +1,62 @@
 ## 1. Core Types - StatModTarget Enum
 
-- [ ] 1.1 Add `StatModTarget` enum to `extensions/core/src/types.rs` with
+- [x] 1.1 Add `StatModTarget` enum to `extensions/core/src/types.rs` with
       `Self_ = 0` and `Target = 1`
-- [ ] 1.2 Add `stat_mod_target: StatModTarget` field to `MoveData` struct in
+- [x] 1.2 Add `stat_mod_target: StatModTarget` field to `MoveData` struct in
       `extensions/core/src/moves.rs`
-- [ ] 1.3 Add `has_stat_mod_target()` helper method to `MoveData`
-- [ ] 1.4 Add validation for `stat_mod_target` in
+- [x] 1.3 Add `has_stat_mod_target()` helper method to `MoveData`
+- [x] 1.4 Add validation for `stat_mod_target` in
       `extensions/core/src/validator.rs` (MR-4 extension)
 
 ## 2. GDScript Types - StatModTarget Enum
 
-- [ ] 2.1 Add `enum StatModTarget { SELF, TARGET }` to `scripts/type_enums.gd`
-- [ ] 2.2 Add `@export var stat_mod_target: int = TypeEnums.StatModTarget.SELF`
+- [x] 2.1 Add `enum StatModTarget { SELF, TARGET }` to `scripts/type_enums.gd`
+- [x] 2.2 Add `@export var stat_mod_target: int = TypeEnums.StatModTarget.SELF`
       to `scripts/move_data.gd`
-- [ ] 2.3 Update `has_stat_mod()` method in `scripts/move_data.gd` to check
+- [x] 2.3 Update `has_stat_mod()` method in `scripts/move_data.gd` to check
       `stat_mod_target`
 
 ## 3. Godot Bridge - Data Conversion
 
-- [ ] 3.1 Update `dict_move()` in `extensions/godot_bridge/src/lib.rs` to parse
+- [x] 3.1 Update `dict_move()` in `extensions/godot_bridge/src/lib.rs` to parse
       `stat_mod_target`
-- [ ] 3.2 Update `part_dict()` in `extensions/godot_bridge/src/lib.rs` to
+- [x] 3.2 Update `part_dict()` in `extensions/godot_bridge/src/lib.rs` to
       include `stat_stages` in result (already exists, verify)
-- [ ] 3.3 Add `stat_mod_applied` and `stat_mod_stage` to `result_dict()` for
+- [x] 3.3 Add `stat_mod_applied` and `stat_mod_stage` to `result_dict()` for
       stat modification feedback
 
 ## 4. Battle Action - Stat Modification Application
 
-- [ ] 4.1 Add stat modification logic to `calculate_damage()` in
+- [x] 4.1 Add stat modification logic to `calculate_damage()` in
       `extensions/battle/src/action.rs`
-- [ ] 4.2 Add log message generation for stat modifications (e.g., "Attacker's
+- [x] 4.2 Add log message generation for stat modifications (e.g., "Attacker's
       Defense rose sharply!")
-- [ ] 4.3 Ensure non-damaging moves generate `log_message` even when
+- [x] 4.3 Ensure non-damaging moves generate `log_message` even when
       `power == 0`
 
 ## 5. Data Validation - GDScript
 
-- [ ] 5.1 Update `systems/data/data_validator.gd` MR-4 to validate
+- [x] 5.1 Update `systems/data/data_validator.gd` MR-4 to validate
       `stat_mod_target` range
-- [ ] 5.2 Update `tools/data_export.gd` to export `stat_mod_target` field
+- [x] 5.2 Update `tools/data_export.gd` to export `stat_mod_target` field
 
 ## 6. Checker Tool
 
-- [ ] 6.1 Update `extensions/tools/xiangke_checker/src/main.rs` MOVE_KEYS array
+- [x] 6.1 Update `extensions/tools/xiangke_checker/src/main.rs` MOVE_KEYS array
       (14 → 15)
 
 ## 7. Data Files
 
-- [ ] 7.1 Set `stat_mod_target = 0` (SELF) in
+- [x] 7.1 Set `stat_mod_target = 0` (SELF) in
       `resources/moves/earth_barrier.tres`
 
 ## 8. Tests
 
-- [ ] 8.1 Add Rust unit test for `power=0 + SELF + stat_mod` in
+- [x] 8.1 Add Rust unit test for `power=0 + SELF + stat_mod` in
       `extensions/battle/src/action.rs`
-- [ ] 8.2 Add Rust unit test for `power=0 + TARGET + stat_mod` in
+- [x] 8.2 Add Rust unit test for `power=0 + TARGET + stat_mod` in
       `extensions/battle/src/action.rs`
-- [ ] 8.3 Add Rust unit test for non-damaging move log message generation
-- [ ] 8.4 Add Rust integration test for stat modification in battle flow
-- [ ] 8.5 Add GDScript integration test in
+- [x] 8.3 Add Rust unit test for non-damaging move log message generation
+- [x] 8.4 Add Rust integration test for stat modification in battle flow
+- [x] 8.5 Add GDScript integration test in
       `tests/unit/test_battle_flow_service.gd` for stat modification via bridge

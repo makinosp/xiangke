@@ -4,6 +4,7 @@ use rand::Rng;
 
 use xiangke_core::status::StatusEffectData;
 use xiangke_core::types::EffectType;
+use xiangke_core::types::StatModTarget;
 use xiangke_core::types::TypeChart;
 use xiangke_core::types::TypeElement;
 
@@ -259,6 +260,7 @@ mod tests {
                 effect_chance: 0,
                 stat_mod_stat: None,
                 stat_mod_stage: 0,
+                stat_mod_target: StatModTarget::Self_,
                 hit_count: 1,
                 recoil: 0,
                 healing: 0,

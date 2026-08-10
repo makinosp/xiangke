@@ -15,6 +15,7 @@ extends Node
 const TYPE_NAMES: Array[String] = ["Wood", "Fire", "Earth", "Metal", "Water", "Yang", "Yin"]
 const EFFECT_NAMES: Array[String] = ["None", "Burn", "Poison", "Confusion", "Chain", "Charm"]
 const STAT_NAMES: Array[String] = ["Attack", "Defense", "Speed", "Intelligence", "Spirit"]
+const STAT_MOD_TARGET_NAMES: Array[String] = ["Self_", "Target"]
 const CATEGORY_NAMES: Array[String] = ["Physical", "Arts"]
 
 ## Marker used by DataLoader placeholders for missing/corrupted files.
@@ -140,6 +141,8 @@ func _move_to_dict(m: MoveData, errors: Array[String]) -> Dictionary:
 		"stat_mod_stat": _optional_enum_name(STAT_NAMES, m.stat_mod_stat,
 				"move '" + m.id + "' stat_mod_stat", errors),
 		"stat_mod_stage": m.stat_mod_stage,
+		"stat_mod_target": _enum_name(STAT_MOD_TARGET_NAMES, m.stat_mod_target,
+				"move '" + m.id + "' stat_mod_target", errors),
 		"hit_count": m.hit_count,
 		"recoil": m.recoil,
 		"healing": m.healing,

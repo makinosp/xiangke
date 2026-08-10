@@ -38,3 +38,9 @@ enum Stat {
 	INTELLIGENCE,
 	SPIRIT
 }
+
+## Target of a stat modification effect.
+enum StatModTarget {
+	SELF, ## Applies to the move's user (attacker)
+	TARGET ## Applies to the target (defender)
+}
