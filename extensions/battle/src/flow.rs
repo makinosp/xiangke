@@ -7,10 +7,11 @@ use xiangke_core::types::EffectType;
 use xiangke_core::types::TypeChart;
 use xiangke_core::types::TypeElement;
 
-use crate::manager::{find_front_index, living_bench_indices};
+use crate::action::{self, ActionResult};
+use crate::manager::{auto_replace, execute_switch, find_front_index, living_bench_indices};
 use crate::participant::BattleParticipant;
 use crate::participant::Team;
-use crate::state::BattleState;
+use crate::state::{BattleError, BattleState};
 
 /// The action selected by an AI strategy.
 #[derive(Debug, Clone)]
@@ -226,6 +227,131 @@ pub fn process_end_of_turn(
         }
     }
     logs
+}
+
+/// Executes a damaging action from one participant against another.
+///
+/// Performs the `split_at_mut` borrow split needed to mutate both the attacker
+/// and the defender simultaneously, then delegates to
+/// [`action::calculate_damage`]. The attacker and target indices are global
+/// participant indices and may appear in any order.
+///
+/// Returns an error if either index is out of range, the attacker and target
+/// are the same participant, or the move is not present in the battle state.
+pub fn execute_damage_action(
+    state: &mut BattleState,
+    attacker_index: usize,
+    target_index: usize,
+    move_id: &str,
+    rng: &mut impl Rng,
+) -> Result<ActionResult, BattleError> {
+    if attacker_index >= state.participants.len() || target_index >= state.participants.len() {
+        return Err(BattleError::InvalidTarget(format!(
+            "Index out of range: attacker={attacker_index}, target={target_index}"
+        )));
+    }
+    if attacker_index == target_index {
+        return Err(BattleError::InvalidTarget(
+            "Attacker and target cannot be the same participant".into(),
+        ));
+    }
+
+    let mv = state
+        .move_lookup
+        .get(move_id)
+        .map(|m| m.as_ref().clone())
+        .ok_or_else(|| BattleError::MoveNotFound(move_id.into()))?;
+
+    if attacker_index < target_index {
+        let (left, right) = state.participants.split_at_mut(target_index);
+        action::calculate_damage(
+            &mut left[attacker_index],
+            &mut right[0],
+            &mv,
+            target_index,
+            rng,
+        )
+    } else {
+        let (left, right) = state.participants.split_at_mut(attacker_index);
+        action::calculate_damage(
+            &mut right[0],
+            &mut left[target_index],
+            &mv,
+            target_index,
+            rng,
+        )
+    }
+}
+
+/// The outcome of an executed AI turn.
+#[derive(Debug)]
+pub enum AiTurnOutcome {
+    /// An attack was executed against a target participant.
+    Attack(ActionResult),
+    /// The team's front was switched with a benched participant.
+    Switch {
+        /// Index of the benched participant that entered the front.
+        bench_index: usize,
+        /// Log message describing the switch.
+        log: String,
+    },
+    /// No action was available or possible.
+    None,
+}
+
+/// Executes the AI turn for the battle's active participant.
+///
+/// Resolves the active participant, asks the [`BasicAi`] strategy for an
+/// action, and executes it (an attack against the opponent's front or a bench
+/// switch). If the attack defeats the target's front, the first living benched
+/// participant of that team automatically replaces it.
+pub fn execute_ai_turn(state: &mut BattleState, rng: &mut impl Rng) -> AiTurnOutcome {
+    let attacker_index = match state.active_participant {
+        Some(i) => i,
+        None => return AiTurnOutcome::None,
+    };
+
+    let ai = BasicAi::new();
+    let Some(action) = ai.select_action(state, attacker_index) else {
+        return AiTurnOutcome::None;
+    };
+
+    match action {
+        AIAction::Attack {
+            move_id,
+            target_index,
+            ..
+        } => match execute_damage_action(state, attacker_index, target_index, &move_id, rng) {
+            Ok(result) => {
+                if !result.log_message.is_empty() {
+                    state.add_log(result.log_message.clone());
+                }
+                // If the target's front was defeated, bring in a replacement.
+                if target_index < state.participants.len()
+                    && state.participants[target_index].is_defeated
+                {
+                    let target_team = state.participants[target_index].team;
+                    auto_replace(state, target_team);
+                }
+                AiTurnOutcome::Attack(result)
+            }
+            Err(_) => AiTurnOutcome::None,
+        },
+        AIAction::Switch { bench_index, .. } => {
+            let self_team = state.participants[attacker_index].team;
+            match execute_switch(state, self_team, bench_index) {
+                Ok(()) => {
+                    let log = state
+                        .recent_log(1)
+                        .first()
+                        .map(|s| s.to_string())
+                        .unwrap_or_default();
+                    AiTurnOutcome::Switch { bench_index, log }
+                }
+                Err(_) => AiTurnOutcome::None,
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -461,5 +587,96 @@ mod tests {
         let ai = BasicAi::new();
         let action = ai.select_action(&state, 1);
         assert!(action.is_none());
+    }
+
+    #[test]
+    fn test_execute_damage_action_attacker_before_target() {
+        let mut state = make_state();
+        // Player (index 0) attacks enemy front (index 1): attacker before target.
+        let mut rng = StdRng::seed_from_u64(7);
+        let result = execute_damage_action(&mut state, 0, 1, "fire_strike", &mut rng).unwrap();
+        assert!(result.damage_dealt > 0);
+        assert!(state.participants[1].current_hp < 100);
+        // The attacker (player) is unharmed.
+        assert_eq!(state.participants[0].current_hp, 100);
+    }
+
+    #[test]
+    fn test_execute_damage_action_attacker_after_target() {
+        let mut state = make_state();
+        // Enemy (index 1) attacks player front (index 0): attacker after target.
+        let mut rng = StdRng::seed_from_u64(42);
+        let result = execute_damage_action(&mut state, 1, 0, "fire_strike", &mut rng).unwrap();
+        assert!(result.damage_dealt > 0);
+        assert!(state.participants[0].current_hp < 100);
+        // The attacker (enemy) is unharmed.
+        assert_eq!(state.participants[1].current_hp, 100);
+    }
+
+    #[test]
+    fn test_execute_damage_action_miss() {
+        let mut state = make_state();
+        let mut miss_move = state
+            .move_lookup
+            .get("fire_strike")
+            .unwrap()
+            .as_ref()
+            .clone();
+        miss_move.accuracy = 0;
+        state
+            .move_lookup
+            .insert("miss_strike".into(), Box::new(miss_move));
+        let mut rng = StdRng::seed_from_u64(1);
+        let result = execute_damage_action(&mut state, 1, 0, "miss_strike", &mut rng).unwrap();
+        assert!(!result.hit);
+        assert_eq!(result.damage_dealt, 0);
+        assert_eq!(state.participants[0].current_hp, 100);
+    }
+
+    #[test]
+    fn test_execute_ai_turn_attacks_player_front() {
+        let mut state = make_state();
+        // Enemy (index 1) is the active participant.
+        state.active_participant = Some(1);
+        let mut rng = StdRng::seed_from_u64(42);
+        match execute_ai_turn(&mut state, &mut rng) {
+            AiTurnOutcome::Attack(result) => {
+                // The AI attacks the player's front (index 0), never itself.
+                assert_eq!(result.target_index, 0);
+                assert!(state.participants[0].current_hp < 100);
+                assert_eq!(state.participants[1].current_hp, 100);
+            }
+            other => panic!("expected attack, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_execute_ai_turn_switches_on_low_hp() {
+        let mut state = make_state();
+        state.participants.push(make_participant(Team::Enemy, 100));
+        state.participants[1].take_damage(90);
+        state.participants[1].character_data.moves = vec!["fire_strike".into()];
+        state.participants[2].character_data.moves = vec!["fire_strike".into()];
+        state.active_participant = Some(1);
+        let mut rng = StdRng::seed_from_u64(42);
+        match execute_ai_turn(&mut state, &mut rng) {
+            AiTurnOutcome::Switch { bench_index, .. } => {
+                assert_eq!(bench_index, 2);
+                assert!(!state.participants[1].is_front);
+                assert!(state.participants[2].is_front);
+            }
+            other => panic!("expected switch, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_execute_ai_turn_none_when_no_active() {
+        let mut state = make_state();
+        state.active_participant = None;
+        let mut rng = StdRng::seed_from_u64(42);
+        match execute_ai_turn(&mut state, &mut rng) {
+            AiTurnOutcome::None => {}
+            other => panic!("expected none, got {other:?}"),
+        }
     }
 }

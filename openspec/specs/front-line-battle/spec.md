@@ -37,8 +37,9 @@ action is performed; players and AI cannot choose a target.
 
 #### Scenario: AI action targets front
 
-- **WHEN** the AI selects a move
+- **WHEN** the AI takes its turn and selects a damaging move
 - **THEN** the move is applied to the player's current front character
+- **AND** the AI's own front character is never selected as the target
 
 #### Scenario: Non-damaging move stat modification target
 
@@ -130,3 +131,32 @@ character switches to the bench and back.
 
 - **WHEN** a character with active status effects switches to the bench
 - **THEN** the status effects remain when the character returns to the front
+
+### Requirement: AI Action Selection
+
+The system SHALL select an AI action (a damaging move or a bench switch) through
+the battle engine's AI strategy when an enemy participant takes its turn.
+
+#### Scenario: AI chooses a damaging move
+
+- **WHEN** the enemy front's turn begins and a damaging move is available
+- **THEN** the AI selects the move with the highest heuristic score
+- **AND** the move is executed against the player's front character
+
+#### Scenario: AI switches at low HP
+
+- **WHEN** the enemy front's HP ratio is below 0.3 and a living benched enemy
+  exists
+- **THEN** the AI switches with a living benched enemy
+- **AND** the switch consumes the enemy's turn for the round
+
+#### Scenario: AI switches on type disadvantage
+
+- **WHEN** the enemy front's best effectiveness against the player's front is at
+  most 0.5 and a living benched enemy is not worse off
+- **THEN** the AI switches with that benched enemy
+
+#### Scenario: AI turn without valid action
+
+- **WHEN** the AI has no living benched participants and no usable move
+- **THEN** the AI performs no action and its turn ends

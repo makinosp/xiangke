@@ -286,39 +286,17 @@ impl RustBattleSystem {
         };
         let state = self.battle_state.as_mut().unwrap();
 
+        // Player actions always target the enemy's front character.
         let target_index = match manager::find_front_index(state, Team::Enemy) {
             Some(i) => i,
             None => return default,
         };
-        if target_index >= state.participants.len() {
-            return default;
-        }
 
-        let result = if attacker_idx <= target_index {
-            let (left, right) = state.participants.split_at_mut(target_index);
-            match action::calculate_damage(
-                &mut left[attacker_idx],
-                &mut right[0],
-                &mv,
-                target_index,
-                rng,
-            ) {
+        let result =
+            match flow::execute_damage_action(state, attacker_idx, target_index, &mv.id, rng) {
                 Ok(r) => r,
                 Err(_) => return default,
-            }
-        } else {
-            let (left, right) = state.participants.split_at_mut(attacker_idx);
-            match action::calculate_damage(
-                &mut right[0],
-                &mut left[target_index],
-                &mv,
-                target_index,
-                rng,
-            ) {
-                Ok(r) => r,
-                Err(_) => return default,
-            }
-        };
+            };
 
         if !result.log_message.is_empty() {
             state.add_log(result.log_message.clone());
@@ -330,6 +308,40 @@ impl RustBattleSystem {
         }
 
         result_dict(&result)
+    }
+
+    /// Executes the enemy AI's turn for the current active participant using the
+    /// Rust `BasicAi` strategy. The AI either attacks the player's front
+    /// character or switches with a living benched participant. Returns a
+    /// Dictionary describing what happened; `action_type` is `"attack"`,
+    /// `"switch"`, or `"none"`.
+    #[func]
+    fn perform_ai_turn(&mut self) -> Dict {
+        let default = Dict::new();
+        let (state, rng) = match (self.battle_state.as_mut(), self.rng.as_mut()) {
+            (Some(s), Some(r)) => (s, r),
+            _ => return default,
+        };
+        match flow::execute_ai_turn(state, rng) {
+            flow::AiTurnOutcome::Attack(result) => {
+                let mut d = result_dict(&result);
+                d.set("action_type", "attack");
+                d
+            }
+            flow::AiTurnOutcome::Switch { bench_index, log } => {
+                let mut d = Dict::new();
+                d.set("action_type", "switch");
+                d.set("bench_index", bench_index as i64);
+                d.set("log_message", log);
+                d
+            }
+            flow::AiTurnOutcome::None => {
+                let mut d = Dict::new();
+                d.set("action_type", "none");
+                d.set("log_message", "The enemy has no valid action.");
+                d
+            }
+        }
     }
 
     /// Executes a switch for the given team: swap the team's front with a
