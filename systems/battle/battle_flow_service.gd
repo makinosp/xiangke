@@ -72,6 +72,12 @@ func execute_player_action(move: MoveData) -> Dictionary:
 	return _rust_system.execute_player_action(move_payload)
 
 
+## Executes the AI's turn for the current active participant via the Rust AI
+## strategy. Returns a result dictionary with an `action_type` key.
+func perform_ai_turn() -> Dictionary:
+	return _rust_system.perform_ai_turn()
+
+
 ## Switches the team's front character with a benched participant.
 ## Returns true on success.
 func execute_switch(team: int, bench_index: int) -> bool:

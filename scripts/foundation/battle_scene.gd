@@ -93,7 +93,12 @@ func _handle_current_turn() -> void:
 		status_label.text = "%s's turn!" % participant.character_data.name
 		_show_move_selection()
 	else:
-		_execute_ai_turn()
+		# The enemy AI decision and execution live in the Rust battle engine.
+		var result := _flow_service.perform_ai_turn()
+		status_label.text = result.get("log_message", "Enemy acted.")
+		_update_hp_displays()
+		_update_log_display()
+		call_deferred("_advance_turn")
 
 
 func _show_move_selection() -> void:
@@ -239,66 +244,6 @@ func _advance_turn() -> void:
 	_handle_current_turn()
 
 
-func _execute_ai_turn() -> void:
-	var participant := _flow_service.get_active_participant()
-	if participant == null or participant.character_data == null:
-		call_deferred("_advance_turn")
-		return
-
-	# Decide whether to switch: low HP or a type disadvantage.
-	var enemy_front := _flow_service.get_front_participant(BattleParticipant.Team.PLAYER)
-	if enemy_front != null and _should_ai_switch(participant, enemy_front):
-		var bench := _flow_service.get_bench_participants(BattleParticipant.Team.ENEMY)
-		if not bench.is_empty():
-			var switched := _flow_service.execute_switch(BattleParticipant.Team.ENEMY, bench[0].slot_index)
-			if switched:
-				status_label.text = "Enemy switched characters!"
-				_update_hp_displays()
-				_update_log_display()
-				call_deferred("_advance_turn")
-				return
-
-	var move := _select_best_move(participant)
-	var player_front := _flow_service.get_front_participant(BattleParticipant.Team.PLAYER)
-
-	if move != null and player_front != null:
-		var result := _flow_service.execute_player_action(move)
-		status_label.text = result.get("log_message", "Enemy acted.")
-		_update_hp_displays()
-		_update_log_display()
-
-		# If the player's front was defeated, bring in a replacement.
-		if _flow_service.get_front_participant(BattleParticipant.Team.PLAYER) == null:
-			if _flow_service.replace_front_if_defeated(BattleParticipant.Team.PLAYER):
-				_update_hp_displays()
-				_update_log_display()
-
-	call_deferred("_advance_turn")
-
-
-## Returns true if the AI front should switch: front HP is low or the front
-## holds a type disadvantage against the opponent front.
-func _should_ai_switch(ai_front: BattleParticipant, opponent_front: BattleParticipant) -> bool:
-	if ai_front.character_data == null or opponent_front.character_data == null:
-		return false
-	var hp_ratio := float(ai_front.current_hp) / float(ai_front.max_hp)
-	if hp_ratio < 0.3:
-		return true
-
-	var type_chart := TypeChart.new()
-	var best_eff := 0.0
-	for move_id: String in ai_front.character_data.moves:
-		var move_data: MoveData = DataRegistry.get_move(move_id)
-		if move_data == null or move_data.power <= 0:
-			continue
-		var eff := type_chart.resolve_type_effectiveness(
-				move_data.type,
-				opponent_front.character_data.type,
-				opponent_front.character_data.secondary_type)
-		best_eff = max(best_eff, eff)
-	return best_eff > 0.0 and best_eff <= 0.5
-
-
 ## Selects the 3 enemy characters to field in battle from the 6-character
 ## opponent corps. Picks the strongest 3 by combined stats; the strongest is
 ## the first (initial front).
@@ -319,34 +264,6 @@ func _select_enemy_battle_team(opponent_ids: Array[String]) -> Array[String]:
 	for i in range(min(3, ranked.size())):
 		result.append(ranked[i]["id"])
 	return result
-
-
-func _select_best_move(participant: BattleParticipant) -> MoveData:
-	var best_move: MoveData = null
-	var best_score: float = -1.0
-
-	# Only the opponent's front character is a valid target.
-	var opponent_front := _flow_service.get_front_participant(BattleParticipant.Team.PLAYER)
-	if opponent_front == null or opponent_front.character_data == null:
-		return null
-
-	var type_chart := TypeChart.new()
-
-	for move_id: String in participant.character_data.moves:
-		var move_data: MoveData = DataRegistry.get_move(move_id)
-		if move_data == null or move_data.power <= 0:
-			continue
-
-		var eff := type_chart.resolve_type_effectiveness(
-				move_data.type,
-				opponent_front.character_data.type,
-				opponent_front.character_data.secondary_type)
-		var score := float(move_data.power) * eff * (float(move_data.accuracy) / 100.0)
-		if score > best_score:
-			best_score = score
-			best_move = move_data
-
-	return best_move
 
 
 func _on_battle_ended(status: int) -> void:
