@@ -265,6 +265,11 @@ impl RustBattleSystem {
     /// Resolves the opponent's current front character as the target. If the
     /// action defeats the enemy front, the first living benched enemy
     /// automatically replaces it.
+    ///
+    /// The move is resolved by its `id` from the battle's move registry (the
+    /// registry passed to [`start_battle`]), not from `move_data` itself. An
+    /// ID that is not present in the registry yields an empty result
+    /// dictionary rather than an error.
     #[func]
     fn execute_player_action(&mut self, move_data: Dict) -> Dict {
         let default = Dict::new();

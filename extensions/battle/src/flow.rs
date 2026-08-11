@@ -670,6 +670,40 @@ mod tests {
     }
 
     #[test]
+    fn test_execute_ai_turn_switches_on_type_disadvantage() {
+        let mut state = make_state();
+        // Enemy front (index 1) holds a Fire move that is weak against the
+        // single-type Wood player front (0.5 * 0.5 = 0.25x), so the AI switches
+        // on type disadvantage even at full HP.
+        state.participants[1].character_data.moves = vec!["fire_strike".into()];
+        // Enemy bench (index 2) holds an Earth move (2.0 * 2.0 = 4.0x clamped
+        // vs Wood), so it is not worse off than the current front.
+        let mv = state
+            .move_lookup
+            .get("fire_strike")
+            .unwrap()
+            .as_ref()
+            .clone();
+        let mut earth_move = mv.clone();
+        earth_move.element = TypeElement::Earth;
+        state
+            .move_lookup
+            .insert("earth_move".into(), Box::new(earth_move));
+        state.participants.push(make_participant(Team::Enemy, 100));
+        state.participants[2].character_data.moves = vec!["earth_move".into()];
+        state.active_participant = Some(1);
+        let mut rng = StdRng::seed_from_u64(42);
+        match execute_ai_turn(&mut state, &mut rng) {
+            AiTurnOutcome::Switch { bench_index, .. } => {
+                assert_eq!(bench_index, 2);
+                assert!(!state.participants[1].is_front);
+                assert!(state.participants[2].is_front);
+            }
+            other => panic!("expected switch on type disadvantage, got {other:?}"),
+        }
+    }
+
+    #[test]
     fn test_execute_ai_turn_none_when_no_active() {
         let mut state = make_state();
         state.active_participant = None;

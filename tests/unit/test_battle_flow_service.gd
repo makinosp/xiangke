@@ -331,6 +331,47 @@ func test_perform_ai_turn_switches_on_low_hp() -> int:
 		"Enemy front should change after the AI switch")
 
 
+## The enemy AI switches with a benched character when its front holds a type
+## disadvantage against the player's front, even at full HP.
+func test_perform_ai_turn_switches_on_type_disadvantage() -> int:
+	var wood_move := PackedStringArray(["wood_heal"])
+	var player_chars: Array[CharacterData] = [
+		_make_char("p_front", TypeEnums.Type.WOOD, 300, wood_move),
+		_make_char("p_bench1", TypeEnums.Type.WOOD, 150, wood_move),
+		_make_char("p_bench2", TypeEnums.Type.EARTH, 150, wood_move),
+	]
+	# The enemy front holds a Fire move that is weak against the Wood player
+	# front; the enemy bench holds a Metal move that is neutral or better.
+	var fire_move := PackedStringArray(["fire_strike"])
+	var metal_move := PackedStringArray(["iron_cleave"])
+	var enemy_chars: Array[CharacterData] = [
+		_make_char("e_front", TypeEnums.Type.WOOD, 500, fire_move),
+		_make_char("e_bench1", TypeEnums.Type.METAL, 150, metal_move),
+		_make_char("e_bench2", TypeEnums.Type.WATER, 150, metal_move),
+	]
+	if not _service.start_battle(player_chars, enemy_chars):
+		return assert_true(false, "start_battle should succeed")
+
+	var enemy_front := _service.get_front_participant(BattleParticipant.Team.ENEMY)
+	var err := OK
+	err = assert_true(enemy_front != null, "Enemy front should exist"); if err: return err
+	err = assert_true(enemy_front.current_hp == enemy_front.max_hp,
+		"Enemy front should be at full HP (isolates the type-disadvantage switch)"); if err: return err
+	var enemy_front_id: String = enemy_front.character_data.id
+
+	_ensure_enemy_turn()
+
+	var result := _service.perform_ai_turn()
+	err = assert_eq(result["action_type"], "switch",
+		"AI with a type disadvantage at full HP should switch"); if err: return err
+
+	var front_after := _service.get_front_participant(BattleParticipant.Team.ENEMY)
+	err = assert_true(front_after != null,
+		"Enemy should still have a front after the switch"); if err: return err
+	return assert_ne(front_after.character_data.id, enemy_front_id,
+		"Enemy front should change after the type-disadvantage switch")
+
+
 func test_stat_mod_move_updates_participant() -> int:
 	if not _start_3v3():
 		return assert_true(false, "start_battle should succeed")
