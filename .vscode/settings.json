@@ -1,0 +1,8 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "cargo test": true
+  },
+  "search.exclude": {
+    "**/.vendor": true
+  }
+}
