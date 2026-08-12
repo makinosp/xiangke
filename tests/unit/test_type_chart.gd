@@ -17,7 +17,7 @@ func test_type_chart_has_get_effectiveness_method() -> int:
 		"TypeChart should have get_effectiveness method")
 
 
-func test_same_type_is_neutral() -> int:
+func test_same_type_effectiveness_is_neutral() -> int:
 	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.WOOD, TypeEnums.Type.WOOD), 1.0,
 		"WOOD vs WOOD should be 1.0 (neutral)")
 
