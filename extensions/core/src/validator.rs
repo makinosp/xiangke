@@ -13,7 +13,7 @@ const MAX_ACCURACY: u32 = 100;
 /// Maximum effect chance percentage.
 const MAX_EFFECT_CHANCE: u32 = 100;
 /// Maximum stat modification stage (absolute value).
-const MAX_STAT_MOD_STAGE: i32 = 3;
+const MAX_STAT_MOD_STAGE: i32 = 6;
 /// Maximum hit count for multi-hit moves.
 const MAX_HIT_COUNT: u32 = 5;
 /// Maximum recoil percentage.
@@ -919,7 +919,7 @@ mod tests {
     #[test]
     fn test_validate_move_stat_mod_stage_out_of_range() {
         let mut mv = valid_moves()[3].clone(); // has Defense+2
-        mv.stat_mod_stage = 5;
+        mv.stat_mod_stage = 7;
         assert!(validate_move(&mv).is_err());
     }
 
