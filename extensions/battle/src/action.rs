@@ -12,9 +12,8 @@ const MIN_VARIANCE: f64 = 0.85;
 const MAX_VARIANCE: f64 = 1.0;
 const CRITICAL_CHANCE: f64 = 6.0;
 const CRITICAL_MULTIPLIER: f64 = 1.5;
-/// Multiplier applied when the attacker's element matches the move's element.
-/// This is the "Same-Type Attack Bonus" (type match bonus).
-/// No existing project spec defines this value, so the standard 1.5× is used.
+/// Multiplier applied when the attacker's element matches the move's element
+/// (type match bonus). The standard 1.5× is used.
 const TYPE_MATCH_MULTIPLIER: f64 = 1.5;
 
 /// The result of a single action execution during battle.
@@ -36,6 +35,8 @@ pub struct ActionResult {
     pub is_not_very_effective: bool,
     /// True when type_effectiveness == 0.0.
     pub is_immune: bool,
+    /// True when the attacker's element matches the move's element (type match bonus).
+    pub is_type_matched: bool,
     /// Status effect that was applied, if any.
     pub status_applied: Option<EffectType>,
     /// True if the target already had this status.
@@ -72,8 +73,8 @@ pub fn check_effect_chance(chance: u32, rng: &mut impl Rng) -> bool {
     roll_percent(chance, rng)
 }
 
-/// Returns `true` if the attacker's element matches the move's element.
-/// This is the "type match" condition (formerly known as STAB / Same-Type Attack Bonus).
+/// Returns `true` if the attacker's element matches the move's element
+/// (type match condition).
 pub fn is_type_matched(attacker: &BattleParticipant, mv: &MoveData) -> bool {
     attacker.character_data.element == mv.element
 }
@@ -322,6 +323,7 @@ pub fn calculate_damage(
         result.is_super_effective = raw_damage.is_super_effective;
         result.is_not_very_effective = raw_damage.is_not_very_effective;
         result.is_immune = raw_damage.is_immune;
+        result.is_type_matched = raw_damage.is_type_matched;
         result.raw_damage = raw_damage.raw_damage;
 
         result.damage_dealt = defender.take_damage(final_damage);
@@ -381,6 +383,7 @@ impl ActionResult {
             is_super_effective: false,
             is_not_very_effective: false,
             is_immune: false,
+            is_type_matched: false,
             status_applied: None,
             status_resisted: false,
             recoil_damage: 0,
@@ -403,6 +406,7 @@ impl ActionResult {
             is_super_effective: false,
             is_not_very_effective: false,
             is_immune: false,
+            is_type_matched: false,
             status_applied: None,
             status_resisted: false,
             recoil_damage: 0,
@@ -426,6 +430,7 @@ impl From<RawDamage> for ActionResult {
             is_super_effective: raw.is_super_effective,
             is_not_very_effective: raw.is_not_very_effective,
             is_immune: raw.is_immune,
+            is_type_matched: raw.is_type_matched,
             status_applied: None,
             status_resisted: false,
             recoil_damage: 0,
@@ -703,6 +708,7 @@ mod tests {
                 is_super_effective: false,
                 is_not_very_effective: false,
                 is_immune: true,
+                is_type_matched: false,
                 status_applied: None,
                 status_resisted: false,
                 recoil_damage: 0,

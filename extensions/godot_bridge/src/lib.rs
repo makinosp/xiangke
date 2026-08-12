@@ -164,6 +164,7 @@ fn result_dict(r: &action::ActionResult) -> Dict {
     d.set("is_super_effective", r.is_super_effective);
     d.set("is_not_very_effective", r.is_not_very_effective);
     d.set("is_immune", r.is_immune);
+    d.set("is_type_matched", r.is_type_matched);
     d.set(
         "status_applied",
         r.status_applied.map(|e| e as i64).unwrap_or(0),
