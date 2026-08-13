@@ -1,8 +1,11 @@
 use std::collections::HashMap;
+use std::sync::OnceLock;
 
 use rand::Rng;
 
+use xiangke_core::calc;
 use xiangke_core::status::StatusEffectData;
+use xiangke_core::types::DamageCategory;
 use xiangke_core::types::EffectType;
 use xiangke_core::types::TypeChart;
 use xiangke_core::types::TypeElement;
@@ -12,6 +15,19 @@ use crate::manager::{auto_replace, execute_switch, find_front_index, living_benc
 use crate::participant::BattleParticipant;
 use crate::participant::Team;
 use crate::state::{BattleError, BattleState};
+
+/// Lazily-initialized shared type chart, built once per process.
+static TYPE_CHART: OnceLock<TypeChart> = OnceLock::new();
+
+/// Returns the shared `TypeChart` instance.
+fn type_chart() -> &'static TypeChart {
+    TYPE_CHART.get_or_init(TypeChart::default)
+}
+
+/// Minimum variance factor assumed when estimating whether an attack can KO.
+const MIN_VARIANCE_FACTOR: f64 = 0.85;
+/// Type-match bonus multiplier (matches the battle damage pipeline).
+const TYPE_MATCH_MULTIPLIER: f64 = 1.5;
 
 /// The action selected by an AI strategy.
 #[derive(Debug, Clone)]
@@ -46,16 +62,20 @@ const SWITCH_HP_RATIO: f64 = 0.3;
 const SWITCH_TYPE_THRESHOLD: f64 = 0.5;
 
 /// Computes the type effectiveness of a move element against a defender's element(s).
+///
+/// Uses the single-type lookup when the defender has no secondary element, and
+/// the dual-type lookup (product, clamped) otherwise.
 fn move_effectiveness_against(
     type_chart: &TypeChart,
     move_element: TypeElement,
     defender: &BattleParticipant,
 ) -> f64 {
-    let def_secondary = defender
-        .character_data
-        .secondary_element
-        .unwrap_or(defender.character_data.element);
-    type_chart.effectiveness_dual(move_element, defender.character_data.element, def_secondary)
+    match defender.character_data.secondary_element {
+        Some(secondary) => {
+            type_chart.effectiveness_dual(move_element, defender.character_data.element, secondary)
+        }
+        None => type_chart.effectiveness(move_element, defender.character_data.element),
+    }
 }
 
 /// A basic AI that targets the opponent's front character and switches when
@@ -69,6 +89,9 @@ impl BasicAi {
     }
 
     /// Computes the type effectiveness of the attacker's best move against the defender.
+    ///
+    /// Returns `-1.0` when the attacker has no usable damaging move, so that
+    /// "no move" is distinguishable from a 0.0 effectiveness matchup.
     fn best_effectiveness(
         &self,
         state: &BattleState,
@@ -77,8 +100,8 @@ impl BasicAi {
     ) -> f64 {
         let attacker = &state.participants[attacker_index];
         let defender = &state.participants[defender_index];
-        let type_chart = TypeChart::default();
-        let mut best: f64 = 0.0;
+        let type_chart = type_chart();
+        let mut best: f64 = -1.0;
         for move_id in &attacker.character_data.moves {
             let Some(mv) = state.move_lookup.get(move_id) else {
                 continue;
@@ -86,7 +109,7 @@ impl BasicAi {
             if mv.power == 0 {
                 continue;
             }
-            let eff = move_effectiveness_against(&type_chart, mv.element, defender);
+            let eff = move_effectiveness_against(type_chart, mv.element, defender);
             best = best.max(eff);
         }
         best
@@ -100,9 +123,45 @@ impl BasicAi {
             return -1.0;
         }
         let defender = &state.participants[target_index];
-        let type_chart = TypeChart::default();
-        let effectiveness = move_effectiveness_against(&type_chart, mv.element, defender);
+        let effectiveness = move_effectiveness_against(type_chart(), mv.element, defender);
         mv.power as f64 * effectiveness * mv.accuracy as f64 / 100.0
+    }
+
+    /// Estimates the minimum damage `move_id` would deal to the defender,
+    /// assuming worst-case variance and no critical hit.
+    fn estimate_min_damage(
+        &self,
+        state: &BattleState,
+        attacker_index: usize,
+        defender_index: usize,
+        move_id: &str,
+    ) -> u32 {
+        let attacker = &state.participants[attacker_index];
+        let defender = &state.participants[defender_index];
+        let Some(mv) = state.move_lookup.get(move_id) else {
+            return 0;
+        };
+        if mv.power == 0 {
+            return 0;
+        }
+        let (atk, def) = match mv.damage_category {
+            DamageCategory::Physical => (attacker.effective_attack(), defender.effective_defense()),
+            DamageCategory::Arts => (
+                attacker.effective_intelligence(),
+                defender.effective_spirit(),
+            ),
+        };
+        let base = calc::calculate_raw_damage(atk, mv.power, def) as f64;
+        let effectiveness = move_effectiveness_against(type_chart(), mv.element, defender);
+        if effectiveness == 0.0 {
+            return 0;
+        }
+        let type_match = if attacker.character_data.element == mv.element {
+            TYPE_MATCH_MULTIPLIER
+        } else {
+            1.0
+        };
+        ((base * type_match * effectiveness) * MIN_VARIANCE_FACTOR).max(1.0) as u32
     }
 }
 
@@ -128,35 +187,58 @@ impl AiStrategy for BasicAi {
         // The only valid target is the opponent's front character.
         let target_index = find_front_index(state, enemy_team)?;
 
-        // Decide whether to switch: low front HP or type disadvantage.
-        let hp_ratio = attacker.current_hp as f64 / attacker.max_hp as f64;
-        let our_eff = self.best_effectiveness(state, participant_index, target_index);
-        let should_switch =
-            hp_ratio < SWITCH_HP_RATIO || (our_eff > 0.0 && our_eff <= SWITCH_TYPE_THRESHOLD);
-
-        if should_switch {
-            let bench = living_bench_indices(state, self_team);
-            if let Some(&bench_index) = bench.first() {
-                let bench_eff = self.best_effectiveness(state, bench_index, target_index);
-                // Only switch if the bench character is not worse off.
-                if bench_eff >= our_eff {
-                    let score = (1.0 - hp_ratio) * 10.0 + bench_eff;
-                    return Some(AIAction::Switch { bench_index, score });
-                }
-            }
-        }
-
+        // Find the best damaging move first; it is needed both for the attack
+        // decision and for the attack-vs-switch comparison.
         let mut best_move: Option<(String, f64)> = None;
         for move_id in &attacker.character_data.moves {
             let Some(mv) = state.move_lookup.get(move_id) else {
                 continue;
             };
-            if mv.healing > 0 {
+            if mv.power == 0 || mv.healing > 0 {
                 continue;
             }
             let score = self.score_move(state, move_id, target_index);
             if score > 0.0 && (best_move.is_none() || score > best_move.as_ref().unwrap().1) {
                 best_move = Some((move_id.clone(), score));
+            }
+        }
+
+        // Decide whether to switch: low front HP or type disadvantage
+        // (including no usable move, where best effectiveness is -1.0).
+        let hp_ratio = attacker.current_hp as f64 / attacker.max_hp as f64;
+        let our_eff = self.best_effectiveness(state, participant_index, target_index);
+        let should_switch = hp_ratio < SWITCH_HP_RATIO || our_eff <= SWITCH_TYPE_THRESHOLD;
+
+        if should_switch {
+            // Prefer attacking when the best move is guaranteed to defeat the
+            // opponent's front, even at low HP.
+            if let Some((move_id, score)) = &best_move {
+                let est = self.estimate_min_damage(state, participant_index, target_index, move_id);
+                let target_hp = state.participants[target_index].current_hp;
+                if est >= target_hp {
+                    return Some(AIAction::Attack {
+                        move_id: move_id.clone(),
+                        target_index,
+                        score: *score,
+                    });
+                }
+            }
+
+            // Otherwise pick the living benched participant with the best type
+            // effectiveness against the opponent's front.
+            let mut best_bench: Option<(usize, f64)> = None;
+            for bench_index in living_bench_indices(state, self_team) {
+                let bench_eff = self.best_effectiveness(state, bench_index, target_index);
+                if best_bench.is_none_or(|(_, eff)| bench_eff > eff) {
+                    best_bench = Some((bench_index, bench_eff));
+                }
+            }
+            if let Some((bench_index, bench_eff)) = best_bench {
+                // Only switch if the bench character is not worse off.
+                if bench_eff >= our_eff {
+                    let score = (1.0 - hp_ratio) * 10.0 + bench_eff;
+                    return Some(AIAction::Switch { bench_index, score });
+                }
             }
         }
 
@@ -167,9 +249,20 @@ impl AiStrategy for BasicAi {
                 score,
             }),
             None => {
-                let fallback = attacker.character_data.moves.first()?;
+                // Fallback: first usable damaging move — never a healing move.
+                let fallback = attacker
+                    .character_data
+                    .moves
+                    .iter()
+                    .find(|move_id| {
+                        state
+                            .move_lookup
+                            .get(move_id.as_str())
+                            .is_some_and(|mv| mv.power > 0 && mv.healing == 0)
+                    })?
+                    .clone();
                 Some(AIAction::Attack {
-                    move_id: fallback.clone(),
+                    move_id: fallback,
                     target_index,
                     score: 0.0,
                 })
@@ -340,14 +433,7 @@ pub fn execute_ai_turn(state: &mut BattleState, rng: &mut impl Rng) -> AiTurnOut
         AIAction::Switch { bench_index, .. } => {
             let self_team = state.participants[attacker_index].team;
             match execute_switch(state, self_team, bench_index) {
-                Ok(()) => {
-                    let log = state
-                        .recent_log(1)
-                        .first()
-                        .map(|s| s.to_string())
-                        .unwrap_or_default();
-                    AiTurnOutcome::Switch { bench_index, log }
-                }
+                Ok(log) => AiTurnOutcome::Switch { bench_index, log },
                 Err(_) => AiTurnOutcome::None,
             }
         }
@@ -673,11 +759,11 @@ mod tests {
     fn test_execute_ai_turn_switches_on_type_disadvantage() {
         let mut state = make_state();
         // Enemy front (index 1) holds a Fire move that is weak against the
-        // single-type Wood player front (0.5 * 0.5 = 0.25x), so the AI switches
-        // on type disadvantage even at full HP.
+        // single-type Wood player front (0.5x), so the AI switches on type
+        // disadvantage even at full HP.
         state.participants[1].character_data.moves = vec!["fire_strike".into()];
-        // Enemy bench (index 2) holds an Earth move (2.0 * 2.0 = 4.0x clamped
-        // vs Wood), so it is not worse off than the current front.
+        // Enemy bench (index 2) holds an Earth move (2.0x vs Wood), so it is
+        // not worse off than the current front.
         let mv = state
             .move_lookup
             .get("fire_strike")
@@ -711,6 +797,118 @@ mod tests {
         match execute_ai_turn(&mut state, &mut rng) {
             AiTurnOutcome::None => {}
             other => panic!("expected none, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_effectiveness_single_type_not_squared() {
+        let state = make_state();
+        // Player front (index 0) is single-type Wood.
+        // Fire vs Wood is 0.5 — not 0.25 (the squared dual-type result).
+        let eff =
+            move_effectiveness_against(type_chart(), TypeElement::Fire, &state.participants[0]);
+        assert!((eff - 0.5).abs() < f64::EPSILON, "got {eff}");
+    }
+
+    #[test]
+    fn test_effectiveness_dual_type_uses_both_elements() {
+        let mut state = make_state();
+        // Give the player front a secondary Fire element: Wood/Fire defender.
+        state.participants[0].character_data.secondary_element = Some(TypeElement::Fire);
+        // Metal vs Wood/Fire = chart[Wood][Metal] * chart[Fire][Metal] = 1.0 * 2.0.
+        let eff =
+            move_effectiveness_against(type_chart(), TypeElement::Metal, &state.participants[0]);
+        assert!((eff - 2.0).abs() < f64::EPSILON, "got {eff}");
+    }
+
+    #[test]
+    fn test_ai_fallback_skips_healing_only() {
+        let mut state = make_state();
+        state.participants.push(make_participant(Team::Enemy, 100));
+        let mv = state.move_lookup.get("fire_strike").unwrap();
+        let mut healing_move = mv.as_ref().clone();
+        healing_move.healing = 50;
+        state
+            .move_lookup
+            .insert("heal".into(), Box::new(healing_move));
+        // Enemy front has only a healing move; the bench has a real attack.
+        state.participants[1].character_data.moves = vec!["heal".into()];
+        state.participants[2].character_data.moves = vec!["fire_strike".into()];
+        let ai = BasicAi::new();
+        // The AI must never select the healing move as an attack; it switches
+        // to the bench instead.
+        match ai.select_action(&state, 1) {
+            Some(AIAction::Switch { bench_index, .. }) => assert_eq!(bench_index, 2),
+            Some(AIAction::Attack { move_id, .. }) => {
+                panic!("expected switch, got attack with {move_id}")
+            }
+            None => panic!("expected switch"),
+        }
+    }
+
+    #[test]
+    fn test_ai_switches_when_no_attack_move() {
+        let mut state = make_state();
+        state.participants.push(make_participant(Team::Enemy, 100));
+        // Enemy front has no moves at all: best effectiveness is -1.0, which
+        // is at most the switch threshold, so the AI switches to the bench.
+        state.participants[1].character_data.moves = vec![];
+        state.participants[2].character_data.moves = vec!["fire_strike".into()];
+        let ai = BasicAi::new();
+        let action = ai.select_action(&state, 1);
+        match action {
+            Some(AIAction::Switch { bench_index, .. }) => assert_eq!(bench_index, 2),
+            other => panic!("expected switch, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_ai_switches_to_best_bench() {
+        let mut state = make_state();
+        state.participants.push(make_participant(Team::Enemy, 100));
+        state.participants.push(make_participant(Team::Enemy, 100));
+        // Player front is single-type Wood.
+        // Enemy front holds a Fire move (0.5x vs Wood) → type disadvantage.
+        state.participants[1].character_data.moves = vec!["fire_strike".into()];
+        // Bench 2: Fire move (0.5x vs Wood) — same matchup as the front.
+        state.participants[2].character_data.moves = vec!["fire_strike".into()];
+        // Bench 3: Metal move (1.0x vs Wood) — strictly better matchup.
+        let mv = state
+            .move_lookup
+            .get("fire_strike")
+            .unwrap()
+            .as_ref()
+            .clone();
+        let mut metal_strike = mv.clone();
+        metal_strike.element = TypeElement::Metal;
+        state
+            .move_lookup
+            .insert("metal_strike".into(), Box::new(metal_strike));
+        state.participants[3].character_data.moves = vec!["metal_strike".into()];
+        let ai = BasicAi::new();
+        let action = ai.select_action(&state, 1);
+        match action {
+            Some(AIAction::Switch { bench_index, .. }) => assert_eq!(bench_index, 3),
+            other => panic!("expected switch to best bench (3), got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_ai_attacks_when_can_defeat_front() {
+        let mut state = make_state();
+        state.participants.push(make_participant(Team::Enemy, 100));
+        // Enemy front at low HP (10/100) — switch condition is met.
+        state.participants[1].take_damage(90);
+        // Player front at 15/100: the enemy's minimum Fire Strike damage (~20)
+        // defeats it, so the AI must attack instead of switching.
+        state.participants[0].take_damage(85);
+        state.participants[1].character_data.moves = vec!["fire_strike".into()];
+        state.participants[2].character_data.moves = vec!["fire_strike".into()];
+        let ai = BasicAi::new();
+        let action = ai.select_action(&state, 1);
+        match action {
+            Some(AIAction::Attack { target_index, .. }) => assert_eq!(target_index, 0),
+            other => panic!("expected attack, got {other:?}"),
         }
     }
 }
