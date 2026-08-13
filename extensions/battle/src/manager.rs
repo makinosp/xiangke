@@ -50,11 +50,12 @@ pub fn living_bench_indices(state: &BattleState, team: Team) -> Vec<usize> {
 ///
 /// Validates that the target is alive, on the same team, and currently benched.
 /// Returns an error otherwise. Stat stages and status effects are preserved.
+/// On success, returns the switch log message.
 pub fn execute_switch(
     state: &mut BattleState,
     team: Team,
     bench_index: usize,
-) -> Result<(), BattleError> {
+) -> Result<String, BattleError> {
     if bench_index >= state.participants.len() {
         return Err(BattleError::InvalidTarget(format!(
             "Bench index {bench_index} out of range"
@@ -90,10 +91,9 @@ pub fn execute_switch(
     state.participants[front_index].is_front = false;
     state.participants[bench_index].is_front = true;
 
-    state.add_log(format!(
-        "{front_name} switches out! {bench_name} enters the front line."
-    ));
-    Ok(())
+    let log = format!("{front_name} switches out! {bench_name} enters the front line.");
+    state.add_log(log.clone());
+    Ok(log)
 }
 
 /// Promotes the first living benched participant of a team to the front.
@@ -272,6 +272,9 @@ mod tests {
         let mut state = make_state(2, 2);
         let result = execute_switch(&mut state, Team::Player, 1);
         assert!(result.is_ok());
+        let log = result.unwrap();
+        assert!(log.contains("switches out"));
+        assert!(log.contains("enters the front line"));
         assert!(!state.participants[0].is_front);
         assert!(state.participants[1].is_front);
     }
