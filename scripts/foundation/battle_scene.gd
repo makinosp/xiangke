@@ -9,6 +9,8 @@ extends Control
 
 var _flow_service: BattleFlowService = null
 var _is_selecting_switch: bool = false
+var _player_panels: Array[BattleUnitPanel] = []
+var _enemy_panels: Array[BattleUnitPanel] = []
 
 
 func _ready() -> void:
@@ -123,7 +125,12 @@ func _show_move_selection() -> void:
 			continue
 
 		var btn := Button.new()
-		btn.text = "%s (Power: %d, Acc: %d%%)" % [move_data.name, move_data.power, move_data.accuracy]
+		var type_color: Color = TypeColors.get_type_color(move_data.type)
+		var type_name: String = TypeColors.get_type_name(move_data.type)
+		var cat_name: String = TypeColors.get_category_name(move_data.damage_category)
+		btn.text = "[%s] %s (P:%d A:%d%% %s)" % [type_name, move_data.name, move_data.power, move_data.accuracy, cat_name]
+		btn.add_theme_color_override("font_color", type_color)
+		btn.add_theme_color_override("font_hover_color", type_color.lightened(0.3))
 		btn.connect("pressed", Callable(self, "_on_move_selected").bind(move_data))
 		btn.size_flags_horizontal = Control.SIZE_EXPAND
 		move_container.add_child(btn)
@@ -153,11 +160,21 @@ func _show_switch_selection() -> void:
 		return
 
 	for p: BattleParticipant in bench:
+		var wrapper := VBoxContainer.new()
+		wrapper.size_flags_horizontal = Control.SIZE_EXPAND
+
+		var panel: BattleUnitPanel = preload("res://scenes/battle_unit_panel.tscn").instantiate()
+		panel.update_from_participant(p)
+		panel.size_flags_horizontal = Control.SIZE_EXPAND
+		wrapper.add_child(panel)
+
 		var btn := Button.new()
-		var name := "Unknown" if p.character_data == null else p.character_data.name
-		btn.text = "%s (HP: %d/%d)" % [name, p.current_hp, p.max_hp]
+		btn.text = "Switch In"
+		btn.size_flags_horizontal = Control.SIZE_EXPAND
 		btn.connect("pressed", Callable(self, "_on_switch_target_selected").bind(p.slot_index))
-		action_container.add_child(btn)
+		wrapper.add_child(btn)
+
+		action_container.add_child(wrapper)
 
 	var cancel_btn := Button.new()
 	cancel_btn.text = "Cancel"
@@ -289,42 +306,40 @@ func _update_hp_displays() -> void:
 	_update_team_hp(enemy_hp_container, BattleParticipant.Team.ENEMY)
 
 
-## Renders the team's HP: the front character highlighted, benched characters
-## dimmed below.
+## Updates the team's HP display using BattleUnitPanel instances.
+## Creates panels on first call; reuses and reorders them on subsequent calls.
 func _update_team_hp(container: HBoxContainer, team: int) -> void:
-	for child: Node in container.get_children():
-		child.queue_free()
+	var is_player: bool = (team == BattleParticipant.Team.PLAYER)
+	var panels: Array[BattleUnitPanel] = _player_panels if is_player else _enemy_panels
 
+	# Collect all participants in order: front first, then bench.
+	var all_participants: Array[BattleParticipant] = []
 	var front := _flow_service.get_front_participant(team)
 	if front != null:
-		var front_label := Label.new()
-		if front.character_data == null:
-			front_label.text = "Unknown"
-		elif front.is_defeated:
-			front_label.text = "%s: DEFEATED" % front.character_data.name
-			front_label.modulate = Color.GRAY
-		else:
-			front_label.text = "%s: %d/%d" % [front.character_data.name, front.current_hp, front.max_hp]
-			var hp_ratio: float = float(front.current_hp) / float(front.max_hp)
-			if hp_ratio < 0.25:
-				front_label.modulate = Color.RED
-			elif hp_ratio < 0.5:
-				front_label.modulate = Color.YELLOW
-			else:
-				front_label.modulate = Color.WHITE
-		container.add_child(front_label)
-
+		all_participants.append(front)
 	for p: BattleParticipant in _flow_service.get_bench_participants(team):
-		var label := Label.new()
-		if p.character_data == null:
-			label.text = "Unknown (bench)"
-		elif p.is_defeated:
-			label.text = "%s: DEFEATED" % p.character_data.name
-			label.modulate = Color.GRAY
-		else:
-			label.text = "%s: %d/%d" % [p.character_data.name, p.current_hp, p.max_hp]
-			label.modulate = Color(0.6, 0.6, 0.6)
-		container.add_child(label)
+		all_participants.append(p)
+
+	# Ensure we have exactly the right number of panels.
+	while panels.size() < all_participants.size():
+		var panel: BattleUnitPanel = preload("res://scenes/battle_unit_panel.tscn").instantiate()
+		panels.append(panel)
+	while panels.size() > all_participants.size():
+		var old: BattleUnitPanel = panels.pop_back()
+		if old.get_parent() != null:
+			old.get_parent().remove_child(old)
+		old.queue_free()
+
+	# Rebuild the container with panels in the correct order.
+	for child: Node in container.get_children():
+		container.remove_child(child)
+
+	for i in range(all_participants.size()):
+		var p: BattleParticipant = all_participants[i]
+		var panel: BattleUnitPanel = panels[i]
+		panel.update_from_participant(p)
+		panel.set_front_highlight(p.is_front)
+		container.add_child(panel)
 
 
 func _update_log_display() -> void:
