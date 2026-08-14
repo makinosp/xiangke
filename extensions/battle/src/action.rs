@@ -12,8 +12,9 @@ const MIN_VARIANCE: f64 = 0.85;
 const MAX_VARIANCE: f64 = 1.0;
 const CRITICAL_CHANCE: f64 = 6.0;
 const CRITICAL_MULTIPLIER: f64 = 1.5;
-/// Multiplier applied when the attacker's element matches the move's element
-/// (type match bonus). The standard 1.5× is used.
+/// Multiplier applied when the attacker's element matches the move's element.
+/// This is the "Same-Type Attack Bonus" (type match bonus).
+/// No existing project spec defines this value, so the standard 1.5× is used.
 const TYPE_MATCH_MULTIPLIER: f64 = 1.5;
 
 /// The result of a single action execution during battle.
@@ -73,8 +74,8 @@ pub fn check_effect_chance(chance: u32, rng: &mut impl Rng) -> bool {
     roll_percent(chance, rng)
 }
 
-/// Returns `true` if the attacker's element matches the move's element
-/// (type match condition).
+/// Returns `true` if the attacker's element matches the move's element.
+/// This is the "type match" condition (formerly known as STAB / Same-Type Attack Bonus).
 pub fn is_type_matched(attacker: &BattleParticipant, mv: &MoveData) -> bool {
     attacker.character_data.element == mv.element
 }
@@ -835,7 +836,6 @@ mod tests {
         power: u32,
         atk: u32,
         def_stat: u32,
-        seed: u64,
     ) -> u32 {
         let attacker = BattleParticipant::new(
             CharacterData {
@@ -896,7 +896,8 @@ mod tests {
             damage_category: DamageCategory::Physical,
             description: "".into(),
         };
-        let mut rng = StdRng::seed_from_u64(seed);
+        // Fixed seed keeps damage variance/critical rolls deterministic across tests.
+        let mut rng = StdRng::seed_from_u64(42);
         let result =
             calculate_damage(&mut attacker.clone(), &mut defender, &mv, 1, &mut rng).unwrap();
         result.damage_dealt
@@ -914,7 +915,6 @@ mod tests {
             60,
             100,
             50,
-            42,
         );
         // Fire vs Fire = 1.0× (neutral)
         let damage_1x = compute_damage(
@@ -925,7 +925,6 @@ mod tests {
             60,
             100,
             50,
-            42,
         );
         assert!(
             damage_2x > damage_1x,
@@ -947,7 +946,6 @@ mod tests {
             60,
             100,
             50,
-            42,
         );
         // Fire vs Fire = 1.0× (neutral)
         let damage_1x = compute_damage(
@@ -958,7 +956,6 @@ mod tests {
             60,
             100,
             50,
-            42,
         );
         assert!(
             damage_05x < damage_1x,
@@ -1021,7 +1018,6 @@ mod tests {
             60,
             100,
             50,
-            42,
         );
         // Fire vs Water = 2.0, so damage should be > 0
         assert!(damage > 0, "Super effective move should deal damage");
@@ -1039,7 +1035,6 @@ mod tests {
             60,
             100,
             50,
-            42,
         );
         // Different type: Water attacker, Fire move, vs Wood defender (0.5× effectiveness)
         let damage_unmatched = compute_damage(
@@ -1050,7 +1045,6 @@ mod tests {
             60,
             100,
             50,
-            42,
         );
         assert!(
             damage_matched > damage_unmatched,
