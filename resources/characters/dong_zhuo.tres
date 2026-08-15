@@ -16,3 +16,4 @@ intelligence = 75
 spirit = 95
 moves = PackedStringArray("iron_cleave", "metal_slash", "fire_strike", "earth_barrier")
 description = "The tyrant who seized the Han capital. His brutality forged the alliance that would topple him."
+portrait_path = ""

@@ -16,3 +16,4 @@ intelligence = 95
 spirit = 100
 moves = PackedStringArray("metal_slash", "iron_cleave", "earth_barrier", "war_cry")
 description = "Proud lord of the north. Vast in power and following, undone by indecision at Guandu."
+portrait_path = ""

@@ -16,3 +16,4 @@ intelligence = 70
 spirit = 80
 moves = PackedStringArray("fire_strike", "flame_burst", "iron_cleave", "war_cry")
 description = "A fierce and proud Shu general. His talents were overshadowed by mistrust and a fiery temper."
+portrait_path = ""

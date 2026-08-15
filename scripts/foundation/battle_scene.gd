@@ -6,12 +6,16 @@ extends Control
 @onready var move_list: VBoxContainer = $MoveContainer/MovePanel/PanelContent/MoveList
 @onready var switch_slot: VBoxContainer = $MoveContainer/MovePanel/PanelContent/SwitchSlot
 @onready var status_label: Label = $StatusLabel
-@onready var player_hp_container: HBoxContainer = $PlayerHPContainer
-@onready var enemy_hp_container: Container = $EnemyHPContainer
+@onready var player_front_panel: BattleUnitPanel = $PlayerFrontPanel
+@onready var enemy_front_panel: BattleUnitPanel = $EnemyFrontPanel
+@onready var player_bench_container: HBoxContainer = $PlayerBenchContainer
+@onready var enemy_bench_container: HBoxContainer = $EnemyBenchContainer
 
 var _flow_service: BattleFlowService = null
 var _is_selecting_switch: bool = false
+## Reusable panels for the player's bench row.
 var _player_panels: Array[BattleUnitPanel] = []
+## Reusable panels for the enemy's bench row.
 var _enemy_panels: Array[BattleUnitPanel] = []
 ## Move option buttons in the order they appear in the list.
 var _move_buttons: Array[MoveButton] = []
@@ -352,59 +356,60 @@ func _update_hp_displays() -> void:
 	if _flow_service == null:
 		return
 
-	_update_team_hp(player_hp_container, BattleParticipant.Team.PLAYER)
-	_update_team_hp(enemy_hp_container, BattleParticipant.Team.ENEMY)
+	_update_player_team()
+	_update_enemy_team()
 
 
-## Updates the team's HP display using BattleUnitPanel instances.
-## Creates panels on first call; reuses and reorders them on subsequent calls.
-## The player team renders all fielded participants; the opponent team renders
-## one slot per corps member, hiding unrevealed characters.
-func _update_team_hp(container: Container, team: int) -> void:
-	if team == BattleParticipant.Team.PLAYER:
-		_update_player_team_hp(container, _player_panels)
-	else:
-		_update_enemy_team_hp(container, _enemy_panels)
-
-
-## Updates the player's team display: front first, then bench, full identity.
-func _update_player_team_hp(container: Container, panels: Array[BattleUnitPanel]) -> void:
-	# Collect all participants in order: front first, then bench.
-	var all_participants: Array[BattleParticipant] = []
+## Updates the player's display: the front character in a large panel and the
+## bench characters in a row of small panels.
+func _update_player_team() -> void:
+	# Front: large panel with the active character.
 	var front := _flow_service.get_front_participant(BattleParticipant.Team.PLAYER)
 	if front != null:
-		all_participants.append(front)
-	for p: BattleParticipant in _flow_service.get_bench_participants(BattleParticipant.Team.PLAYER):
-		all_participants.append(p)
+		player_front_panel.set_size_mode(BattleUnitPanel.SizeMode.LARGE)
+		player_front_panel.update_from_participant(front)
+		player_front_panel.set_front_highlight(true)
 
-	_resize_panels(panels, all_participants.size())
+	# Bench: small panels for the remaining living participants.
+	var bench: Array[BattleParticipant] = _flow_service.get_bench_participants(
+			BattleParticipant.Team.PLAYER)
+	_resize_panels(_player_panels, bench.size())
 
-	# Rebuild the container with panels in the correct order.
-	for child: Node in container.get_children():
-		container.remove_child(child)
+	# Rebuild the bench row with panels in the correct order.
+	for child: Node in player_bench_container.get_children():
+		player_bench_container.remove_child(child)
 
-	for i in range(all_participants.size()):
-		var p: BattleParticipant = all_participants[i]
-		var panel: BattleUnitPanel = panels[i]
+	for i in range(bench.size()):
+		var p: BattleParticipant = bench[i]
+		var panel: BattleUnitPanel = _player_panels[i]
+		panel.set_size_mode(BattleUnitPanel.SizeMode.SMALL)
 		# Add before updating: add_child() runs _ready()/_build_ui(), which the
 		# update methods rely on (labels would be null otherwise).
-		container.add_child(panel)
+		player_bench_container.add_child(panel)
 		panel.update_from_participant(p)
-		panel.set_front_highlight(p.is_front)
+		panel.set_front_highlight(false)
 
 
-## Updates the opponent's team display: one slot per corps member in corps
-## order. Slots whose character has never appeared on the field are grayed out
-## (identity only, no battle state); the rest are fully displayed.
-func _update_enemy_team_hp(container: Container, panels: Array[BattleUnitPanel]) -> void:
+## Updates the opponent's display: the front character in a large panel and the
+## remaining corps members in a row of small panels, one slot per corps member
+## in corps order. Slots whose character has never appeared on the field are
+## grayed out (identity only, no battle state); the rest are fully displayed.
+func _update_enemy_team() -> void:
 	# Mark the current front's corps slot as revealed: every path that changes
 	# the front funnels through this update. The Rust bridge reports global
 	# participant indices in slot_index, so resolve the corps position by id.
 	var front := _flow_service.get_front_participant(BattleParticipant.Team.ENEMY)
+	var front_corps_idx: int = -1
 	if front != null:
-		var front_corps_idx: int = _enemy_corps_ids.find(front.character_data.id)
+		front_corps_idx = _enemy_corps_ids.find(front.character_data.id)
 		if front_corps_idx >= 0 and front_corps_idx < _revealed_enemy_slots.size():
 			_revealed_enemy_slots[front_corps_idx] = true
+
+	# Front: large panel with the active character.
+	if front != null:
+		enemy_front_panel.set_size_mode(BattleUnitPanel.SizeMode.LARGE)
+		enemy_front_panel.update_from_participant(front)
+		enemy_front_panel.set_front_highlight(true)
 
 	# Map corps index -> participant for revealed slots.
 	var by_corps: Dictionary = {}
@@ -418,23 +423,31 @@ func _update_enemy_team_hp(container: Container, panels: Array[BattleUnitPanel])
 		if corps_idx >= 0:
 			by_corps[corps_idx] = p
 
-	_resize_panels(panels, _enemy_corps_ids.size())
-
-	# Rebuild the container with one panel per corps member.
-	for child: Node in container.get_children():
-		container.remove_child(child)
-
+	# Bench: one slot per corps member except the current front, in corps order.
+	var bench_indices: Array[int] = []
 	for i in range(_enemy_corps_ids.size()):
-		var panel: BattleUnitPanel = panels[i]
+		if i != front_corps_idx:
+			bench_indices.append(i)
+
+	_resize_panels(_enemy_panels, bench_indices.size())
+
+	# Rebuild the bench row.
+	for child: Node in enemy_bench_container.get_children():
+		enemy_bench_container.remove_child(child)
+
+	for i in range(bench_indices.size()):
+		var corps_idx: int = bench_indices[i]
+		var panel: BattleUnitPanel = _enemy_panels[i]
+		panel.set_size_mode(BattleUnitPanel.SizeMode.SMALL)
 		# Add before updating: add_child() runs _ready()/_build_ui(), which the
 		# placeholder/update methods rely on (labels would be null otherwise).
-		container.add_child(panel)
-		var p: BattleParticipant = by_corps.get(i)
-		var char_data: CharacterData = DataRegistry.get_character(_enemy_corps_ids[i])
-		if _revealed_enemy_slots[i] and p != null:
+		enemy_bench_container.add_child(panel)
+		var p: BattleParticipant = by_corps.get(corps_idx)
+		var char_data: CharacterData = DataRegistry.get_character(_enemy_corps_ids[corps_idx])
+		if _revealed_enemy_slots[corps_idx] and p != null:
 			panel.update_from_participant(p)
-			panel.set_front_highlight(p.is_front)
-		elif _revealed_enemy_slots[i]:
+			panel.set_front_highlight(false)
+		elif _revealed_enemy_slots[corps_idx]:
 			# Revealed earlier but no longer among the living participants:
 			# the character was defeated (the bridge only reports living
 			# bench participants). Render a distinct defeated state so it

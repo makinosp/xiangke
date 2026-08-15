@@ -16,3 +16,4 @@ intelligence = 75
 spirit = 95
 moves = PackedStringArray("iron_cleave", "earth_barrier", "metal_slash", "wood_heal")
 description = "The unbreakable shield of Wei. Held Fan Castle against Guan Yu's siege with a skeleton garrison."
+portrait_path = ""

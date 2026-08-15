@@ -16,3 +16,4 @@ intelligence = 120
 spirit = 100
 moves = PackedStringArray("flame_burst", "water_surge", "war_cry", "earth_barrier")
 description = "The 'Young Phoenix,' rival of Zhuge Liang. His genius was cut short at Fallen Phoenix Slope."
+portrait_path = ""

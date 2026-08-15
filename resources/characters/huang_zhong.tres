@@ -15,3 +15,4 @@ intelligence = 80
 spirit = 75
 moves = PackedStringArray("fire_strike", "flame_burst", "iron_cleave", "water_surge")
 description = "The veteran archer of Shu. Age has not dulled his aim or his fighting spirit."
+portrait_path = ""

@@ -16,3 +16,4 @@ intelligence = 90
 spirit = 85
 moves = PackedStringArray("fire_strike", "war_cry", "water_surge", "wood_heal")
 description = "The mesmerizing beauty of the Three Kingdoms. Her charms sway the hearts of heroes."
+portrait_path = ""

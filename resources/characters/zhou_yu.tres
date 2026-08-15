@@ -16,3 +16,4 @@ intelligence = 125
 spirit = 100
 moves = PackedStringArray("fire_strike", "flame_burst", "water_surge", "war_cry")
 description = "The handsome commander. His strategies burn bright and strike swift like a phoenix in battle."
+portrait_path = ""

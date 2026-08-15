@@ -3,6 +3,11 @@
 class_name BattleUnitPanel
 extends PanelContainer
 
+## Size presets: STANDARD (default), LARGE (front characters), SMALL (bench).
+enum SizeMode {STANDARD, LARGE, SMALL}
+
+## Root VBox holding all rows, kept for size-mode adjustments.
+var _vbox: VBoxContainer
 ## Name label showing the character's display name.
 var _name_label: Label
 ## Type label showing primary (+ secondary) type in type color.
@@ -15,26 +20,52 @@ var _hp_label: Label
 var _status_container: HBoxContainer
 ## Container for stat stage indicators.
 var _stat_container: HBoxContainer
+## Portrait display area.
+var _portrait_rect: TextureRect
+## Cached placeholder texture.
+var _placeholder_texture: Texture2D
 ## True while the panel displays a grayed-out placeholder (identity only).
 var _is_hidden: bool = false
+## Current size preset; defaults to STANDARD.
+var _size_mode: SizeMode = SizeMode.STANDARD
 
 
 func _ready() -> void:
 	_build_ui()
 
 
+## Switches the panel between STANDARD, LARGE (front), and SMALL (bench) sizes.
+## Applies immediately when the UI has been built; otherwise the preset is
+## applied once _build_ui() runs.
+func set_size_mode(mode: SizeMode) -> void:
+	_size_mode = mode
+	if _vbox != null:
+		_apply_size_mode()
+
+
 func _build_ui() -> void:
 	# Panel styling for visual distinction.
 	add_theme_stylebox_override("panel", _create_panel_style())
 
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 2)
-	add_child(vbox)
+	_vbox = VBoxContainer.new()
+	_vbox.add_theme_constant_override("separation", 2)
+	add_child(_vbox)
+
+	# Portrait (2:3 aspect ratio, keep-aspect centered).
+	# The texture is assigned via _load_portrait(); keeping it null here is
+	# fine (renders as an empty area until the first update).
+	# EXPAND_IGNORE_SIZE lets the size presets (SMALL/STANDARD/LARGE) control
+	# the rect via custom_minimum_size instead of the texture's pixel size.
+	_portrait_rect = TextureRect.new()
+	_portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait_rect.custom_minimum_size = Vector2(120, 180)
+	_vbox.add_child(_portrait_rect)
 
 	# Row 1: Name + Type
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 6)
-	vbox.add_child(header)
+	_vbox.add_child(header)
 
 	_name_label = Label.new()
 	_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -51,23 +82,61 @@ func _build_ui() -> void:
 	_hp_bar.max_value = 100
 	_hp_bar.value = 100
 	_hp_bar.show_percentage = false
-	vbox.add_child(_hp_bar)
+	_vbox.add_child(_hp_bar)
 
 	# Row 3: HP Text
 	_hp_label = Label.new()
 	_hp_label.add_theme_font_size_override("font_size", 11)
 	_hp_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-	vbox.add_child(_hp_label)
+	_vbox.add_child(_hp_label)
 
 	# Row 4: Status Effects
 	_status_container = HBoxContainer.new()
 	_status_container.add_theme_constant_override("separation", 4)
-	vbox.add_child(_status_container)
+	_vbox.add_child(_status_container)
 
 	# Row 5: Stat Stages
 	_stat_container = HBoxContainer.new()
 	_stat_container.add_theme_constant_override("separation", 4)
-	vbox.add_child(_stat_container)
+	_vbox.add_child(_stat_container)
+
+	_apply_size_mode()
+
+
+## Applies the current size preset: portrait size, fonts, HP bar size,
+## status/stat row visibility, and panel margins.
+func _apply_size_mode() -> void:
+	match _size_mode:
+		SizeMode.LARGE:
+			_portrait_rect.custom_minimum_size = Vector2(160, 240)
+			_name_label.add_theme_font_size_override("font_size", 16)
+			_type_label.add_theme_font_size_override("font_size", 14)
+			_hp_bar.custom_minimum_size = Vector2(160, 14)
+			_hp_label.add_theme_font_size_override("font_size", 13)
+			_status_container.show()
+			_stat_container.show()
+			custom_minimum_size = Vector2(160, 0)
+		SizeMode.SMALL:
+			_portrait_rect.custom_minimum_size = Vector2(40, 60)
+			_name_label.add_theme_font_size_override("font_size", 10)
+			_type_label.add_theme_font_size_override("font_size", 9)
+			_hp_bar.custom_minimum_size = Vector2(40, 8)
+			_hp_label.add_theme_font_size_override("font_size", 9)
+			_status_container.hide()
+			_stat_container.hide()
+			custom_minimum_size = Vector2(0, 0)
+		_:
+			_portrait_rect.custom_minimum_size = Vector2(120, 180)
+			_name_label.add_theme_font_size_override("font_size", 14)
+			_type_label.add_theme_font_size_override("font_size", 12)
+			_hp_bar.custom_minimum_size = Vector2(120, 12)
+			_hp_label.add_theme_font_size_override("font_size", 11)
+			_status_container.show()
+			_stat_container.show()
+			custom_minimum_size = Vector2(160, 0)
+
+	# Panel margins adapt to the size preset.
+	add_theme_stylebox_override("panel", _create_panel_style())
 
 
 func _create_panel_style() -> StyleBoxFlat:
@@ -76,7 +145,12 @@ func _create_panel_style() -> StyleBoxFlat:
 	style.border_color = Color(0.3, 0.3, 0.4)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(4)
-	style.set_content_margin_all(6)
+	var margin := 6
+	if _size_mode == SizeMode.SMALL:
+		margin = 4
+	elif _size_mode == SizeMode.LARGE:
+		margin = 8
+	style.set_content_margin_all(margin)
 	return style
 
 
@@ -85,6 +159,24 @@ func _create_panel_style() -> StyleBoxFlat:
 func _ensure_ui() -> void:
 	if _name_label == null:
 		_build_ui()
+
+
+## Loads portrait texture for the given path.
+## Falls back to placeholder if path is empty or load fails.
+## The placeholder itself is loaded lazily so tests that build the UI without
+## entering the tree (no _ready()) never crash on a missing resource.
+func _load_portrait(portrait_path: String, grayed_out: bool = false) -> void:
+	if _placeholder_texture == null:
+		_placeholder_texture = load("res://assets/portraits/placeholder.png")
+	var texture: Texture2D = _placeholder_texture
+	if portrait_path != "":
+		var loaded := load(portrait_path)
+		if loaded is Texture2D:
+			texture = loaded
+		else:
+			push_warning("BattleUnitPanel: Failed to load portrait: %s" % portrait_path)
+	_portrait_rect.texture = texture
+	_portrait_rect.modulate = Color.GRAY if grayed_out else Color.WHITE
 
 
 ## Updates all display elements from a battle participant's data.
@@ -107,6 +199,9 @@ func update_from_participant(p: BattleParticipant) -> void:
 
 	# Type
 	_update_type_display(p.character_data)
+
+	# Portrait
+	_load_portrait(p.character_data.portrait_path)
 
 	# HP Bar
 	if p.is_defeated:
@@ -152,6 +247,9 @@ func show_hidden_placeholder(char_data: CharacterData) -> void:
 	_update_type_display(char_data)
 	_type_label.add_theme_color_override("font_color", Color.GRAY)
 
+	# Portrait (grayed out for hidden)
+	_load_portrait(char_data.portrait_path, true)
+
 	_hp_bar.value = 0
 	_hp_bar.modulate = Color.GRAY
 	_hp_label.text = "???"
@@ -186,6 +284,9 @@ func show_defeated_placeholder(char_data: CharacterData) -> void:
 
 	_update_type_display(char_data)
 	_type_label.add_theme_color_override("font_color", Color.GRAY)
+
+	# Portrait (grayed out for defeated)
+	_load_portrait(char_data.portrait_path, true)
 
 	_hp_bar.value = 0
 	_hp_bar.modulate = Color.GRAY

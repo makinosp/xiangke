@@ -128,16 +128,63 @@ func test_defeated_placeholder_distinct_from_hidden() -> int:
 	return err
 
 
-func test_battle_scene_enemy_container_is_grid() -> int:
+func test_battle_scene_enemy_front_and_bench_structure() -> int:
 	var scene: PackedScene = load("res://scenes/battle_scene.tscn")
 	if scene == null:
 		return assert_true(false, "battle_scene.tscn should load")
 	var instance := scene.instantiate()
-	var container := instance.get_node("EnemyHPContainer")
 	var err := OK
-	err = assert_true(container is GridContainer,
-		"EnemyHPContainer should be a GridContainer to fit 6 slots"); if err: return err
-	err = assert_eq((container as GridContainer).columns, 3,
-		"EnemyHPContainer should use 3 columns"); if err: return err
+
+	# The enemy front is displayed in a large panel.
+	var front_panel := instance.get_node("EnemyFrontPanel")
+	err = assert_true(front_panel is BattleUnitPanel,
+		"EnemyFrontPanel should be a BattleUnitPanel"); if err: return err
+
+	# The remaining corps members are shown in a small-panel bench row.
+	var bench := instance.get_node("EnemyBenchContainer")
+	err = assert_true(bench is HBoxContainer,
+		"EnemyBenchContainer should be an HBoxContainer for the bench row"); if err: return err
+
 	instance.free()
+	return err
+
+
+func test_size_mode_large_enlarges_portrait() -> int:
+	var panel := _make_panel()
+	panel.set_size_mode(BattleUnitPanel.SizeMode.LARGE)
+	var err := OK
+	err = assert_eq(panel._portrait_rect.custom_minimum_size, Vector2(160, 240),
+		"LARGE mode should enlarge the portrait to 160x240"); if err: return err
+	err = assert_true(panel._status_container.visible,
+		"LARGE mode should keep the status row visible"); if err: return err
+	err = assert_true(panel._stat_container.visible,
+		"LARGE mode should keep the stat row visible"); if err: return err
+	panel.free()
+	return err
+
+
+func test_size_mode_small_shrinks_portrait() -> int:
+	var panel := _make_panel()
+	panel.set_size_mode(BattleUnitPanel.SizeMode.SMALL)
+	var err := OK
+	err = assert_eq(panel._portrait_rect.custom_minimum_size, Vector2(40, 60),
+		"SMALL mode should shrink the portrait to 40x60"); if err: return err
+	err = assert_eq(panel.custom_minimum_size, Vector2(0, 0),
+		"SMALL mode should not force a wide minimum size"); if err: return err
+	err = assert_false(panel._status_container.visible,
+		"SMALL mode should hide the status row to save space"); if err: return err
+	err = assert_false(panel._stat_container.visible,
+		"SMALL mode should hide the stat row to save space"); if err: return err
+	panel.free()
+	return err
+
+
+func test_size_mode_standard_is_default() -> int:
+	var panel := _make_panel()
+	var err := OK
+	err = assert_eq(panel._portrait_rect.custom_minimum_size, Vector2(120, 180),
+		"Default mode should keep the standard 120x180 portrait"); if err: return err
+	err = assert_eq(panel.custom_minimum_size, Vector2(160, 0),
+		"Default mode should keep the standard minimum width"); if err: return err
+	panel.free()
 	return err

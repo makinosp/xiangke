@@ -16,3 +16,4 @@ intelligence = 55
 spirit = 60
 moves = PackedStringArray("metal_slash", "iron_cleave", "water_surge", "war_cry")
 description = "The young general of Xiliang. His cavalry charges are swift as the wind."
+portrait_path = ""

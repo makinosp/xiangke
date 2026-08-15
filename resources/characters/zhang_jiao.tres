@@ -16,3 +16,4 @@ intelligence = 115
 spirit = 105
 moves = PackedStringArray("flame_burst", "water_surge", "wood_heal", "war_cry")
 description = "The 'Great Teacher' of the Yellow Turbans. His rebellion shook the Han to its foundations."
+portrait_path = ""

@@ -16,3 +16,4 @@ intelligence = 55
 spirit = 90
 moves = PackedStringArray("iron_cleave", "metal_slash", "earth_barrier", "war_cry")
 description = "A massive, loyal bodyguard of Cao Cao. His strength is said to rival that of a thousand men."
+portrait_path = ""

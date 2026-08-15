@@ -16,3 +16,4 @@ intelligence = 110
 spirit = 105
 moves = PackedStringArray("water_surge", "earth_barrier", "war_cry", "metal_slash")
 description = "The cunning warlord who unified the north. A master of strategy and politics."
+portrait_path = ""

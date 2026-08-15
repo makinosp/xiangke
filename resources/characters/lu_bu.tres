@@ -16,3 +16,4 @@ intelligence = 40
 spirit = 50
 moves = PackedStringArray("fire_strike", "flame_burst", "metal_slash", "iron_cleave")
 description = "The unstoppable flying general. Peerless in combat, but his ambition knows no loyalty."
+portrait_path = ""

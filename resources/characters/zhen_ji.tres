@@ -16,3 +16,4 @@ intelligence = 105
 spirit = 110
 moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "war_cry")
 description = "Lady Zhen, famed beauty of the Wei court. Graceful and perceptive, favored of the Cao family."
+portrait_path = ""

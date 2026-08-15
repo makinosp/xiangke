@@ -16,3 +16,4 @@ intelligence = 110
 spirit = 115
 moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "earth_barrier")
 description = "Eldest of the Qiao sisters, wife of Sun Ce. A beauty whose sorrow was sung of for centuries."
+portrait_path = ""

@@ -16,3 +16,4 @@ intelligence = 125
 spirit = 115
 moves = PackedStringArray("wood_heal", "water_surge", "earth_barrier", "metal_slash")
 description = "The master strategist of Wei. Patient and calculating, he outlasts all his rivals."
+portrait_path = ""

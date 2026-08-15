@@ -16,3 +16,4 @@ intelligence = 50
 spirit = 65
 moves = PackedStringArray("earth_barrier", "fire_strike", "iron_cleave", "war_cry")
 description = "The one-eyed general of Wei. His fierce loyalty and toughness are legendary."
+portrait_path = ""

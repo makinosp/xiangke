@@ -16,3 +16,4 @@ intelligence = 115
 spirit = 110
 moves = PackedStringArray("war_cry", "flame_burst", "wood_heal", "earth_barrier")
 description = "The architect of Wei's civil administration. Often called the true pillar of Cao Cao's rise."
+portrait_path = ""
