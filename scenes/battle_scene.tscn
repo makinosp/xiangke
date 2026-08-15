@@ -36,7 +36,7 @@ offset_bottom = 30.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="EnemyHPContainer" type="HBoxContainer" parent="." unique_id=1365237612]
+[node name="EnemyHPContainer" type="GridContainer" parent="." unique_id=1365237612]
 layout_mode = 0
 anchor_left = 0.52
 anchor_top = 0.1
@@ -45,6 +45,7 @@ anchor_bottom = 0.1
 offset_bottom = 30.0
 grow_horizontal = 2
 grow_vertical = 2
+columns = 3
 
 [node name="ActionContainer" type="VBoxContainer" parent="." unique_id=1971235323]
 layout_mode = 0
