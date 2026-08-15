@@ -99,6 +99,22 @@ displayed slots.
 The player branch of `_update_team_hp` keeps rendering fielded participants
 (front first, then bench) with full identity.
 
+### D7: Defeated opponents render in a distinct defeated state
+
+The Rust bridge reports only _living_ benched participants
+(`living_bench_indices` filters on `is_defeated`), so a defeated enemy
+disappears from `get_bench_participants()`. In `_update_enemy_team_hp`, a slot
+that was revealed but has no matching participant must therefore be defeated:
+render it with a new `show_defeated_placeholder()` that keeps the identity
+visible and adds a red panel border plus a "DEFEATED" label, visually distinct
+from the gray "???" placeholder used for never-appeared slots.
+
+- Alternative: keep defeated participants in the bridge's bench list. Rejected:
+  changes the bridge contract and the player-side layout for a presentation
+  concern.
+- Alternative: parse defeat out of the battle log. Rejected: fragile string
+  matching; "revealed and no longer living" is a precise, code-level signal.
+
 ## Risks / Trade-offs
 
 - [Layout shifts when a hidden character appears] → Slots are fixed to corps

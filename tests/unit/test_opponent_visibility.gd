@@ -86,6 +86,48 @@ func test_update_from_participant_resets_hidden_state() -> int:
 	return err
 
 
+func test_defeated_placeholder_shows_defeat_marker() -> int:
+	var panel := _make_panel()
+	var char_data: CharacterData = DataRegistry.get_character("vis_test")
+	panel.show_defeated_placeholder(char_data)
+
+	var err := OK
+	err = assert_eq(panel._name_label.text, "Visibility Test",
+		"Defeated slot should keep the character's name"); if err: return err
+	err = assert_eq(panel._hp_label.text, "DEFEATED",
+		"Defeated slot should show a defeat marker"); if err: return err
+	err = assert_true(panel._hp_label.text != "???",
+		"Defeated slot should not use the hidden placeholder text"); if err: return err
+	err = assert_eq(panel._hp_bar.value, 0.0,
+		"Defeated slot should have an empty HP bar"); if err: return err
+	err = assert_eq(panel._status_container.get_child_count(), 0,
+		"Defeated slot should show no status effects"); if err: return err
+	err = assert_eq(panel._stat_container.get_child_count(), 0,
+		"Defeated slot should show no stat stages"); if err: return err
+	panel.free()
+	return err
+
+
+func test_defeated_placeholder_distinct_from_hidden() -> int:
+	var panel := _make_panel()
+	var char_data: CharacterData = DataRegistry.get_character("vis_test")
+
+	panel.show_hidden_placeholder(char_data)
+	var hidden_border: Color = (panel.get_theme_stylebox("panel") as StyleBoxFlat).border_color
+	panel.show_defeated_placeholder(char_data)
+	var defeated_border: Color = (panel.get_theme_stylebox("panel") as StyleBoxFlat).border_color
+
+	var err := OK
+	err = assert_true(defeated_border != hidden_border,
+		"Defeated slot should use a different panel border than hidden slots"); if err: return err
+	err = assert_eq(panel._hp_label.text, "DEFEATED",
+		"Defeated slot should show the defeat marker"); if err: return err
+	err = assert_true(panel._hp_label.get_theme_color("font_color") != Color.GRAY,
+		"Defeated slot's marker should not use the hidden placeholder's gray"); if err: return err
+	panel.free()
+	return err
+
+
 func test_battle_scene_enemy_container_is_grid() -> int:
 	var scene: PackedScene = load("res://scenes/battle_scene.tscn")
 	if scene == null:

@@ -161,6 +161,40 @@ func show_hidden_placeholder(char_data: CharacterData) -> void:
 	add_theme_stylebox_override("panel", style)
 
 
+## Shows a defeated state for a character that appeared on the field and was
+## defeated. Displays identity (name and type) plus a "DEFEATED" marker and a
+## red panel border; shows no HP, status, or stat-stage content. Distinct from
+## show_hidden_placeholder() so a defeated slot never looks like an unselected
+## one.
+func show_defeated_placeholder(char_data: CharacterData) -> void:
+	if char_data == null:
+		return
+	_is_hidden = false
+
+	_name_label.text = char_data.name
+	_name_label.add_theme_color_override("font_color", Color.GRAY)
+
+	_update_type_display(char_data)
+	_type_label.add_theme_color_override("font_color", Color.GRAY)
+
+	_hp_bar.value = 0
+	_hp_bar.modulate = Color.GRAY
+	_hp_label.text = "DEFEATED"
+	_hp_label.add_theme_color_override("font_color", Color(0.9, 0.4, 0.4))
+
+	# Clear status and stat-stage content.
+	for child: Node in _status_container.get_children():
+		child.queue_free()
+	for child: Node in _stat_container.get_children():
+		child.queue_free()
+
+	# Dark panel with a red border to signal defeat.
+	var style := _create_panel_style()
+	style.bg_color = Color(0.13, 0.1, 0.1, 0.8)
+	style.border_color = Color(0.62, 0.22, 0.22)
+	add_theme_stylebox_override("panel", style)
+
+
 func _update_type_display(char_data: CharacterData) -> void:
 	var type_text: String = TypeColors.get_type_name(char_data.type)
 	var type_color: Color = TypeColors.get_type_color(char_data.type)

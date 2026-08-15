@@ -50,6 +50,28 @@ the bench.
 - **WHEN** a revealed opponent character switches back to the bench
 - **THEN** the character remains revealed
 
+### Requirement: Defeated Opponent Display
+
+The system SHALL render an opponent character that appeared on the field and was
+defeated in a state clearly distinct from a slot that never appeared: the slot
+SHALL stay revealed and show the character's identity plus a defeat marker, and
+SHALL NOT resemble an unselected slot.
+
+#### Scenario: Defeated slot shows a defeat marker
+
+- **WHEN** an opponent character that appeared on the field is defeated
+- **THEN** the character's slot stays revealed and shows the character's name
+  and type
+- **AND** the slot shows a clear defeat marker (e.g., "DEFEATED") and no HP,
+  status, or stat-stage information
+
+#### Scenario: Defeated state distinguishable from unselected
+
+- **WHEN** the opponent panel displays both a defeated slot and slots whose
+  characters never appeared on the field
+- **THEN** the defeated slot is visually distinct from the never-appeared slots
+- **AND** no never-appeared slot shows the defeat marker
+
 ### Requirement: Hidden Slot Placeholders
 
 The system SHALL render opponent slots whose characters have never appeared on

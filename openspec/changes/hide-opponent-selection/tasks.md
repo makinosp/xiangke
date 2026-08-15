@@ -26,6 +26,10 @@
       participants, front first, full identity)
 - [x] 3.3 Verify `scenes/battle_scene.tscn` enemy container layout fits 6 panels
       (adjust container sizing/scroll if needed)
+- [ ] 3.4 Add `show_defeated_placeholder()` to `scripts/battle_unit_panel.gd`
+      (identity + red "DEFEATED" marker, no battle state) and render revealed
+      slots whose participant is no longer living (defeated) with it in
+      `_update_enemy_team_hp()`
 
 ## 4. Verification
 
@@ -39,7 +43,8 @@
       that character becomes revealed and stays revealed after switching back to
       the bench
 - [ ] 4.4 Manual test: when the enemy front is defeated, the automatic
-      replacement character becomes revealed
+      replacement character becomes revealed and the defeated character's slot
+      shows a distinct defeated state (not the hidden "???" placeholder)
 - [ ] 4.5 Manual test: the player team panel still shows all player characters
       with full identity
 - [ ] 4.6 Manual test: grayed-out slots give no way to distinguish selected from

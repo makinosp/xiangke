@@ -384,11 +384,18 @@ func _update_enemy_team_hp(container: Container, panels: Array[BattleUnitPanel])
 	for i in range(_enemy_corps_ids.size()):
 		var panel: BattleUnitPanel = panels[i]
 		var p: BattleParticipant = by_corps.get(i)
+		var char_data: CharacterData = DataRegistry.get_character(_enemy_corps_ids[i])
 		if _revealed_enemy_slots[i] and p != null:
 			panel.update_from_participant(p)
 			panel.set_front_highlight(p.is_front)
+		elif _revealed_enemy_slots[i]:
+			# Revealed earlier but no longer among the living participants:
+			# the character was defeated (the bridge only reports living
+			# bench participants). Render a distinct defeated state so it
+			# never looks like an unselected slot.
+			panel.show_defeated_placeholder(char_data)
+			panel.set_front_highlight(false)
 		else:
-			var char_data: CharacterData = DataRegistry.get_character(_enemy_corps_ids[i])
 			panel.show_hidden_placeholder(char_data)
 			panel.set_front_highlight(false)
 		container.add_child(panel)
