@@ -38,7 +38,21 @@ offset_right = 80.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Start"
+text = "ui.start"
+
+[node name="SettingsButton" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.65
+anchor_right = 0.5
+anchor_bottom = 0.65
+offset_left = -80.0
+offset_top = -20.0
+offset_right = 80.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "ui.settings"
 
 [node name="VersionLabel" type="Label" parent="."]
 anchors_preset = 12
@@ -55,3 +69,4 @@ grow_vertical = 0
 text = "v1.0.0"
 
 [connection signal="pressed" from="StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="SettingsButton" to="." method="_on_settings_button_pressed"]

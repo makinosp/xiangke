@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "diao_chan"
 name = "貂蝉"
+name_key = "char.diao_chan.name"
 type = 6
 secondary_type = 1
 hp = 65
@@ -16,4 +17,5 @@ intelligence = 90
 spirit = 85
 moves = PackedStringArray("fire_strike", "war_cry", "water_surge", "wood_heal")
 description = "The mesmerizing beauty of the Three Kingdoms. Her charms sway the hearts of heroes."
+desc_key = "char.diao_chan.desc"
 portrait_path = ""

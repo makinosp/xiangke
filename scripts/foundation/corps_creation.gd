@@ -93,7 +93,7 @@ func _load_characters() -> void:
 			continue
 
 		var btn := Button.new()
-		btn.text = char_data.name
+		btn.text = tr(char_data.name_key)
 		# Store char_id in button metadata for later lookup
 		btn.set_meta(&"char_id", char_id)
 		btn.connect("pressed", Callable(self, "_on_character_pressed").bind(char_id))
@@ -124,14 +124,14 @@ func _on_character_hovered(char_id: String) -> void:
 	if char_data == null:
 		return
 
-	preview_name.text = char_data.name
-	preview_type.text = "Type: %s" % _format_type(char_data.type, char_data.secondary_type)
-	preview_hp.text = "HP: %d" % char_data.hp
-	preview_attack.text = "Attack: %d" % char_data.attack
-	preview_defense.text = "Defense: %d" % char_data.defense
-	preview_speed.text = "Speed: %d" % char_data.speed
-	preview_intelligence.text = "Intelligence: %d" % char_data.intelligence
-	preview_spirit.text = "Spirit: %d" % char_data.spirit
+	preview_name.text = tr(char_data.name_key)
+	preview_type.text = tr("ui.type") % _format_type(char_data.type, char_data.secondary_type)
+	preview_hp.text = tr("ui.hp") % char_data.hp
+	preview_attack.text = tr("ui.attack") % char_data.attack
+	preview_defense.text = tr("ui.defense") % char_data.defense
+	preview_speed.text = tr("ui.speed") % char_data.speed
+	preview_intelligence.text = tr("ui.intelligence") % char_data.intelligence
+	preview_spirit.text = tr("ui.spirit") % char_data.spirit
 
 	# Load and display move list
 	var move_labels := [preview_move_1, preview_move_2, preview_move_3, preview_move_4]
@@ -139,7 +139,7 @@ func _on_character_hovered(char_id: String) -> void:
 		if i < char_data.moves.size():
 			var move := DataRegistry.get_move(char_data.moves[i])
 			if move != null:
-				move_labels[i].text = "%s (%s)" % [move.name, TypeEnums.Type.keys()[move.type]]
+				move_labels[i].text = tr("ui.name_type_format") % [tr(move.name_key), TypeColors.get_type_name(move.type)]
 				move_labels[i].show()
 			else:
 				move_labels[i].text = "???"
@@ -147,15 +147,15 @@ func _on_character_hovered(char_id: String) -> void:
 		else:
 			move_labels[i].hide()
 
-	preview_desc.text = char_data.description if char_data.description else ""
+	preview_desc.text = tr(char_data.desc_key) if char_data.desc_key else ""
 	stats_preview.show()
 
 
 ## Formats character types for display.
 func _format_type(primary: int, secondary: int) -> String:
-	var result: String = TypeEnums.Type.keys()[primary]
+	var result: String = TypeColors.get_type_name(primary)
 	if secondary >= 0:
-		result += "/" + TypeEnums.Type.keys()[secondary]
+		result += "/" + TypeColors.get_type_name(secondary)
 	return result
 
 
@@ -203,7 +203,7 @@ func _generate_opponent_corps() -> void:
 
 ## Updates UI elements based on current selection state.
 func _update_ui() -> void:
-	phase_label.text = "Select 6 Characters for Your Corps (%d/6)" % _selected_ids.size()
+	phase_label.text = tr("ui.select_corps_count") % _selected_ids.size()
 	confirm_button.disabled = _selected_ids.size() != 6
 
 	# Update button visual states — highlight selected buttons

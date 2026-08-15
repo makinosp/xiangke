@@ -6,6 +6,7 @@
 script = ExtResource("1_move")
 id = "earth_barrier"
 name = "土壁"
+name_key = "move.earth_barrier.name"
 type = 2
 power = 0
 accuracy = 100
@@ -19,3 +20,4 @@ recoil = 0
 healing = 0
 damage_category = 0
 description = "Raises a stone barrier. Sharply boosts the user's defense."
+desc_key = "move.earth_barrier.desc"

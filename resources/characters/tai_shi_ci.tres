@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "tai_shi_ci"
 name = "太史慈"
+name_key = "char.tai_shi_ci.name"
 type = 3
 secondary_type = -1
 hp = 115
@@ -16,4 +17,5 @@ intelligence = 75
 spirit = 90
 moves = PackedStringArray("metal_slash", "iron_cleave", "water_surge", "earth_barrier")
 description = "An archer of unmatched skill and a loyal knight. Served Wu with honor until his final arrow."
+desc_key = "char.tai_shi_ci.desc"
 portrait_path = ""

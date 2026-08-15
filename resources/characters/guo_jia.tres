@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "guo_jia"
 name = "郭嘉"
+name_key = "char.guo_jia.name"
 type = 4
 secondary_type = -1
 hp = 110
@@ -16,4 +17,5 @@ intelligence = 120
 spirit = 100
 moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "earth_barrier")
 description = "Cao Cao's sharpest strategist. Died young, but his foresight won the north before he left."
+desc_key = "char.guo_jia.desc"
 portrait_path = ""

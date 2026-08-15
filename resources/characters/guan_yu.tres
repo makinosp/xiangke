@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "guan_yu"
 name = "関羽"
+name_key = "char.guan_yu.name"
 type = 3
 secondary_type = -1
 hp = 120
@@ -16,4 +17,5 @@ intelligence = 60
 spirit = 70
 moves = PackedStringArray("metal_slash", "iron_cleave", "war_cry", "earth_barrier")
 description = "The God of War. His blade is as sharp as his loyalty, cutting through all who oppose him."
+desc_key = "char.guan_yu.desc"
 portrait_path = ""

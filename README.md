@@ -66,10 +66,10 @@ xiangke/
 │   ├── godot_bridge/          # Godot ↔ Rust bindings (cdylib)
 │   └── Cargo.toml             # Workspace root
 ├── resources/
-│   ├── characters/            # 13 character .tres files
+│   ├── characters/            # 38 character .tres files
 │   ├── moves/                 # 8 move .tres files
 │   └── status_effects/        # 5 status effect .tres files
-├── scenes/                    # 5 game scenes
+├── scenes/                    # 7 game scenes
 ├── scripts/
 │   ├── character_data.gd      # Character data resource
 │   ├── move_data.gd           # Move data resource
@@ -127,6 +127,8 @@ Or press `F5` in the Godot editor.
 | `just inspect`                      | Headless Godot validation (no errors)     |
 | `just verify-data`                  | Export .tres + validate against Rust core |
 | `UPDATE_FIXTURE=1 just verify-data` | Regenerate integration test fixture       |
+| `just report roster`                | Generate roster analysis report           |
+| `just report types --format=csv`    | Export type chart as CSV                  |
 
 ## 🧩 OpenSpec Workflow
 
@@ -147,7 +149,26 @@ The most common CLI operations are wrapped as npm scripts:
 Other CLI operations (e.g. `list`, `status`, `show`) can be run directly with
 `npx openspec <command>`; add `--json` for machine-readable output.
 
-## 🎯 How to Play
+### Specs
+
+| Spec                         | Purpose                                               |
+| ---------------------------- | ----------------------------------------------------- |
+| `domain`                     | Core domain model (characters, moves, status effects) |
+| `system`                     | Game state machine and lifecycle                      |
+| `front-line-battle`          | Battle flow, state, and participant rules             |
+| `move-selection-ui`          | Move grid layout, info display, keyboard navigation   |
+| `opponent-roster-visibility` | Opponent team disclosure during battle                |
+| `rust-bridge`                | Godot ↔ Rust GDExtension binding contract             |
+| `data-verify`                | Resource export and validation against Rust core      |
+| `testing`                    | Test strategy and coverage requirements               |
+
+### Active Changes
+
+| Change              | Status      | Description                                                |
+| ------------------- | ----------- | ---------------------------------------------------------- |
+| `add-i18n-settings` | In progress | Translation catalogs + settings screen (language & volume) |
+
+## How to Play
 
 1. Select your general from the roster
 2. Choose your moves strategically based on enemy elemental weaknesses
@@ -165,13 +186,13 @@ Other CLI operations (e.g. `list`, `status`, `show`) can be run directly with
 
 ## 🧪 Testing
 
-The project includes **235 tests** across two stacks:
+The project includes **330 tests** across two stacks:
 
-- **Rust** (200 tests): Core logic and battle engine
+- **Rust** (262 tests): Core logic and battle engine
   ```bash
   just test-rust
   ```
-- **GDScript** (35 tests): Autoloads, type system, UI focus manager Run via
+- **GDScript** (68 tests): Autoloads, type system, UI focus manager Run via
   Godot's test runner (`tests/test_runner.tscn`).
 
 ## 📜 License

@@ -31,19 +31,19 @@ static func get_type_color(type: int) -> Color:
 static func get_type_name(type: int) -> String:
 	match type:
 		TypeEnums.Type.WOOD:
-			return "Wood"
+			return TranslationServer.translate("ui.type_wood")
 		TypeEnums.Type.FIRE:
-			return "Fire"
+			return TranslationServer.translate("ui.type_fire")
 		TypeEnums.Type.EARTH:
-			return "Earth"
+			return TranslationServer.translate("ui.type_earth")
 		TypeEnums.Type.METAL:
-			return "Metal"
+			return TranslationServer.translate("ui.type_metal")
 		TypeEnums.Type.WATER:
-			return "Water"
+			return TranslationServer.translate("ui.type_water")
 		TypeEnums.Type.YANG:
-			return "Yang"
+			return TranslationServer.translate("ui.type_yang")
 		TypeEnums.Type.YIN:
-			return "Yin"
+			return TranslationServer.translate("ui.type_yin")
 		_:
 			return "?"
 
@@ -52,15 +52,15 @@ static func get_type_name(type: int) -> String:
 static func get_status_effect_label(effect: int) -> String:
 	match effect:
 		TypeEnums.EffectType.BURN:
-			return "🔥Burn"
+			return "🔥" + TranslationServer.translate("ui.effect_burn")
 		TypeEnums.EffectType.POISON:
-			return "☠Poison"
+			return "☠" + TranslationServer.translate("ui.effect_poison")
 		TypeEnums.EffectType.CONFUSION:
-			return "❓Confused"
+			return "❓" + TranslationServer.translate("ui.effect_confusion")
 		TypeEnums.EffectType.CHAIN:
-			return "⚡Chain"
+			return "⚡" + TranslationServer.translate("ui.effect_chain")
 		TypeEnums.EffectType.CHARM:
-			return "✨Charm"
+			return "✨" + TranslationServer.translate("ui.effect_charm")
 		_:
 			return ""
 
@@ -86,15 +86,15 @@ static func get_status_effect_color(effect: int) -> Color:
 static func get_stat_name(stat: int) -> String:
 	match stat:
 		TypeEnums.Stat.ATTACK:
-			return "ATK"
+			return TranslationServer.translate("ui.stat_attack")
 		TypeEnums.Stat.DEFENSE:
-			return "DEF"
+			return TranslationServer.translate("ui.stat_defense")
 		TypeEnums.Stat.SPEED:
-			return "SPD"
+			return TranslationServer.translate("ui.stat_speed")
 		TypeEnums.Stat.INTELLIGENCE:
-			return "INT"
+			return TranslationServer.translate("ui.stat_intelligence")
 		TypeEnums.Stat.SPIRIT:
-			return "SPR"
+			return TranslationServer.translate("ui.stat_spirit")
 		_:
 			return "?"
 
@@ -103,8 +103,8 @@ static func get_stat_name(stat: int) -> String:
 static func get_category_name(category: int) -> String:
 	match category:
 		TypeEnums.DamageCategory.PHYSICAL:
-			return "Phys"
+			return TranslationServer.translate("ui.category_physical")
 		TypeEnums.DamageCategory.ARTS:
-			return "Arts"
+			return TranslationServer.translate("ui.category_arts")
 		_:
 			return ""

@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "lv_meng"
 name = "呂蒙"
+name_key = "char.lv_meng.name"
 type = 4
 secondary_type = -1
 hp = 115
@@ -16,4 +17,5 @@ intelligence = 105
 spirit = 90
 moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "earth_barrier")
 description = "The scholar-general of Wu. Slain by Guan Yu's ghost, but his scheme took the enemy's head first."
+desc_key = "char.lv_meng.desc"
 portrait_path = ""

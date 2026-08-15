@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "zhen_ji"
 name = "甄姫"
+name_key = "char.zhen_ji.name"
 type = 6
 secondary_type = -1
 hp = 80
@@ -16,4 +17,5 @@ intelligence = 105
 spirit = 110
 moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "war_cry")
 description = "Lady Zhen, famed beauty of the Wei court. Graceful and perceptive, favored of the Cao family."
+desc_key = "char.zhen_ji.desc"
 portrait_path = ""

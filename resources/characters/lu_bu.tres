@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "lu_bu"
 name = "呂布"
+name_key = "char.lu_bu.name"
 type = 1
 secondary_type = 3
 hp = 95
@@ -16,4 +17,5 @@ intelligence = 40
 spirit = 50
 moves = PackedStringArray("fire_strike", "flame_burst", "metal_slash", "iron_cleave")
 description = "The unstoppable flying general. Peerless in combat, but his ambition knows no loyalty."
+desc_key = "char.lu_bu.desc"
 portrait_path = ""

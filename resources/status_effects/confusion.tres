@@ -6,7 +6,9 @@
 script = ExtResource("1_stat")
 effect_type = 3
 name = "Confusion"
+name_key = "effect.confusion.name"
 description = "May cause the target to hit itself instead of acting."
+desc_key = "effect.confusion.desc"
 damage_per_turn = 0.0
 escalating = false
 max_damage_cap = 0.0

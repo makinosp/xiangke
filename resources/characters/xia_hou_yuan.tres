@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "xia_hou_yuan"
 name = "夏侯淵"
+name_key = "char.xia_hou_yuan.name"
 type = 1
 secondary_type = -1
 hp = 105
@@ -16,4 +17,5 @@ intelligence = 80
 spirit = 80
 moves = PackedStringArray("flame_burst", "fire_strike", "water_surge", "war_cry")
 description = "A swift and fierce Wei general. Met his end at the hands of Huang Zhong at Mount Dingjun."
+desc_key = "char.xia_hou_yuan.desc"
 portrait_path = ""

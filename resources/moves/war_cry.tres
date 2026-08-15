@@ -6,6 +6,7 @@
 script = ExtResource("1_move")
 id = "war_cry"
 name = "戦声"
+name_key = "move.war_cry.name"
 type = 5
 power = 0
 accuracy = 100
@@ -18,3 +19,4 @@ recoil = 0
 healing = 0
 damage_category = 0
 description = "A fearsome battle cry that may charm the foe, reducing their attack."
+desc_key = "move.war_cry.desc"

@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "dian_wei"
 name = "典韋"
+name_key = "char.dian_wei.name"
 type = 2
 secondary_type = -1
 hp = 100
@@ -16,4 +17,5 @@ intelligence = 55
 spirit = 96
 moves = PackedStringArray("iron_cleave", "metal_slash", "earth_barrier", "war_cry")
 description = "Cao Cao's first bodyguard. His twin halberds fell dozens of enemies before he died covering his lord's escape."
+desc_key = "char.dian_wei.desc"
 portrait_path = ""

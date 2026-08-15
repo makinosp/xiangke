@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "dong_zhuo"
 name = "董卓"
+name_key = "char.dong_zhuo.name"
 type = 2
 secondary_type = -1
 hp = 150
@@ -16,4 +17,5 @@ intelligence = 75
 spirit = 95
 moves = PackedStringArray("iron_cleave", "metal_slash", "fire_strike", "earth_barrier")
 description = "The tyrant who seized the Han capital. His brutality forged the alliance that would topple him."
+desc_key = "char.dong_zhuo.desc"
 portrait_path = ""

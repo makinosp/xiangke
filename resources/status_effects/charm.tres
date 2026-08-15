@@ -6,7 +6,9 @@
 script = ExtResource("1_stat")
 effect_type = 5
 name = "Charm"
+name_key = "effect.charm.name"
 description = "Reduces the target's attack through enchantment."
+desc_key = "effect.charm.desc"
 damage_per_turn = 0.0
 escalating = false
 max_damage_cap = 0.0

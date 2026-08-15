@@ -6,6 +6,7 @@
 script = ExtResource("1_move")
 id = "water_surge"
 name = "水衝"
+name_key = "move.water_surge.name"
 type = 4
 power = 70
 accuracy = 100
@@ -18,3 +19,4 @@ recoil = 0
 healing = 0
 damage_category = 1
 description = "A surge of water that slows the target. Reduces target's speed."
+desc_key = "move.water_surge.desc"

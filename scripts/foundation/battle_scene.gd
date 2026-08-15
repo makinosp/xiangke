@@ -70,7 +70,7 @@ func _setup_battle() -> void:
 		return
 	var started := _flow_service.start_battle(player_chars, enemy_chars)
 	if not started:
-		status_label.text = "Failed to start battle!"
+		status_label.text = tr("ui.battle_failed")
 		return
 
 	# Initialize opponent visibility state from the corps.
@@ -84,7 +84,7 @@ func _setup_battle() -> void:
 
 	var participant := _flow_service.get_active_participant()
 	if participant != null:
-		status_label.text = "%s's turn!" % participant.character_data.name
+		status_label.text = tr("ui.turn_format") % tr(participant.character_data.name_key)
 	call_deferred("_handle_current_turn")
 
 
@@ -113,12 +113,12 @@ func _handle_current_turn() -> void:
 		return
 
 	if participant.team == BattleParticipant.Team.PLAYER:
-		status_label.text = "%s's turn!" % participant.character_data.name
+		status_label.text = tr("ui.turn_format") % tr(participant.character_data.name_key)
 		_show_move_selection()
 	else:
 		# The enemy AI decision and execution live in the Rust battle engine.
 		var result := _flow_service.perform_ai_turn()
-		status_label.text = result.get("log_message", "Enemy acted.")
+		status_label.text = result.get("log_message", tr("ui.enemy_acted"))
 		_update_hp_displays()
 		_update_log_display()
 		call_deferred("_advance_turn")
@@ -157,7 +157,7 @@ func _show_move_selection() -> void:
 
 	# Switch option: swap the front character with a living benched character.
 	var switch_btn := Button.new()
-	switch_btn.text = "Switch (Bench)"
+	switch_btn.text = tr("ui.switch_bench")
 	switch_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	switch_btn.connect("pressed", Callable(self, "_on_switch_selected"))
 	switch_btn.connect("focus_entered", Callable(self, "_on_move_option_focused")
@@ -200,14 +200,14 @@ func _compute_effectiveness(move_data: MoveData, target: BattleParticipant) -> f
 func _show_switch_selection() -> void:
 	move_container.hide()
 	_is_selecting_switch = true
-	status_label.text = "Choose a character to switch in:"
+	status_label.text = tr("ui.choose_switch")
 
 	for child: Node in action_container.get_children():
 		child.queue_free()
 
 	var bench := _flow_service.get_bench_participants(BattleParticipant.Team.PLAYER)
 	if bench.is_empty():
-		status_label.text = "No benched characters available!"
+		status_label.text = tr("ui.no_bench")
 		_is_selecting_switch = false
 		action_container.hide()
 		_show_move_selection()
@@ -223,7 +223,7 @@ func _show_switch_selection() -> void:
 		wrapper.add_child(panel)
 
 		var btn := Button.new()
-		btn.text = "Switch In"
+		btn.text = tr("ui.switch_in")
 		btn.size_flags_horizontal = Control.SIZE_EXPAND
 		btn.connect("pressed", Callable(self, "_on_switch_target_selected").bind(p.slot_index))
 		wrapper.add_child(btn)
@@ -231,7 +231,7 @@ func _show_switch_selection() -> void:
 		action_container.add_child(wrapper)
 
 	var cancel_btn := Button.new()
-	cancel_btn.text = "Cancel"
+	cancel_btn.text = tr("ui.cancel")
 	cancel_btn.connect("pressed", Callable(self, "_on_cancel_switch_selection"))
 	action_container.add_child(cancel_btn)
 
@@ -242,7 +242,7 @@ func _on_move_selected(move_data: MoveData) -> void:
 	_is_selecting_switch = false
 	# No target selection: the move always hits the opponent's front character.
 	var result := _flow_service.execute_player_action(move_data)
-	status_label.text = result.get("log_message", "Action executed.")
+	status_label.text = result.get("log_message", tr("ui.action_executed"))
 	_update_hp_displays()
 	_update_log_display()
 	_advance_turn()
@@ -257,9 +257,9 @@ func _on_switch_target_selected(bench_index: int) -> void:
 	action_container.hide()
 
 	if _flow_service.execute_switch(BattleParticipant.Team.PLAYER, bench_index):
-		status_label.text = "Switched characters!"
+		status_label.text = tr("ui.switched")
 	else:
-		status_label.text = "Switch failed!"
+		status_label.text = tr("ui.switch_failed")
 
 	_update_hp_displays()
 	_update_log_display()

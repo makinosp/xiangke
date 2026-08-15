@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "sun_ce"
 name = "孫策"
+name_key = "char.sun_ce.name"
 type = 1
 secondary_type = -1
 hp = 125
@@ -16,4 +17,5 @@ intelligence = 70
 spirit = 85
 moves = PackedStringArray("flame_burst", "fire_strike", "iron_cleave", "war_cry")
 description = "The 'Little Conqueror.' With a thousand men he carved out the foundation of Wu in a single campaign."
+desc_key = "char.sun_ce.desc"
 portrait_path = ""

@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3 uid="uid://settings_screen"]
+
+[ext_resource type="Script" path="res://scripts/foundation/settings_screen.gd" id="1_settings"]
+
+[node name="SettingsScreen" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings")
+
+[node name="TitleLabel" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.15
+anchor_right = 0.5
+anchor_bottom = 0.15
+offset_left = -100.0
+offset_top = -25.0
+offset_right = 100.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "ui.settings"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SettingsPanel" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -180.0
+offset_right = 200.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LanguageLabel" type="Label" parent="SettingsPanel"]
+text = "ui.language"
+
+[node name="LanguageOption" type="OptionButton" parent="SettingsPanel"]
+
+[node name="MasterVolumeLabel" type="Label" parent="SettingsPanel"]
+text = "ui.master_volume"
+
+[node name="MasterVolumeSlider" type="HSlider" parent="SettingsPanel"]
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="BgmVolumeLabel" type="Label" parent="SettingsPanel"]
+text = "ui.bgm_volume"
+
+[node name="BgmVolumeSlider" type="HSlider" parent="SettingsPanel"]
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="SfxVolumeLabel" type="Label" parent="SettingsPanel"]
+text = "ui.sfx_volume"
+
+[node name="SfxVolumeSlider" type="HSlider" parent="SettingsPanel"]
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="BackButton" type="Button" parent="SettingsPanel"]
+text = "ui.back"
+
+[connection signal="item_selected" from="SettingsPanel/LanguageOption" to="." method="_on_language_option_item_selected"]
+[connection signal="value_changed" from="SettingsPanel/MasterVolumeSlider" to="." method="_on_master_volume_value_changed"]
+[connection signal="value_changed" from="SettingsPanel/BgmVolumeSlider" to="." method="_on_bgm_volume_value_changed"]
+[connection signal="value_changed" from="SettingsPanel/SfxVolumeSlider" to="." method="_on_sfx_volume_value_changed"]
+[connection signal="pressed" from="SettingsPanel/BackButton" to="." method="_on_back_button_pressed"]

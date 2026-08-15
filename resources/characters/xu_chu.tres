@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "xu_chu"
 name = "許褚"
+name_key = "char.xu_chu.name"
 type = 2
 secondary_type = -1
 hp = 100
@@ -16,4 +17,5 @@ intelligence = 55
 spirit = 90
 moves = PackedStringArray("iron_cleave", "metal_slash", "earth_barrier", "war_cry")
 description = "A massive, loyal bodyguard of Cao Cao. His strength is said to rival that of a thousand men."
+desc_key = "char.xu_chu.desc"
 portrait_path = ""

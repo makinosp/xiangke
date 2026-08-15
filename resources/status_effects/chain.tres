@@ -6,7 +6,9 @@
 script = ExtResource("1_stat")
 effect_type = 4
 name = "Chain"
+name_key = "effect.chain.name"
 description = "Links damage across multiple targets. Spreads incoming damage."
+desc_key = "effect.chain.desc"
 damage_per_turn = 0.0
 escalating = false
 max_damage_cap = 0.0

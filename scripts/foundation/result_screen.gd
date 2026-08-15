@@ -10,7 +10,7 @@ extends Control
 
 func _ready() -> void:
 	var last_won: bool = SaveManager.current_data.get("last_battle_won", false)
-	result_label.text = "Victory!" if last_won else "Defeat..."
+	result_label.text = tr("ui.victory") if last_won else tr("ui.defeat")
 	return_button.grab_focus()
 
 	UIFocusManager.register_focus_group([return_button])

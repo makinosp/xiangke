@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "zhang_jiao"
 name = "張角"
+name_key = "char.zhang_jiao.name"
 type = 6
 secondary_type = -1
 hp = 120
@@ -16,4 +17,5 @@ intelligence = 115
 spirit = 105
 moves = PackedStringArray("flame_burst", "water_surge", "wood_heal", "war_cry")
 description = "The 'Great Teacher' of the Yellow Turbans. His rebellion shook the Han to its foundations."
+desc_key = "char.zhang_jiao.desc"
 portrait_path = ""

@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "zhao_yun"
 name = "趙雲"
+name_key = "char.zhao_yun.name"
 type = 3
 secondary_type = 0
 hp = 105
@@ -16,4 +17,5 @@ intelligence = 65
 spirit = 75
 moves = PackedStringArray("metal_slash", "iron_cleave", "wood_heal", "war_cry")
 description = "The dragon of Changshan. A general of unmatched valor and unwavering loyalty."
+desc_key = "char.zhao_yun.desc"
 portrait_path = ""

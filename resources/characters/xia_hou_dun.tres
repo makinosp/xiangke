@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "xia_hou_dun"
 name = "夏侯惇"
+name_key = "char.xia_hou_dun.name"
 type = 2
 secondary_type = 1
 hp = 85
@@ -16,4 +17,5 @@ intelligence = 50
 spirit = 65
 moves = PackedStringArray("earth_barrier", "fire_strike", "iron_cleave", "war_cry")
 description = "The one-eyed general of Wei. His fierce loyalty and toughness are legendary."
+desc_key = "char.xia_hou_dun.desc"
 portrait_path = ""

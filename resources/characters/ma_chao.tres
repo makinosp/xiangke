@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "ma_chao"
 name = "馬超"
+name_key = "char.ma_chao.name"
 type = 3
 secondary_type = 4
 hp = 110
@@ -16,4 +17,5 @@ intelligence = 55
 spirit = 60
 moves = PackedStringArray("metal_slash", "iron_cleave", "water_surge", "war_cry")
 description = "The young general of Xiliang. His cavalry charges are swift as the wind."
+desc_key = "char.ma_chao.desc"
 portrait_path = ""

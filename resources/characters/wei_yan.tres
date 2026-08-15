@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "wei_yan"
 name = "魏延"
+name_key = "char.wei_yan.name"
 type = 1
 secondary_type = -1
 hp = 115
@@ -16,4 +17,5 @@ intelligence = 70
 spirit = 80
 moves = PackedStringArray("fire_strike", "flame_burst", "iron_cleave", "war_cry")
 description = "A fierce and proud Shu general. His talents were overshadowed by mistrust and a fiery temper."
+desc_key = "char.wei_yan.desc"
 portrait_path = ""

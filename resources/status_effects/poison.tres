@@ -6,7 +6,9 @@
 script = ExtResource("1_stat")
 effect_type = 2
 name = "Poison"
+name_key = "effect.poison.name"
 description = "Deals increasing damage over time. Damage escalates each turn."
+desc_key = "effect.poison.desc"
 damage_per_turn = 0.1
 escalating = true
 max_damage_cap = 0.25
