@@ -1,6 +1,22 @@
-[gd_scene format=3 uid="uid://d1n4b2jo25xp0"]
+[gd_scene load_steps=3 format=3 uid="uid://d1n4b2jo25xp0"]
 
 [ext_resource type="Script" uid="uid://ditdl3sfqrpht" path="res://scripts/foundation/battle_scene.gd" id="1_wd6yu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_move_panel"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.15, 0.15, 0.2, 0.8)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.3, 0.4, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="BattleScene" type="Control" unique_id=2115787393]
 layout_mode = 3
@@ -58,12 +74,27 @@ grow_vertical = 2
 
 [node name="MoveContainer" type="VBoxContainer" parent="." unique_id=1878473471]
 layout_mode = 0
-anchor_left = 0.35
-anchor_top = 0.85
-anchor_right = 0.65
+anchor_left = 0.62
+anchor_top = 0.45
+anchor_right = 0.98
 anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="MovePanel" type="PanelContainer" parent="MoveContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_move_panel")
+size_flags_vertical = 3
+
+[node name="PanelContent" type="VBoxContainer" parent="MoveContainer/MovePanel"]
+layout_mode = 2
+
+[node name="MoveList" type="VBoxContainer" parent="MoveContainer/MovePanel/PanelContent"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SwitchSlot" type="VBoxContainer" parent="MoveContainer/MovePanel/PanelContent"]
+layout_mode = 2
 
 [node name="BattleLog" type="RichTextLabel" parent="." unique_id=1437781952]
 layout_mode = 0
