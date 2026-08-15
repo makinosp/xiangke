@@ -252,9 +252,9 @@ move list and bench rows remain fully visible within the 1280x720 viewport.
 
 ### Requirement: Panel Size Modes
 
-The system SHALL support three size presets on battle character panels:
-STANDARD (default), LARGE (front characters), and SMALL (bench characters),
-switchable at runtime.
+The system SHALL support three size presets on battle character panels: STANDARD
+(default), LARGE (front characters), and SMALL (bench characters), switchable at
+runtime.
 
 #### Scenario: LARGE mode for front characters
 
