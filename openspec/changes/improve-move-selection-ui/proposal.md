@@ -13,8 +13,8 @@ navigation with `UIFocusManager`, making it inconsistent with the other screens.
 
 ## What Changes
 
-- Replace the vertical move list with a 2×2 grid of move buttons plus a separate
-  switch option row
+- Present the moves as a vertical list in a bottom-right panel, one full-width
+  option per row, so the per-move information has room to breathe
 - Expand the move selection panel layout so all options fit within the viewport
 - Each move button displays:
   - Type name in type color, move name, power, accuracy, and damage category
@@ -23,10 +23,9 @@ navigation with `UIFocusManager`, making it inconsistent with the other screens.
   - Type effectiveness multiplier against the opponent's current front character
     (e.g. ×2.0, ×1.25, ×0.5, ×0)
   - Flavor description as a tooltip on hover/focus
-- Switch (Bench) remains available as a separate full-width option below the
-  move grid
-- Keyboard navigation for the move grid and switch option works consistently
-  with the rest of the game (arrow keys move within the grid, Enter confirms)
+- Switch (Bench) remains available as a separate option below the move list
+- Keyboard navigation for the move list and switch option works consistently
+  with the rest of the game (arrow keys move within the list, Enter confirms)
 
 ## Capabilities
 

@@ -6,24 +6,26 @@ interaction.
 
 ## ADDED Requirements
 
-### Requirement: Move Grid Layout
+### Requirement: Move List Layout
 
-The system SHALL present the active player character's moves in a 2×2 grid
-during the player's turn, with all move options and the switch option fully
-visible within the viewport.
+The system SHALL present the active player character's moves as a vertical list
+in a bottom-right panel during the player's turn, with each move on its own
+full-width row, and all move options and the switch option fully visible within
+the viewport.
 
-#### Scenario: Player turn shows move grid
+#### Scenario: Player turn shows move list
 
 - **WHEN** the player's turn starts with a living front character
-- **THEN** exactly the front character's known moves are displayed in a 2×2 grid
-- **AND** the switch option is displayed as a separate full-width option
+- **THEN** exactly the front character's known moves are displayed as vertical
+  list rows
+- **AND** the switch option is displayed as a separate row below the moves
 - **AND** no move option is clipped or overlaps the screen edges
 
 #### Scenario: Character with fewer than four moves
 
 - **WHEN** the front character has fewer than four moves
 - **THEN** only the known moves are displayed
-- **AND** the grid contains no empty slots
+- **AND** the list contains no empty rows
 
 ### Requirement: Move Information Display
 
@@ -87,11 +89,12 @@ screen; selecting it opens the bench character selection.
 
 #### Scenario: Switch option opens bench selection
 
-- **WHEN** the player activates the switch option during their turn
-- **THEN** the bench character selection is shown instead of the move grid
+list
 
-#### Scenario: Cancel returns to move grid
+#### Scenario: Cancel returns to move list
 
+- **WHEN** the player cancels the bench character selection
+- **THEN** the move list
 - **WHEN** the player cancels the bench character selection
 - **THEN** the move grid for the active character is shown again
 
@@ -101,11 +104,11 @@ The system SHALL support keyboard-only operation of the move selection: arrow
 keys move between move options, the confirm key activates the focused option,
 and the cancel key closes the bench selection when open.
 
-#### Scenario: Arrow keys move within grid
+#### Scenario: Arrow keys move within list
 
 - **WHEN** the player presses an arrow key while a move option is focused
 - **THEN** focus moves to the neighboring move option in the pressed direction,
-  wrapping within the grid
+  wrapping within the list
 
 #### Scenario: Confirm activates focused option
 
@@ -115,4 +118,4 @@ and the cancel key closes the bench selection when open.
 #### Scenario: Cancel exits bench selection
 
 - **WHEN** the player presses the cancel key while the bench selection is shown
-- **THEN** the bench selection closes and the move grid is shown again
+- **THEN** the bench selection closes and the move list is shown again

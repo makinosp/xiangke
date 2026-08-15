@@ -39,26 +39,30 @@ The opponent's front character is always fully revealed (see
 
 - Changing battle mechanics, targeting, or AI (Rust untouched)
 - Changing the switch/bench selection panel itself beyond keeping it working
-- Reworking `UIFocusManager` for 2D grids (grid nav is handled locally in the
-  battle scene; see Decisions)
+- Reworking `UIFocusManager` (list navigation is handled locally in the battle
+  scene; see Decisions)
 
 ## Decisions
 
-### D1: Move panel layout — bottom-center panel
+### D1: Move panel layout — bottom-right vertical list
 
-MoveContainer anchors change to 0.28–0.72 x / 0.58–0.95 y (~560×266px), wrapping
-a `PanelContainer` styled like `BattleUnitPanel` (dark `StyleBoxFlat`: bg
-`0.15,0.15,0.2,0.8`, border `0.3,0.3,0.4`, radius 4). Inside: a `GridContainer`
-(2 columns) for the moves, then a full-width switch button.
+MoveContainer anchors change to 0.62–0.98 x / 0.45–0.95 y (~460×360px at
+1280×720), wrapping a `PanelContainer` styled like `BattleUnitPanel` (dark
+`StyleBoxFlat`: bg `0.15,0.15,0.2,0.8`, border `0.3,0.3,0.4`, radius 4). Inside:
+a `VBoxContainer` list — one `MoveButton` per move, then a full-width switch
+button.
 
-**Rationale:** the current 72px strip cannot hold rich buttons; the bottom
-center area is unused during move selection (`ActionContainer` on the left is
-only shown during switch selection). The panel visually matches the existing
-unit panels.
+**Rationale:** the first implementation used a bottom-center 2×2 grid, but the
+half-width cells left no room for the three text rows (name/type, stats/
+effectiveness, badges), which visually overlapped. A vertical list gives every
+option the full panel width (~450px), so each row has room to breathe. The
+bottom-right area is unused during move selection (`ActionContainer` on the left
+is only shown during switch selection, and `BattleLog` ends at 0.4 y).
 
-**Alternatives considered:** reusing the left `ActionContainer` area — rejected
-because it doubles as the switch-selection surface, causing overlap and
-confusing state management.
+**Alternatives considered:** keeping the 2×2 grid with smaller fonts — rejected,
+shrinking text further harms readability on the Web target; a bottom-center
+vertical list — rejected, bottom-right keeps the screen center clear for the
+battle log and status messages.
 
 ### D2: Rich move buttons via a small helper script
 
@@ -95,20 +99,19 @@ shown, so a front change automatically recomputes (satisfies the spec scenario).
 revealed, so no "unknown" state is needed. (If it ever could be unknown, the
 display falls back to hiding the multiplier.)
 
-### D4: Keyboard navigation — local 2D wrap logic in battle_scene
+### D4: Keyboard navigation — vertical wrap logic in battle_scene
 
 Keep a 5-element focus order `[move0..move3, switch]` (index 4 = switch). Handle
-`ui_left/right/up/down` in `_input` while the move grid is visible:
+`ui_up/ui_down` (with `ui_left/ui_right` as prev/next equivalents) in `_input`
+while the move list is visible:
 
-- left/right: swap column within the row (from switch → index 0)
-- up/down: ±2 rows; from bottom row down → switch; from switch up/down →
-  top-left (index 0)
+- up/left: previous option, wrapping from the first move to the switch
+- down/right: next option, wrapping from the switch to the first move
 - `ui_accept` activates the focused Button natively; `ui_cancel` closes the
   bench selection (existing code path)
 
-**Rationale:** `UIFocusManager` is linear (prev/next) and does not fit a 2×2
-grid; native Godot focus neighbors do not guarantee wrapping. Explicit index
-math is deterministic, testable, and small. The move grid also gets
+**Rationale:** a vertical list only needs 1D navigation; explicit index math is
+deterministic, testable, and small. The move list also gets
 `UIFocusManager`-style modulate highlighting on the focused button for visual
 consistency with other screens.
 

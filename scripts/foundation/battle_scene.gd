@@ -3,6 +3,8 @@ extends Control
 @onready var battle_log_label: RichTextLabel = $BattleLog
 @onready var action_container: VBoxContainer = $ActionContainer
 @onready var move_container: VBoxContainer = $MoveContainer
+@onready var move_list: VBoxContainer = $MoveContainer/MovePanel/PanelContent/MoveList
+@onready var switch_slot: VBoxContainer = $MoveContainer/MovePanel/PanelContent/SwitchSlot
 @onready var status_label: Label = $StatusLabel
 @onready var player_hp_container: HBoxContainer = $PlayerHPContainer
 @onready var enemy_hp_container: Container = $EnemyHPContainer
@@ -11,6 +13,12 @@ var _flow_service: BattleFlowService = null
 var _is_selecting_switch: bool = false
 var _player_panels: Array[BattleUnitPanel] = []
 var _enemy_panels: Array[BattleUnitPanel] = []
+## Move option buttons in the order they appear in the list.
+var _move_buttons: Array[MoveButton] = []
+## The switch (bench) button below the move list.
+var _switch_button: Button = null
+## Index of the currently focused option; _move_buttons.size() is the switch.
+var _focused_option_index: int = -1
 ## Opponent corps character IDs in corps order (used for hidden slot display).
 var _enemy_corps_ids: Array[String] = []
 ## Per corps index: whether the character has ever appeared on the field.
@@ -124,31 +132,64 @@ func _show_move_selection() -> void:
 	action_container.hide()
 	move_container.show()
 
-	for child: Node in move_container.get_children():
-		child.queue_free()
+	_clear_move_options()
 
+	var enemy_front := _flow_service.get_front_participant(BattleParticipant.Team.ENEMY)
 	for i in range(participant.character_data.moves.size()):
 		var move_id: String = participant.character_data.moves[i]
 		var move_data: MoveData = DataRegistry.get_move(move_id)
 		if move_data == null:
 			continue
 
-		var btn := Button.new()
-		var type_color: Color = TypeColors.get_type_color(move_data.type)
-		var type_name: String = TypeColors.get_type_name(move_data.type)
-		var cat_name: String = TypeColors.get_category_name(move_data.damage_category)
-		btn.text = "[%s] %s (P:%d A:%d%% %s)" % [type_name, move_data.name, move_data.power, move_data.accuracy, cat_name]
-		btn.add_theme_color_override("font_color", type_color)
-		btn.add_theme_color_override("font_hover_color", type_color.lightened(0.3))
+		var effectiveness: float = _compute_effectiveness(move_data, enemy_front)
+		var btn := MoveButton.new()
+		btn.update_from_move(move_data, effectiveness)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.connect("pressed", Callable(self, "_on_move_selected").bind(move_data))
-		btn.size_flags_horizontal = Control.SIZE_EXPAND
-		move_container.add_child(btn)
+		btn.connect("focus_entered", Callable(self, "_on_move_option_focused")
+				.bind(_move_buttons.size()))
+		move_list.add_child(btn)
+		_move_buttons.append(btn)
 
 	# Switch option: swap the front character with a living benched character.
 	var switch_btn := Button.new()
 	switch_btn.text = "Switch (Bench)"
+	switch_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	switch_btn.connect("pressed", Callable(self, "_on_switch_selected"))
-	move_container.add_child(switch_btn)
+	switch_btn.connect("focus_entered", Callable(self, "_on_move_option_focused")
+			.bind(_move_buttons.size()))
+	switch_slot.add_child(switch_btn)
+	_switch_button = switch_btn
+
+	_focused_option_index = 0
+	if not _move_buttons.is_empty():
+		_move_buttons[0].grab_focus()
+	_update_move_focus_highlight()
+
+
+## Frees all move options and resets navigation state.
+func _clear_move_options() -> void:
+	for child: Node in move_list.get_children():
+		move_list.remove_child(child)
+		child.queue_free()
+	for child: Node in switch_slot.get_children():
+		switch_slot.remove_child(child)
+		child.queue_free()
+	_move_buttons.clear()
+	_switch_button = null
+	_focused_option_index = -1
+
+
+## Computes the type effectiveness multiplier of a move against a target.
+## Returns -1.0 when the target is unknown so the UI hides the multiplier.
+func _compute_effectiveness(move_data: MoveData, target: BattleParticipant) -> float:
+	if target == null or target.character_data == null:
+		return -1.0
+	var chart := TypeChart.new()
+	return chart.resolve_type_effectiveness(
+		move_data.type,
+		target.character_data.type,
+		target.character_data.secondary_type)
 
 
 ## Displays the living benched characters for the player to choose a switch.
@@ -428,3 +469,62 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if _is_selecting_switch:
 			_on_cancel_switch_selection()
+		return
+
+	# List navigation only applies while the move selection is visible.
+	if not move_container.visible or _is_selecting_switch:
+		return
+	if _move_buttons.is_empty():
+		return
+
+	var step := 0
+	if event.is_action_pressed("ui_up") or event.is_action_pressed("ui_left"):
+		step = -1
+	elif event.is_action_pressed("ui_down") or event.is_action_pressed("ui_right"):
+		step = 1
+	if step == 0:
+		return
+
+	var next_index := _next_list_index(_focused_option_index, step, _move_buttons.size())
+	_focus_option(next_index)
+
+
+## Focuses the option at the given index; _move_buttons.size() is the switch.
+func _focus_option(option_index: int) -> void:
+	if option_index < 0 or option_index > _move_buttons.size():
+		return
+	if option_index == _move_buttons.size():
+		if _switch_button != null:
+			_switch_button.grab_focus()
+		return
+	_move_buttons[option_index].grab_focus()
+
+
+## Called when a move option gains focus (mouse click or keyboard).
+func _on_move_option_focused(option_index: int) -> void:
+	_focused_option_index = option_index
+	_update_move_focus_highlight()
+
+
+## Applies UIFocusManager-style highlighting to the focused option.
+func _update_move_focus_highlight() -> void:
+	var highlighted := Color(1.2, 1.2, 1.0)
+	var normal := Color(1, 1, 1)
+	for i in _move_buttons.size():
+		_move_buttons[i].modulate = highlighted if i == _focused_option_index else normal
+	if _switch_button != null:
+		_switch_button.modulate = highlighted \
+				if _focused_option_index == _move_buttons.size() else normal
+
+
+## Pure list navigation helper: returns the next option index for a step.
+## Options 0..move_count-1 are moves in a vertical list; move_count is the
+## switch option. step is -1 (previous) or +1 (next); navigation wraps at
+## both ends of the list.
+static func _next_list_index(from_idx: int, step: int, move_count: int) -> int:
+	if move_count <= 0:
+		return -1
+	var option_count := move_count + 1
+	if from_idx < 0 or from_idx >= option_count:
+		return 0
+	return ((from_idx + step) % option_count + option_count) % option_count
