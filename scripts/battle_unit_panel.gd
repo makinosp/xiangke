@@ -15,6 +15,8 @@ var _hp_label: Label
 var _status_container: HBoxContainer
 ## Container for stat stage indicators.
 var _stat_container: HBoxContainer
+## True while the panel displays a grayed-out placeholder (identity only).
+var _is_hidden: bool = false
 
 
 func _ready() -> void:
@@ -78,10 +80,23 @@ func _create_panel_style() -> StyleBoxFlat:
 	return style
 
 
+## Builds the UI lazily when _ready() has not run yet (e.g., a freshly
+## instantiated panel that has not been added to the tree).
+func _ensure_ui() -> void:
+	if _name_label == null:
+		_build_ui()
+
+
 ## Updates all display elements from a battle participant's data.
+## Also resets any placeholder state from a previous hidden display.
 func update_from_participant(p: BattleParticipant) -> void:
 	if p == null or p.character_data == null:
 		return
+	_ensure_ui()
+
+	_is_hidden = false
+	# Restore normal panel styling in case the panel was a placeholder.
+	add_theme_stylebox_override("panel", _create_panel_style())
 
 	# Name
 	_name_label.text = p.character_data.name
@@ -120,6 +135,74 @@ func update_from_participant(p: BattleParticipant) -> void:
 
 	# Stat Stages
 	_update_stat_display(p.stat_stages)
+
+
+## Shows a grayed-out placeholder for a character that has not appeared on the
+## field yet. Displays identity (name and type) but no battle state (HP,
+## status effects, stat stages).
+func show_hidden_placeholder(char_data: CharacterData) -> void:
+	if char_data == null:
+		return
+	_ensure_ui()
+	_is_hidden = true
+
+	_name_label.text = char_data.name
+	_name_label.add_theme_color_override("font_color", Color.GRAY)
+
+	_update_type_display(char_data)
+	_type_label.add_theme_color_override("font_color", Color.GRAY)
+
+	_hp_bar.value = 0
+	_hp_bar.modulate = Color.GRAY
+	_hp_label.text = "???"
+	_hp_label.add_theme_color_override("font_color", Color.GRAY)
+
+	# Clear status and stat-stage content.
+	for child: Node in _status_container.get_children():
+		child.queue_free()
+	for child: Node in _stat_container.get_children():
+		child.queue_free()
+
+	# Gray panel styling.
+	var style := _create_panel_style()
+	style.bg_color = Color(0.12, 0.12, 0.16, 0.8)
+	style.border_color = Color(0.25, 0.25, 0.32)
+	add_theme_stylebox_override("panel", style)
+
+
+## Shows a defeated state for a character that appeared on the field and was
+## defeated. Displays identity (name and type) plus a "DEFEATED" marker and a
+## red panel border; shows no HP, status, or stat-stage content. Distinct from
+## show_hidden_placeholder() so a defeated slot never looks like an unselected
+## one.
+func show_defeated_placeholder(char_data: CharacterData) -> void:
+	if char_data == null:
+		return
+	_ensure_ui()
+	_is_hidden = false
+
+	_name_label.text = char_data.name
+	_name_label.add_theme_color_override("font_color", Color.GRAY)
+
+	_update_type_display(char_data)
+	_type_label.add_theme_color_override("font_color", Color.GRAY)
+
+	_hp_bar.value = 0
+	_hp_bar.modulate = Color.GRAY
+	_hp_label.text = "DEFEATED"
+	_hp_label.add_theme_color_override("font_color", Color(0.9, 0.4, 0.4))
+
+	# Clear status and stat-stage content.
+	for child: Node in _status_container.get_children():
+		child.queue_free()
+	for child: Node in _stat_container.get_children():
+		child.queue_free()
+
+	# Dark panel with a red border to signal defeat.
+	var style := _create_panel_style()
+	style.bg_color = Color(0.13, 0.1, 0.1, 0.8)
+	style.border_color = Color(0.62, 0.22, 0.22)
+	add_theme_stylebox_override("panel", style)
 
 
 func _update_type_display(char_data: CharacterData) -> void:
