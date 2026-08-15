@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "zhou_yu"
 name = "周瑜"
+name_key = "char.zhou_yu.name"
 type = 1
 secondary_type = 5
 hp = 115
@@ -16,4 +17,5 @@ intelligence = 125
 spirit = 100
 moves = PackedStringArray("fire_strike", "flame_burst", "water_surge", "war_cry")
 description = "The handsome commander. His strategies burn bright and strike swift like a phoenix in battle."
+desc_key = "char.zhou_yu.desc"
 portrait_path = ""

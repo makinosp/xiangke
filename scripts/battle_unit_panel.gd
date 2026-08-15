@@ -179,6 +179,12 @@ func _load_portrait(portrait_path: String, grayed_out: bool = false) -> void:
 	_portrait_rect.modulate = Color.GRAY if grayed_out else Color.WHITE
 
 
+## Resolves the display name: localized text when a key is set, otherwise the
+## raw name as a fallback (defensive for data without a localization key).
+func _display_name(key: String, raw: String) -> String:
+	return tr(key) if not key.is_empty() else raw
+
+
 ## Updates all display elements from a battle participant's data.
 ## Also resets any placeholder state from a previous hidden display.
 func update_from_participant(p: BattleParticipant) -> void:
@@ -191,7 +197,7 @@ func update_from_participant(p: BattleParticipant) -> void:
 	add_theme_stylebox_override("panel", _create_panel_style())
 
 	# Name
-	_name_label.text = p.character_data.name
+	_name_label.text = _display_name(p.character_data.name_key, p.character_data.name)
 	if p.is_defeated:
 		_name_label.add_theme_color_override("font_color", Color.GRAY)
 	else:
@@ -219,7 +225,7 @@ func update_from_participant(p: BattleParticipant) -> void:
 
 	# HP Text
 	if p.is_defeated:
-		_hp_label.text = "DEFEATED"
+		_hp_label.text = tr("ui.defeated")
 		_hp_label.add_theme_color_override("font_color", Color.GRAY)
 	else:
 		_hp_label.text = "%d/%d" % [p.current_hp, p.max_hp]
@@ -241,7 +247,7 @@ func show_hidden_placeholder(char_data: CharacterData) -> void:
 	_ensure_ui()
 	_is_hidden = true
 
-	_name_label.text = char_data.name
+	_name_label.text = _display_name(char_data.name_key, char_data.name)
 	_name_label.add_theme_color_override("font_color", Color.GRAY)
 
 	_update_type_display(char_data)
@@ -279,7 +285,7 @@ func show_defeated_placeholder(char_data: CharacterData) -> void:
 	_ensure_ui()
 	_is_hidden = false
 
-	_name_label.text = char_data.name
+	_name_label.text = _display_name(char_data.name_key, char_data.name)
 	_name_label.add_theme_color_override("font_color", Color.GRAY)
 
 	_update_type_display(char_data)
@@ -290,7 +296,7 @@ func show_defeated_placeholder(char_data: CharacterData) -> void:
 
 	_hp_bar.value = 0
 	_hp_bar.modulate = Color.GRAY
-	_hp_label.text = "DEFEATED"
+	_hp_label.text = tr("ui.defeated")
 	_hp_label.add_theme_color_override("font_color", Color(0.9, 0.4, 0.4))
 
 	# Clear status and stat-stage content.

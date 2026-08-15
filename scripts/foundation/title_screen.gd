@@ -7,6 +7,8 @@ extends Control
 @onready var version_label: Label = $VersionLabel
 ## Reference to the start button.
 @onready var start_button: Button = $StartButton
+## Reference to the settings button.
+@onready var settings_button: Button = $SettingsButton
 
 
 func _ready() -> void:
@@ -15,7 +17,7 @@ func _ready() -> void:
 
 	# Register with focus manager if available
 	if UIFocusManager:
-		UIFocusManager.register_focus_group([start_button])
+		UIFocusManager.register_focus_group([start_button, settings_button])
 
 
 ## Called when the "Start" button is pressed.
@@ -42,6 +44,12 @@ func _on_start_button_pressed() -> void:
 
 	# Transition to corps creation
 	GameManager.transition_to_state(GameManager.GameState.CORPS_CREATION)
+
+
+## Called when the "Settings" button is pressed.
+func _on_settings_button_pressed() -> void:
+	AudioManager.initialize_audio()
+	GameManager.transition_to_state(GameManager.GameState.SETTINGS)
 
 
 ## Called when keyboard navigation is used.

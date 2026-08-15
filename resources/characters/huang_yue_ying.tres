@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "huang_yue_ying"
 name = "黄月英"
+name_key = "char.huang_yue_ying.name"
 type = 0
 secondary_type = -1
 hp = 75
@@ -16,4 +17,5 @@ intelligence = 118
 spirit = 105
 moves = PackedStringArray("flame_burst", "wood_heal", "earth_barrier", "water_surge")
 description = "Zhuge Liang's wife and fellow inventor. Her mechanical brilliance built the wooden oxen and crossbow."
+desc_key = "char.huang_yue_ying.desc"
 portrait_path = ""

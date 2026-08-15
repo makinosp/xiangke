@@ -6,7 +6,9 @@
 script = ExtResource("1_stat")
 effect_type = 1
 name = "Burn"
+name_key = "effect.burn.name"
 description = "Deals damage over time each turn. Reduces attack."
+desc_key = "effect.burn.desc"
 damage_per_turn = 0.125
 escalating = false
 max_damage_cap = 0.25

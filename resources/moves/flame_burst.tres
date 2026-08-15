@@ -6,6 +6,7 @@
 script = ExtResource("1_move")
 id = "flame_burst"
 name = "炎爆"
+name_key = "move.flame_burst.name"
 type = 1
 power = 120
 accuracy = 80
@@ -18,3 +19,4 @@ recoil = 33
 healing = 0
 damage_category = 1
 description = "A devastating explosion of flames. Powerful but risky. May burn."
+desc_key = "move.flame_burst.desc"

@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "huang_zhong"
 name = "黄忠"
+name_key = "char.huang_zhong.name"
 type = 1
 hp = 90
 attack = 115
@@ -15,4 +16,5 @@ intelligence = 80
 spirit = 75
 moves = PackedStringArray("fire_strike", "flame_burst", "iron_cleave", "water_surge")
 description = "The veteran archer of Shu. Age has not dulled his aim or his fighting spirit."
+desc_key = "char.huang_zhong.desc"
 portrait_path = ""

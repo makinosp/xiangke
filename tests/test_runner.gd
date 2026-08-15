@@ -13,6 +13,8 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://tests/unit/test_battle_flow_service.gd",
 	"res://tests/unit/test_opponent_visibility.gd",
 	"res://tests/unit/test_move_selection_ui.gd",
+	"res://tests/unit/test_i18n.gd",
+	"res://tests/unit/test_settings_manager.gd",
 ]
 
 ## Total counters
@@ -67,6 +69,11 @@ func _run_test_suite(script_path: String) -> void:
 
 	var suite_name: String = script_path.get_file().trim_suffix(".gd")
 	print("  [", suite_name, "]")
+
+	# Pin the locale so text-rendering assertions are deterministic regardless
+	# of the host OS locale and independent of earlier suites. Suites that
+	# intentionally exercise locale switching manage/restore it themselves.
+	TranslationServer.set_locale("en")
 
 	# Discover test methods (methods starting with "test_")
 	var method_dicts = instance.get_method_list()

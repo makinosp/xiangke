@@ -35,6 +35,41 @@ func test_title_to_corps_creation_valid() -> int:
 		true, "TITLE -> CORPS_CREATION should be valid")
 
 
+func test_title_to_settings_valid() -> int:
+	return assert_eq(
+		_game_manager.transition_to_state(_game_manager.GameState.SETTINGS),
+		true, "TITLE -> SETTINGS should be valid")
+
+
+func test_settings_to_title_valid() -> int:
+	_game_manager.current_state = _game_manager.GameState.SETTINGS
+	return assert_eq(
+		_game_manager.transition_to_state(_game_manager.GameState.TITLE),
+		true, "SETTINGS -> TITLE should be valid")
+
+
+func test_settings_to_corps_creation_invalid() -> int:
+	_game_manager.current_state = _game_manager.GameState.SETTINGS
+	return assert_eq(
+		_game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION),
+		false, "SETTINGS -> CORPS_CREATION should be invalid")
+
+
+func test_settings_scene_path() -> int:
+	return assert_eq(
+		_game_manager.get_scene_for_state(_game_manager.GameState.SETTINGS),
+		"res://scenes/settings_screen.tscn",
+		"SETTINGS should map to settings_screen.tscn")
+
+
+func test_title_to_settings_to_title_round_trip() -> int:
+	var err := OK
+	err = assert_eq(_game_manager.transition_to_state(_game_manager.GameState.SETTINGS),
+		true, "TITLE -> SETTINGS"); if err: return err
+	return assert_eq(_game_manager.transition_to_state(_game_manager.GameState.TITLE),
+		true, "SETTINGS -> TITLE")
+
+
 func test_skip_corps_creation_invalid() -> int:
 	_game_manager.current_state = _game_manager.GameState.TITLE
 	return assert_eq(

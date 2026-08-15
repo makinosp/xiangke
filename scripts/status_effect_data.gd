@@ -10,8 +10,14 @@ extends Resource
 ## Display name of the status effect.
 @export var name: String = ""
 
+## Localization key for the display name (e.g., "effect.burn.name").
+@export var name_key: String = ""
+
 ## Description of the status effect's behavior.
 @export var description: String = ""
+
+## Localization key for the description (e.g., "effect.burn.desc").
+@export var desc_key: String = ""
 
 ## Per-turn damage as fraction of max HP (0.0-1.0). 0 if no damage.
 @export var damage_per_turn: float = 0.0

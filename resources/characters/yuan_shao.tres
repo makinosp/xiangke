@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "yuan_shao"
 name = "袁紹"
+name_key = "char.yuan_shao.name"
 type = 3
 secondary_type = -1
 hp = 125
@@ -16,4 +17,5 @@ intelligence = 95
 spirit = 100
 moves = PackedStringArray("metal_slash", "iron_cleave", "earth_barrier", "war_cry")
 description = "Proud lord of the north. Vast in power and following, undone by indecision at Guandu."
+desc_key = "char.yuan_shao.desc"
 portrait_path = ""

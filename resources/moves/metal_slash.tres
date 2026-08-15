@@ -6,6 +6,7 @@
 script = ExtResource("1_move")
 id = "metal_slash"
 name = "金斬"
+name_key = "move.metal_slash.name"
 type = 3
 power = 90
 accuracy = 90
@@ -18,3 +19,4 @@ recoil = 25
 healing = 0
 damage_category = 0
 description = "A sharp metallic slash. The user takes recoil damage."
+desc_key = "move.metal_slash.desc"

@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "gan_ning"
 name = "甘寧"
+name_key = "char.gan_ning.name"
 type = 4
 secondary_type = -1
 hp = 110
@@ -16,4 +17,5 @@ intelligence = 75
 spirit = 80
 moves = PackedStringArray("water_surge", "iron_cleave", "metal_slash", "war_cry")
 description = "The 'Pirate General' of Wu. Feared at sea, he burned a thousand Cao ships in a night raid."
+desc_key = "char.gan_ning.desc"
 portrait_path = ""

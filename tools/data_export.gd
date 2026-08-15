@@ -107,9 +107,11 @@ func _export_moves(moves: Dictionary, errors: Array[String]) -> Array:
 func _character_to_dict(c: CharacterData, errors: Array[String]) -> Dictionary:
 	if c.name.contains("\uFFFD"):
 		errors.append("character '" + c.id + "' name contains U+FFFD replacement character (encoding corruption)")
+	_validate_translation_keys("character", c.id, c.name_key, c.desc_key, errors)
 	return {
 		"id": c.id,
 		"name": c.name,
+		"name_key": c.name_key,
 		"element": _enum_name(TYPE_NAMES, c.type, "character '" + c.id + "' type", errors),
 		"secondary_element": _optional_enum_name(TYPE_NAMES, c.secondary_type,
 				"character '" + c.id + "' secondary_type", errors),
@@ -123,6 +125,7 @@ func _character_to_dict(c: CharacterData, errors: Array[String]) -> Dictionary:
 		},
 		"moves": Array(c.moves),
 		"description": c.description,
+		"desc_key": c.desc_key,
 	}
 
 
@@ -130,9 +133,11 @@ func _character_to_dict(c: CharacterData, errors: Array[String]) -> Dictionary:
 func _move_to_dict(m: MoveData, errors: Array[String]) -> Dictionary:
 	if m.name.contains("\uFFFD"):
 		errors.append("move '" + m.id + "' name contains U+FFFD replacement character (encoding corruption)")
+	_validate_translation_keys("move", m.id, m.name_key, m.desc_key, errors)
 	return {
 		"id": m.id,
 		"name": m.name,
+		"name_key": m.name_key,
 		"element": _enum_name(TYPE_NAMES, m.type, "move '" + m.id + "' type", errors),
 		"power": m.power,
 		"accuracy": m.accuracy,
@@ -149,7 +154,20 @@ func _move_to_dict(m: MoveData, errors: Array[String]) -> Dictionary:
 		"damage_category": _enum_name(CATEGORY_NAMES, m.damage_category,
 				"move '" + m.id + "' damage_category", errors),
 		"description": m.description,
+		"desc_key": m.desc_key,
 	}
+
+
+## Validates that an entity's translation keys are present and well-formed.
+func _validate_translation_keys(kind: String, id: String, name_key: String, desc_key: String, errors: Array[String]) -> void:
+	if name_key.is_empty():
+		errors.append(kind + " '" + id + "' is missing name_key")
+	elif not name_key.begins_with(kind + ".") or not name_key.ends_with(".name"):
+		errors.append(kind + " '" + id + "' has malformed name_key: '" + name_key + "'")
+	if desc_key.is_empty():
+		errors.append(kind + " '" + id + "' is missing desc_key")
+	elif not desc_key.begins_with(kind + ".") or not desc_key.ends_with(".desc"):
+		errors.append(kind + " '" + id + "' has malformed desc_key: '" + desc_key + "'")
 
 
 ## Returns the enum name for a value, or "" and records an error if out of range.

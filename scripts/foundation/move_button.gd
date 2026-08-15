@@ -113,6 +113,12 @@ func _set_children_mouse_filter(node: Node, filter: Control.MouseFilter) -> void
 		_set_children_mouse_filter(child, filter)
 
 
+## Resolves the display name: localized text when a key is set, otherwise the
+## raw name as a fallback (defensive for data without a localization key).
+func _display_name(key: String, raw: String) -> String:
+	return tr(key) if not key.is_empty() else raw
+
+
 ## Updates all display elements from a move's data.
 ## effectiveness: type effectiveness multiplier against the opponent's front
 ## character; pass -1.0 to hide the multiplier (unknown target).
@@ -125,14 +131,14 @@ func update_from_move(move: MoveData, effectiveness: float) -> void:
 	var type_name: String = TypeColors.get_type_name(move.type)
 
 	# Row 1: name + type
-	_name_label.text = move.name
+	_name_label.text = _display_name(move.name_key, move.name)
 	_name_label.add_theme_color_override("font_color", Color.WHITE)
 	_type_label.text = type_name
 	_type_label.add_theme_color_override("font_color", type_color)
 
 	# Row 2: stats + effectiveness
 	var cat_name: String = TypeColors.get_category_name(move.damage_category)
-	_stats_label.text = "P:%d A:%d%% %s" % [move.power, move.accuracy, cat_name]
+	_stats_label.text = tr("ui.move_stats") % [move.power, move.accuracy, cat_name]
 	_stats_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	_update_effect_display(effectiveness)
 
@@ -140,7 +146,7 @@ func update_from_move(move: MoveData, effectiveness: float) -> void:
 	_update_badges(move)
 
 	# Tooltip: flavor description.
-	tooltip_text = move.description
+	tooltip_text = _display_name(move.desc_key, move.description)
 
 	# Content changed; refresh the size hint so an in-tree button reflows
 	# immediately (out-of-tree buttons are refreshed on NOTIFICATION_ENTER_TREE).

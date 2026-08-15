@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "jiang_wei"
 name = "姜維"
+name_key = "char.jiang_wei.name"
 type = 4
 secondary_type = -1
 hp = 108
@@ -16,4 +17,5 @@ intelligence = 95
 spirit = 85
 moves = PackedStringArray("water_surge", "flame_burst", "earth_barrier", "war_cry")
 description = "Zhuge Liang's successor in the northern campaigns. Carried Shu's ambitions long after the master's death."
+desc_key = "char.jiang_wei.desc"
 portrait_path = ""

@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "sun_shang_xiang"
 name = "孫尚香"
+name_key = "char.sun_shang_xiang.name"
 type = 1
 secondary_type = -1
 hp = 100
@@ -16,4 +17,5 @@ intelligence = 82
 spirit = 88
 moves = PackedStringArray("fire_strike", "flame_burst", "metal_slash", "war_cry")
 description = "Sun Quan's martial sister, betrothed to Liu Bei. As fierce with a blade as any general."
+desc_key = "char.sun_shang_xiang.desc"
 portrait_path = ""

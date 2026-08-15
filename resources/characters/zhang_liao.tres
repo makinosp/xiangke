@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "zhang_liao"
 name = "張遼"
+name_key = "char.zhang_liao.name"
 type = 3
 secondary_type = -1
 hp = 125
@@ -16,4 +17,5 @@ intelligence = 75
 spirit = 85
 moves = PackedStringArray("metal_slash", "iron_cleave", "fire_strike", "war_cry")
 description = "Wei's most feared general. Routed Sun Quan's army at Hefei and stopped a thousand warriors with eight hundred of his own."
+desc_key = "char.zhang_liao.desc"
 portrait_path = ""

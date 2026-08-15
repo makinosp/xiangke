@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "xun_yu"
 name = "荀彧"
+name_key = "char.xun_yu.name"
 type = 5
 secondary_type = -1
 hp = 115
@@ -16,4 +17,5 @@ intelligence = 115
 spirit = 110
 moves = PackedStringArray("war_cry", "flame_burst", "wood_heal", "earth_barrier")
 description = "The architect of Wei's civil administration. Often called the true pillar of Cao Cao's rise."
+desc_key = "char.xun_yu.desc"
 portrait_path = ""

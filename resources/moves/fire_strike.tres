@@ -6,6 +6,7 @@
 script = ExtResource("1_move")
 id = "fire_strike"
 name = "炎撃"
+name_key = "move.fire_strike.name"
 type = 1
 power = 80
 accuracy = 95
@@ -18,3 +19,4 @@ recoil = 0
 healing = 0
 damage_category = 0
 description = "A blazing strike that engulfs the foe. May inflict burn."
+desc_key = "move.fire_strike.desc"

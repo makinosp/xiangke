@@ -25,6 +25,7 @@ config/icon="res://icon.svg"
 DataRegistry="*res://autoloads/data_registry.gd"
 GameManager="*res://autoloads/game_manager.gd"
 SaveManager="*res://autoloads/save_manager.gd"
+SettingsManager="*res://autoloads/settings_manager.gd"
 AudioManager="*res://autoloads/audio_manager.gd"
 UIFocusManager="*res://autoloads/ui_focus_manager.gd"
 SceneTransitionLayer="*res://scenes/scene_transition_layer.tscn"
@@ -35,6 +36,15 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[gui]
+
+theme/custom="res://assets/ui/default_theme.tres"
+
+[internationalization]
+
+locale/fallback="en"
+locale/translations=PackedStringArray("res://translations/en.en.translation", "res://translations/ja.ja.translation", "res://translations/zh_CN.zh_CN.translation", "res://translations/zh_TW.zh_TW.translation")
 
 [rendering]
 

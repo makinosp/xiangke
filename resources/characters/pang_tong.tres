@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "pang_tong"
 name = "龐統"
+name_key = "char.pang_tong.name"
 type = 6
 secondary_type = -1
 hp = 115
@@ -16,4 +17,5 @@ intelligence = 120
 spirit = 100
 moves = PackedStringArray("flame_burst", "water_surge", "war_cry", "earth_barrier")
 description = "The 'Young Phoenix,' rival of Zhuge Liang. His genius was cut short at Fallen Phoenix Slope."
+desc_key = "char.pang_tong.desc"
 portrait_path = ""

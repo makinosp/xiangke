@@ -25,23 +25,26 @@ use xiangke_core::moves::MoveData;
 use xiangke_core::validator::{ValidationResult, validate_character, validate_move};
 
 /// Expected JSON keys for the core `CharacterData` struct.
-const CHARACTER_KEYS: [&str; 7] = [
+const CHARACTER_KEYS: [&str; 9] = [
     "id",
     "name",
+    "name_key",
     "element",
     "secondary_element",
     "base_stats",
     "moves",
     "description",
+    "desc_key",
 ];
 
 /// Expected JSON keys for the core `Stats` struct.
 const STATS_KEYS: [&str; 6] = ["hp", "attack", "defense", "speed", "intelligence", "spirit"];
 
 /// Expected JSON keys for the core `MoveData` struct.
-const MOVE_KEYS: [&str; 15] = [
+const MOVE_KEYS: [&str; 17] = [
     "id",
     "name",
+    "name_key",
     "element",
     "power",
     "accuracy",
@@ -55,6 +58,7 @@ const MOVE_KEYS: [&str; 15] = [
     "healing",
     "damage_category",
     "description",
+    "desc_key",
 ];
 
 fn main() -> ExitCode {
@@ -109,6 +113,11 @@ fn main() -> ExitCode {
             result.invalid_files += 1;
             continue;
         }
+        if let Some(issue) = check_translation_keys(mv, "move", &id) {
+            result.add_error("SCHEMA-3", &issue, &id);
+            result.invalid_files += 1;
+            continue;
+        }
         match serde_json::from_value::<MoveData>(mv.clone()) {
             Ok(parsed) => {
                 if let Err(errors) = validate_move(&parsed) {
@@ -132,6 +141,11 @@ fn main() -> ExitCode {
         let id = entity_id(c, idx);
         if let Some(issue) = check_keys(c, &CHARACTER_KEYS, "character", &id) {
             result.add_error("SCHEMA-1", &issue, &id);
+            result.invalid_files += 1;
+            continue;
+        }
+        if let Some(issue) = check_translation_keys(c, "character", &id) {
+            result.add_error("SCHEMA-3", &issue, &id);
             result.invalid_files += 1;
             continue;
         }
@@ -177,6 +191,33 @@ fn entity_id(value: &Value, index: usize) -> String {
         .and_then(Value::as_str)
         .map(str::to_string)
         .unwrap_or_else(|| format!("<index {index}>"))
+}
+
+/// Checks that an entity's translation keys are present and well-formed.
+///
+/// Returns `Some(message)` when `name_key`/`desc_key` are missing or do not
+/// follow the `<kind>.<id>.name` / `<kind>.<id>.desc` convention.
+fn check_translation_keys(obj: &Value, kind: &str, id: &str) -> Option<String> {
+    let name_key = obj.get("name_key").and_then(Value::as_str);
+    let desc_key = obj.get("desc_key").and_then(Value::as_str);
+
+    let mut issues = Vec::new();
+    match name_key {
+        Some(k) if !k.is_empty() && k.ends_with(".name") && k.starts_with(&format!("{kind}.")) => {}
+        Some(k) => issues.push(format!("malformed name_key: '{k}'")),
+        None => issues.push("missing name_key".to_string()),
+    }
+    match desc_key {
+        Some(k) if !k.is_empty() && k.ends_with(".desc") && k.starts_with(&format!("{kind}.")) => {}
+        Some(k) => issues.push(format!("malformed desc_key: '{k}'")),
+        None => issues.push("missing desc_key".to_string()),
+    }
+
+    if issues.is_empty() {
+        None
+    } else {
+        Some(format!("entity '{id}' i18n keys: {}", issues.join(", ")))
+    }
 }
 
 /// Checks that `obj` has exactly the expected keys.

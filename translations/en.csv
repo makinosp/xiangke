@@ -1,0 +1,167 @@
+﻿keys,en
+ui.start,Start
+ui.settings,Settings
+ui.back,Back
+ui.confirm,Confirm
+ui.cancel,Cancel
+ui.select_corps,Select 6 Characters for Your Corps
+ui.select_deploy,Select 3 Characters to Deploy
+ui.deploy,Deploy
+ui.opponent_corps,Opponent Corps
+ui.character_name,Character Name
+ui.type,Type: %s
+ui.hp,HP: %d
+ui.attack,Attack: %d
+ui.defense,Defense: %d
+ui.speed,Speed: %d
+ui.intelligence,Intelligence: %d
+ui.spirit,Spirit: %d
+ui.move_1,Move 1: --
+ui.move_2,Move 2: --
+ui.move_3,Move 3: --
+ui.move_4,Move 4: --
+ui.desc_placeholder,Description will appear here...
+ui.battle,Battle!
+ui.victory,Victory!
+ui.defeat,Defeat...
+ui.return_title,Return to Title
+ui.battle_failed,Failed to start battle!
+ui.turn_format,%s's turn!
+ui.switch_bench,Switch (Bench)
+ui.choose_switch,Choose a character to switch in:
+ui.no_bench,No benched characters available!
+ui.switch_in,Switch In
+ui.switched,Switched characters!
+ui.switch_failed,Switch failed!
+ui.defeated,DEFEATED
+ui.stat_attack,ATK
+ui.stat_defense,DEF
+ui.stat_speed,SPD
+ui.stat_intelligence,INT
+ui.stat_spirit,SPR
+ui.type_wood,Wood
+ui.type_fire,Fire
+ui.type_earth,Earth
+ui.type_metal,Metal
+ui.type_water,Water
+ui.type_yang,Yang
+ui.type_yin,Yin
+ui.effect_burn,Burn
+ui.effect_poison,Poison
+ui.effect_confusion,Confused
+ui.effect_chain,Chain
+ui.effect_charm,Charm
+ui.language,Language
+ui.master_volume,Master Volume
+ui.bgm_volume,BGM Volume
+ui.sfx_volume,SFX Volume
+ui.select_corps_count,Select 6 Characters for Your Corps (%d/6)
+ui.select_deploy_count,Select 3 Characters to Deploy (%d/3)
+char.cao_cao.name,Cao Cao
+char.cao_cao.desc,The cunning warlord who unified the north. A master of strategy and politics.
+char.cao_ren.name,Cao Ren
+char.cao_ren.desc,The unbreakable shield of Wei. Held Fan Castle against Guan Yu's siege with a skeleton garrison.
+char.chen_gong.name,Chen Gong
+char.chen_gong.desc,A strategist of shifting loyalty. Served Cao Cao, then Lü Bu, and died refusing to beg for life.
+char.da_qiao.name,Da Qiao
+char.da_qiao.desc,Eldest of the Qiao sisters, wife of Sun Ce. A beauty whose sorrow was sung of for centuries.
+char.dian_wei.name,Dian Wei
+char.dian_wei.desc,Cao Cao's first bodyguard. His twin halberds fell dozens of enemies before he died covering his lord's escape.
+char.diao_chan.name,Diao Chan
+char.diao_chan.desc,The mesmerizing beauty of the Three Kingdoms. Her charms sway the hearts of heroes.
+char.dong_zhuo.name,Dong Zhuo
+char.dong_zhuo.desc,The tyrant who seized the Han capital. His brutality forged the alliance that would topple him.
+char.gan_ning.name,Gan Ning
+char.gan_ning.desc,The 'Pirate General' of Wu. Feared at sea, he burned a thousand Cao ships in a night raid.
+char.guan_yu.name,Guan Yu
+char.guan_yu.desc,The God of War. His blade is as sharp as his loyalty, cutting through all who oppose him.
+char.guo_jia.name,Guo Jia
+char.guo_jia.desc,Cao Cao's sharpest strategist. Died young, but his foresight won the north before he left.
+char.hua_tuo.name,Hua Tuo
+char.hua_tuo.desc,The legendary physician. His surgeries and anesthesia were centuries ahead of their time.
+char.huang_yue_ying.name,Huang Yue Ying
+char.huang_yue_ying.desc,Zhuge Liang's wife and fellow inventor. Her mechanical brilliance built the wooden oxen and crossbow.
+char.huang_zhong.name,Huang Zhong
+char.huang_zhong.desc,The veteran archer of Shu. Age has not dulled his aim or his fighting spirit.
+char.jiang_wei.name,Jiang Wei
+char.jiang_wei.desc,Zhuge Liang's successor in the northern campaigns. Carried Shu's ambitions long after the master's death.
+char.liu_bei.name,Liu Bei
+char.liu_bei.desc,The benevolent founder of Shu. Won hearts across the land with his kindness and ambition to restore the Han.
+char.lu_bu.name,Lü Bu
+char.lu_bu.desc,The unstoppable flying general. Peerless in combat, but his ambition knows no loyalty.
+char.lu_xun.name,Lu Xun
+char.lu_xun.desc,The quiet fire of Wu. Burned Liu Bei's army to ash at Yiling and outsmarted Wei for a decade.
+char.lv_meng.name,Lü Meng
+char.lv_meng.desc,The scholar-general of Wu. Slain by Guan Yu's ghost, but his scheme took the enemy's head first.
+char.ma_chao.name,Ma Chao
+char.ma_chao.desc,The young general of Xiliang. His cavalry charges are swift as the wind.
+char.pang_tong.name,Pang Tong
+char.pang_tong.desc,The 'Young Phoenix,' rival of Zhuge Liang. His genius was cut short at Fallen Phoenix Slope.
+char.si_ma_yi.name,Sima Yi
+char.si_ma_yi.desc,The master strategist of Wei. Patient and calculating, he outlasts all his rivals.
+char.sun_ce.name,Sun Ce
+char.sun_ce.desc,The 'Little Conqueror.' With a thousand men he carved out the foundation of Wu in a single campaign.
+char.sun_quan.name,Sun Quan
+char.sun_quan.desc,The young tiger of Jiangdong. Founder of the Wu kingdom with unwavering resolve.
+char.sun_shang_xiang.name,Sun Shang Xiang
+char.sun_shang_xiang.desc,Sun Quan's martial sister, betrothed to Liu Bei. As fierce with a blade as any general.
+char.tai_shi_ci.name,Tai Shi Ci
+char.tai_shi_ci.desc,An archer of unmatched skill and a loyal knight. Served Wu with honor until his final arrow.
+char.wei_yan.name,Wei Yan
+char.wei_yan.desc,A fierce and proud Shu general. His talents were overshadowed by mistrust and a fiery temper.
+char.xia_hou_dun.name,Xiahou Dun
+char.xia_hou_dun.desc,The one-eyed general of Wei. His fierce loyalty and toughness are legendary.
+char.xia_hou_yuan.name,Xiahou Yuan
+char.xia_hou_yuan.desc,A swift and fierce Wei general. Met his end at the hands of Huang Zhong at Mount Dingjun.
+char.xu_chu.name,Xu Chu
+char.xu_chu.desc,A massive, loyal bodyguard of Cao Cao. His strength is said to rival that of a thousand men.
+char.xun_yu.name,Xun Yu
+char.xun_yu.desc,The architect of Wei's civil administration. Often called the true pillar of Cao Cao's rise.
+char.yuan_shao.name,Yuan Shao
+char.yuan_shao.desc,Proud lord of the north. Vast in power and following, undone by indecision at Guandu.
+char.zhang_fei.name,Zhang Fei
+char.zhang_fei.desc,The valiant warrior of Shu. His fearsome presence alone can turn the tide of battle.
+char.zhang_jiao.name,Zhang Jiao
+char.zhang_jiao.desc,The 'Great Teacher' of the Yellow Turbans. His rebellion shook the Han to its foundations.
+char.zhang_liao.name,Zhang Liao
+char.zhang_liao.desc,Wei's most feared general. Routed Sun Quan's army at Hefei and stopped a thousand warriors with eight hundred of his own.
+char.zhao_yun.name,Zhao Yun
+char.zhao_yun.desc,The dragon of Changshan. A general of unmatched valor and unwavering loyalty.
+char.zhen_ji.name,Zhen Ji
+char.zhen_ji.desc,Lady Zhen, famed beauty of the Wei court. Graceful and perceptive, favored of the Cao family.
+char.zhou_yu.name,Zhou Yu
+char.zhou_yu.desc,The handsome commander. His strategies burn bright and strike swift like a phoenix in battle.
+char.zhuge_liang.name,Zhuge Liang
+char.zhuge_liang.desc,The Sleeping Dragon. A brilliant strategist who commands the elements with wisdom and foresight.
+move.earth_barrier.name,Earth Barrier
+move.earth_barrier.desc,Raises a stone barrier. Sharply boosts the user's defense.
+move.fire_strike.name,Fire Strike
+move.fire_strike.desc,A blazing strike that engulfs the foe. May inflict burn.
+move.flame_burst.name,Flame Burst
+move.flame_burst.desc,A devastating explosion of flames. Powerful but risky. May burn.
+move.iron_cleave.name,Iron Cleave
+move.iron_cleave.desc,Strikes 2-5 times with an iron blade. Multi-hit attack.
+move.metal_slash.name,Metal Slash
+move.metal_slash.desc,A sharp metallic slash. The user takes recoil damage.
+move.war_cry.name,War Cry
+move.war_cry.desc,A fearsome battle cry that may charm the foe, reducing their attack.
+move.water_surge.name,Water Surge
+move.water_surge.desc,A surge of water that slows the target. Reduces target's speed.
+move.wood_heal.name,Wood Heal
+move.wood_heal.desc,Channels the power of wood to restore HP. Heals 50% of max HP.
+effect.burn.name,Burn
+effect.burn.desc,Deals damage over time each turn. Reduces attack.
+effect.poison.name,Poison
+effect.poison.desc,Deals increasing damage over time. Damage escalates each turn.
+effect.confusion.name,Confusion
+effect.confusion.desc,May cause the target to hit itself instead of acting.
+effect.chain.name,Chain
+effect.chain.desc,Links damage across multiple targets. Spreads incoming damage.
+effect.charm.name,Charm
+effect.charm.desc,Reduces the target's attack through enchantment.
+ui.category_physical,Phys
+ui.category_arts,Arts
+ui.move_stats,P:%d A:%d%% %s
+ui.enemy_acted,Enemy acted.
+ui.action_executed,Action executed.
+ui.name_type_format,%s (%s)

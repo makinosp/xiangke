@@ -22,7 +22,7 @@ offset_right = 150.0
 offset_bottom = 30.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Victory!"
+text = "ui.victory"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -38,6 +38,6 @@ offset_right = 100.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Return to Title"
+text = "ui.return_title"
 
 [connection signal="pressed" from="ReturnButton" to="." method="_on_return_button_pressed"]

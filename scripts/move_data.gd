@@ -10,6 +10,9 @@ extends Resource
 ## Display name (e.g., "火撃").
 @export var name: String = ""
 
+## Localization key for the display name (e.g., "move.fire_strike.name").
+@export var name_key: String = ""
+
 ## Move's type (one of 7 types).
 @export var type: int = TypeEnums.Type.WOOD
 
@@ -48,6 +51,9 @@ extends Resource
 
 ## Flavor text for the move.
 @export var description: String = ""
+
+## Localization key for the flavor description (e.g., "move.fire_strike.desc").
+@export var desc_key: String = ""
 
 ## Returns true if this move has a stat modification effect.
 func has_stat_mod() -> bool:

@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "sun_quan"
 name = "孫権"
+name_key = "char.sun_quan.name"
 type = 4
 secondary_type = 2
 hp = 115
@@ -16,4 +17,5 @@ intelligence = 95
 spirit = 90
 moves = PackedStringArray("water_surge", "earth_barrier", "war_cry", "wood_heal")
 description = "The young tiger of Jiangdong. Founder of the Wu kingdom with unwavering resolve."
+desc_key = "char.sun_quan.desc"
 portrait_path = ""

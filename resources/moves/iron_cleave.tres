@@ -6,6 +6,7 @@
 script = ExtResource("1_move")
 id = "iron_cleave"
 name = "鉄裂"
+name_key = "move.iron_cleave.name"
 type = 3
 power = 45
 accuracy = 100
@@ -18,3 +19,4 @@ recoil = 0
 healing = 0
 damage_category = 0
 description = "Strikes 2-5 times with an iron blade. Multi-hit attack."
+desc_key = "move.iron_cleave.desc"

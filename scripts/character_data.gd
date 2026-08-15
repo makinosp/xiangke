@@ -10,6 +10,9 @@ extends Resource
 ## Display name (e.g., "諸葛亮").
 @export var name: String = ""
 
+## Localization key for the display name (e.g., "char.zhuge_liang.name").
+@export var name_key: String = ""
+
 ## Primary type (one of 7 types).
 @export var type: int = TypeEnums.Type.WOOD
 
@@ -39,6 +42,9 @@ extends Resource
 
 ## Flavor text for the character.
 @export var description: String = ""
+
+## Localization key for the flavor description (e.g., "char.zhuge_liang.desc").
+@export var desc_key: String = ""
 
 ## Path to character portrait image (2:3 aspect ratio recommended).
 ## Defaults to placeholder if empty or file not found.

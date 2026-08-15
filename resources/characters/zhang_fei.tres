@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "zhang_fei"
 name = "張飛"
+name_key = "char.zhang_fei.name"
 type = 2
 secondary_type = 5
 hp = 130
@@ -16,4 +17,5 @@ intelligence = 45
 spirit = 60
 moves = PackedStringArray("earth_barrier", "metal_slash", "war_cry", "iron_cleave")
 description = "The valiant warrior of Shu. His fearsome presence alone can turn the tide of battle."
+desc_key = "char.zhang_fei.desc"
 portrait_path = ""

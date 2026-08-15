@@ -64,6 +64,7 @@ func save_game(data: Dictionary = {}) -> void:
 	config.set_value("settings", "bgm_volume", data.get("bgm_volume", 1.0))
 	config.set_value("settings", "sfx_volume", data.get("sfx_volume", 1.0))
 	config.set_value("settings", "master_muted", data.get("master_muted", false))
+	config.set_value("settings", "language", data.get("language", ""))
 
 	# Progress section
 	config.set_value("progress", "selected_character", data.get("selected_character", ""))
@@ -92,6 +93,7 @@ func _create_default_save() -> Dictionary:
 		"bgm_volume": 1.0,
 		"sfx_volume": 1.0,
 		"master_muted": false,
+		"language": "",
 		"selected_character": "",
 		"last_battle_won": false,
 		"last_battle_time": "",
@@ -123,6 +125,7 @@ func _parse_save_data(config: ConfigFile) -> Dictionary:
 	data["bgm_volume"] = config.get_value("settings", "bgm_volume", 1.0)
 	data["sfx_volume"] = config.get_value("settings", "sfx_volume", 1.0)
 	data["master_muted"] = config.get_value("settings", "master_muted", false)
+	data["language"] = config.get_value("settings", "language", "")
 
 	# Progress
 	data["selected_character"] = config.get_value("progress", "selected_character", "")

@@ -10,7 +10,8 @@ enum GameState {
 	CORPS_CREATION, ## Corps creation screen is active (Phase 1: select 6).
 	CHARACTER_SELECT, ## Battle selection screen is active (Phase 2: pick 3 from corps).
 	BATTLE, ## Battle scene is active (managed by Unit 3).
-	RESULT ## Battle result screen is active.
+	RESULT, ## Battle result screen is active.
+	SETTINGS ## Settings screen is active (language + volume).
 }
 
 ## Currently active game state.
@@ -65,6 +66,8 @@ func get_scene_for_state(state: GameState) -> String:
 			return "res://scenes/battle_scene.tscn"
 		GameState.RESULT:
 			return "res://scenes/result_screen.tscn"
+		GameState.SETTINGS:
+			return "res://scenes/settings_screen.tscn"
 	return ""
 
 
@@ -75,7 +78,7 @@ func _is_valid_transition(from: GameState, to: GameState) -> bool:
 
 	match from:
 		GameState.TITLE:
-			return to == GameState.CORPS_CREATION
+			return to == GameState.CORPS_CREATION or to == GameState.SETTINGS
 		GameState.CORPS_CREATION:
 			return to == GameState.CHARACTER_SELECT
 		GameState.CHARACTER_SELECT:
@@ -83,6 +86,8 @@ func _is_valid_transition(from: GameState, to: GameState) -> bool:
 		GameState.BATTLE:
 			return to == GameState.RESULT
 		GameState.RESULT:
+			return to == GameState.TITLE
+		GameState.SETTINGS:
 			return to == GameState.TITLE
 	return false
 

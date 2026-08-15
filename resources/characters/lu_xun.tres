@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "lu_xun"
 name = "陸遜"
+name_key = "char.lu_xun.name"
 type = 1
 secondary_type = -1
 hp = 125
@@ -16,4 +17,5 @@ intelligence = 118
 spirit = 105
 moves = PackedStringArray("flame_burst", "fire_strike", "water_surge", "wood_heal")
 description = "The quiet fire of Wu. Burned Liu Bei's army to ash at Yiling and outsmarted Wei for a decade."
+desc_key = "char.lu_xun.desc"
 portrait_path = ""

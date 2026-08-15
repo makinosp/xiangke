@@ -6,6 +6,7 @@
 script = ExtResource("1_char")
 id = "cao_ren"
 name = "曹仁"
+name_key = "char.cao_ren.name"
 type = 2
 secondary_type = -1
 hp = 70
@@ -16,4 +17,5 @@ intelligence = 75
 spirit = 95
 moves = PackedStringArray("iron_cleave", "earth_barrier", "metal_slash", "wood_heal")
 description = "The unbreakable shield of Wei. Held Fan Castle against Guan Yu's siege with a skeleton garrison."
+desc_key = "char.cao_ren.desc"
 portrait_path = ""
