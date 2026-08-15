@@ -8,11 +8,11 @@
 
 ## 2. Enemy slot mapping and reveal state
 
-- [x] 2.1 Extend `_select_enemy_battle_team()` in
-      `scripts/foundation/battle_scene.gd` to also return each selected
-      character's index within `roster.opponent_corps`, and build a
-      `_enemy_slot_to_corps: Array[int]` mapping Rust participant `slot_index`
-      (0..2) to corps index (0..5)
+- [x] 2.1 In `scripts/foundation/battle_scene.gd`, resolve each enemy
+      participant's corps position by `character_data.id` lookup in
+      `roster.opponent_corps` (the Rust bridge reports global participant
+      indices in `slot_index`, so it cannot be used for corps mapping), and
+      store the corps list as `_enemy_corps_ids` for slot rendering
 - [x] 2.2 Add `_revealed_enemy_slots: Array[bool]` (size = opponent corps size,
       all false) and initialize it in `_setup_battle()`
 

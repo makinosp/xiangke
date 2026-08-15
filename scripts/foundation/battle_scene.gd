@@ -13,8 +13,6 @@ var _player_panels: Array[BattleUnitPanel] = []
 var _enemy_panels: Array[BattleUnitPanel] = []
 ## Opponent corps character IDs in corps order (used for hidden slot display).
 var _enemy_corps_ids: Array[String] = []
-## Maps Rust participant slot_index (0..2) to corps index (0..5).
-var _enemy_slot_to_corps: Array[int] = []
 ## Per corps index: whether the character has ever appeared on the field.
 var _revealed_enemy_slots: Array[bool] = []
 
@@ -48,14 +46,12 @@ func _setup_battle() -> void:
 		push_error("BattleScene: No valid player characters")
 		return
 
-	var enemy_team: Array[Dictionary] = _select_enemy_battle_team(roster.opponent_corps)
+	var enemy_ids: Array[String] = _select_enemy_battle_team(roster.opponent_corps)
 	var enemy_chars: Array[CharacterData] = []
-	_enemy_slot_to_corps.clear()
-	for entry: Dictionary in enemy_team:
-		var char_data: CharacterData = DataRegistry.get_character(entry["id"])
+	for char_id: String in enemy_ids:
+		var char_data: CharacterData = DataRegistry.get_character(char_id)
 		if char_data != null:
 			enemy_chars.append(char_data)
-			_enemy_slot_to_corps.append(entry["corps_index"])
 
 	if enemy_chars.is_empty():
 		push_error("BattleScene: No enemy characters loaded")
@@ -276,25 +272,23 @@ func _advance_turn() -> void:
 
 ## Selects the 3 enemy characters to field in battle from the 6-character
 ## opponent corps. Picks the strongest 3 by combined stats; the strongest is
-## the first (initial front). Each entry carries the character id and its
-## index within the opponent corps, so rendering can map Rust slot indices
-## (0..2) to corps positions.
-func _select_enemy_battle_team(opponent_ids: Array[String]) -> Array[Dictionary]:
+## the first (initial front).
+func _select_enemy_battle_team(opponent_ids: Array[String]) -> Array[String]:
 	var ranked: Array[Dictionary] = []
-	for i in range(opponent_ids.size()):
-		var char_data: CharacterData = DataRegistry.get_character(opponent_ids[i])
+	for char_id: String in opponent_ids:
+		var char_data: CharacterData = DataRegistry.get_character(char_id)
 		if char_data == null:
 			continue
 		var total := char_data.hp + char_data.attack + char_data.defense \
 				+ char_data.speed + char_data.intelligence + char_data.spirit
-		ranked.append({"id": opponent_ids[i], "total": total, "corps_index": i})
+		ranked.append({"id": char_id, "total": total})
 
 	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return a["total"] > b["total"])
 
-	var result: Array[Dictionary] = []
+	var result: Array[String] = []
 	for i in range(min(3, ranked.size())):
-		result.append({"id": ranked[i]["id"], "corps_index": ranked[i]["corps_index"]})
+		result.append(ranked[i]["id"])
 	return result
 
 
@@ -361,12 +355,13 @@ func _update_player_team_hp(container: Container, panels: Array[BattleUnitPanel]
 ## (identity only, no battle state); the rest are fully displayed.
 func _update_enemy_team_hp(container: Container, panels: Array[BattleUnitPanel]) -> void:
 	# Mark the current front's corps slot as revealed: every path that changes
-	# the front funnels through this update.
+	# the front funnels through this update. The Rust bridge reports global
+	# participant indices in slot_index, so resolve the corps position by id.
 	var front := _flow_service.get_front_participant(BattleParticipant.Team.ENEMY)
-	if front != null and front.slot_index >= 0 and front.slot_index < _enemy_slot_to_corps.size():
-		var corps_idx: int = _enemy_slot_to_corps[front.slot_index]
-		if corps_idx >= 0 and corps_idx < _revealed_enemy_slots.size():
-			_revealed_enemy_slots[corps_idx] = true
+	if front != null:
+		var front_corps_idx: int = _enemy_corps_ids.find(front.character_data.id)
+		if front_corps_idx >= 0 and front_corps_idx < _revealed_enemy_slots.size():
+			_revealed_enemy_slots[front_corps_idx] = true
 
 	# Map corps index -> participant for revealed slots.
 	var by_corps: Dictionary = {}
@@ -376,8 +371,9 @@ func _update_enemy_team_hp(container: Container, panels: Array[BattleUnitPanel])
 	for p: BattleParticipant in _flow_service.get_bench_participants(BattleParticipant.Team.ENEMY):
 		all_participants.append(p)
 	for p: BattleParticipant in all_participants:
-		if p.slot_index >= 0 and p.slot_index < _enemy_slot_to_corps.size():
-			by_corps[_enemy_slot_to_corps[p.slot_index]] = p
+		var corps_idx: int = _enemy_corps_ids.find(p.character_data.id)
+		if corps_idx >= 0:
+			by_corps[corps_idx] = p
 
 	_resize_panels(panels, _enemy_corps_ids.size())
 

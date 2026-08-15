@@ -62,13 +62,15 @@ slot positions stable across switches.
   hidden bench characters. Rejected: it would leak that the other 3 corps
   members are not selected (spec: selection status must not be disclosed).
 
-### D3: Map Rust slot indices to corps positions
+### D3: Resolve corps positions by character id
 
-`_select_enemy_battle_team` is extended to also return each selected character's
-index within `roster.opponent_corps`. A `_enemy_slot_to_corps:
-Array[int]` maps
-Rust participant `slot_index` (0..2) to corps index (0..5), so rendering and
-reveal bookkeeping can address slots uniformly.
+The Rust bridge reports _global_ participant indices in `slot_index` (0..2 for
+player, 3..5 for enemy) — a pre-existing contract used by `execute_switch`.
+Treating it as a team-local index breaks reveal bookkeeping, so rendering
+resolves each participant's corps position with
+`_enemy_corps_ids.find(participant.character_data.id)` instead.
+`_select_enemy_battle_team` keeps returning plain character IDs, and the corps
+list is stored as `_enemy_corps_ids` for lookup and slot rendering.
 
 ### D4: Reveal rule = "has ever been the front"
 
