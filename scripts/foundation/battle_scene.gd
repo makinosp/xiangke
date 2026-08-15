@@ -345,9 +345,11 @@ func _update_player_team_hp(container: Container, panels: Array[BattleUnitPanel]
 	for i in range(all_participants.size()):
 		var p: BattleParticipant = all_participants[i]
 		var panel: BattleUnitPanel = panels[i]
+		# Add before updating: add_child() runs _ready()/_build_ui(), which the
+		# update methods rely on (labels would be null otherwise).
+		container.add_child(panel)
 		panel.update_from_participant(p)
 		panel.set_front_highlight(p.is_front)
-		container.add_child(panel)
 
 
 ## Updates the opponent's team display: one slot per corps member in corps
@@ -383,6 +385,9 @@ func _update_enemy_team_hp(container: Container, panels: Array[BattleUnitPanel])
 
 	for i in range(_enemy_corps_ids.size()):
 		var panel: BattleUnitPanel = panels[i]
+		# Add before updating: add_child() runs _ready()/_build_ui(), which the
+		# placeholder/update methods rely on (labels would be null otherwise).
+		container.add_child(panel)
 		var p: BattleParticipant = by_corps.get(i)
 		var char_data: CharacterData = DataRegistry.get_character(_enemy_corps_ids[i])
 		if _revealed_enemy_slots[i] and p != null:
@@ -398,7 +403,6 @@ func _update_enemy_team_hp(container: Container, panels: Array[BattleUnitPanel])
 		else:
 			panel.show_hidden_placeholder(char_data)
 			panel.set_front_highlight(false)
-		container.add_child(panel)
 
 
 ## Grows or shrinks a panel array to the target size, freeing any extras.

@@ -80,11 +80,19 @@ func _create_panel_style() -> StyleBoxFlat:
 	return style
 
 
+## Builds the UI lazily when _ready() has not run yet (e.g., a freshly
+## instantiated panel that has not been added to the tree).
+func _ensure_ui() -> void:
+	if _name_label == null:
+		_build_ui()
+
+
 ## Updates all display elements from a battle participant's data.
 ## Also resets any placeholder state from a previous hidden display.
 func update_from_participant(p: BattleParticipant) -> void:
 	if p == null or p.character_data == null:
 		return
+	_ensure_ui()
 
 	_is_hidden = false
 	# Restore normal panel styling in case the panel was a placeholder.
@@ -135,6 +143,7 @@ func update_from_participant(p: BattleParticipant) -> void:
 func show_hidden_placeholder(char_data: CharacterData) -> void:
 	if char_data == null:
 		return
+	_ensure_ui()
 	_is_hidden = true
 
 	_name_label.text = char_data.name
@@ -169,6 +178,7 @@ func show_hidden_placeholder(char_data: CharacterData) -> void:
 func show_defeated_placeholder(char_data: CharacterData) -> void:
 	if char_data == null:
 		return
+	_ensure_ui()
 	_is_hidden = false
 
 	_name_label.text = char_data.name

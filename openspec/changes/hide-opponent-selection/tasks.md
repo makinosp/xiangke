@@ -26,7 +26,7 @@
       participants, front first, full identity)
 - [x] 3.3 Verify `scenes/battle_scene.tscn` enemy container layout fits 6 panels
       (adjust container sizing/scroll if needed)
-- [ ] 3.4 Add `show_defeated_placeholder()` to `scripts/battle_unit_panel.gd`
+- [x] 3.4 Add `show_defeated_placeholder()` to `scripts/battle_unit_panel.gd`
       (identity + red "DEFEATED" marker, no battle state) and render revealed
       slots whose participant is no longer living (defeated) with it in
       `_update_enemy_team_hp()`
@@ -36,16 +36,16 @@
 - [x] 4.1 Run `just test-rust` and the GDScript test runner
       (`godot --headless -s res://tests/test_runner.gd`) and confirm no
       regressions
-- [ ] 4.2 Manual test: at battle start the enemy panel fully displays exactly
+- [x] 4.2 Manual test: at battle start the enemy panel fully displays exactly
       one front character and up to 5 grayed-out slots that show the character's
       name and type but no HP or status information
-- [ ] 4.3 Manual test: when the enemy switches a hidden benched character in,
+- [x] 4.3 Manual test: when the enemy switches a hidden benched character in,
       that character becomes revealed and stays revealed after switching back to
       the bench
-- [ ] 4.4 Manual test: when the enemy front is defeated, the automatic
+- [x] 4.4 Manual test: when the enemy front is defeated, the automatic
       replacement character becomes revealed and the defeated character's slot
       shows a distinct defeated state (not the hidden "???" placeholder)
-- [ ] 4.5 Manual test: the player team panel still shows all player characters
+- [x] 4.5 Manual test: the player team panel still shows all player characters
       with full identity
-- [ ] 4.6 Manual test: grayed-out slots give no way to distinguish selected from
+- [x] 4.6 Manual test: grayed-out slots give no way to distinguish selected from
       unselected corps members
