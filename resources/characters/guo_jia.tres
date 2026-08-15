@@ -16,3 +16,4 @@ intelligence = 120
 spirit = 100
 moves = PackedStringArray("water_surge", "flame_burst", "wood_heal", "earth_barrier")
 description = "Cao Cao's sharpest strategist. Died young, but his foresight won the north before he left."
+portrait_path = ""

@@ -16,3 +16,4 @@ intelligence = 45
 spirit = 60
 moves = PackedStringArray("earth_barrier", "metal_slash", "war_cry", "iron_cleave")
 description = "The valiant warrior of Shu. His fearsome presence alone can turn the tide of battle."
+portrait_path = ""

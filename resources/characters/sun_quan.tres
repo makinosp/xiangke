@@ -16,3 +16,4 @@ intelligence = 95
 spirit = 90
 moves = PackedStringArray("water_surge", "earth_barrier", "war_cry", "wood_heal")
 description = "The young tiger of Jiangdong. Founder of the Wu kingdom with unwavering resolve."
+portrait_path = ""

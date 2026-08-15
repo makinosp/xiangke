@@ -16,3 +16,4 @@ intelligence = 118
 spirit = 105
 moves = PackedStringArray("flame_burst", "fire_strike", "water_surge", "wood_heal")
 description = "The quiet fire of Wu. Burned Liu Bei's army to ash at Yiling and outsmarted Wei for a decade."
+portrait_path = ""

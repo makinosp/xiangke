@@ -16,3 +16,4 @@ intelligence = 110
 spirit = 120
 moves = PackedStringArray("wood_heal", "earth_barrier", "war_cry", "flame_burst")
 description = "The legendary physician. His surgeries and anesthesia were centuries ahead of their time."
+portrait_path = ""

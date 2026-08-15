@@ -16,3 +16,4 @@ intelligence = 82
 spirit = 88
 moves = PackedStringArray("fire_strike", "flame_burst", "metal_slash", "war_cry")
 description = "Sun Quan's martial sister, betrothed to Liu Bei. As fierce with a blade as any general."
+portrait_path = ""

@@ -16,3 +16,4 @@ intelligence = 130
 spirit = 120
 moves = PackedStringArray("wood_heal", "water_surge", "metal_slash", "earth_barrier")
 description = "The Sleeping Dragon. A brilliant strategist who commands the elements with wisdom and foresight."
+portrait_path = ""

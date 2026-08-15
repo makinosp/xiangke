@@ -16,3 +16,4 @@ intelligence = 100
 spirit = 100
 moves = PackedStringArray("wood_heal", "metal_slash", "earth_barrier", "war_cry")
 description = "The benevolent founder of Shu. Won hearts across the land with his kindness and ambition to restore the Han."
+portrait_path = ""

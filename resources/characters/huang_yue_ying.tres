@@ -16,3 +16,4 @@ intelligence = 118
 spirit = 105
 moves = PackedStringArray("flame_burst", "wood_heal", "earth_barrier", "water_surge")
 description = "Zhuge Liang's wife and fellow inventor. Her mechanical brilliance built the wooden oxen and crossbow."
+portrait_path = ""

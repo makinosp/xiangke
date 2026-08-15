@@ -16,3 +16,4 @@ intelligence = 65
 spirit = 75
 moves = PackedStringArray("metal_slash", "iron_cleave", "wood_heal", "war_cry")
 description = "The dragon of Changshan. A general of unmatched valor and unwavering loyalty."
+portrait_path = ""

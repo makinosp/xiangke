@@ -16,3 +16,4 @@ intelligence = 75
 spirit = 85
 moves = PackedStringArray("metal_slash", "iron_cleave", "fire_strike", "war_cry")
 description = "Wei's most feared general. Routed Sun Quan's army at Hefei and stopped a thousand warriors with eight hundred of his own."
+portrait_path = ""

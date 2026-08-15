@@ -40,6 +40,10 @@ extends Resource
 ## Flavor text for the character.
 @export var description: String = ""
 
+## Path to character portrait image (2:3 aspect ratio recommended).
+## Defaults to placeholder if empty or file not found.
+@export var portrait_path: String = ""
+
 ## Returns true if the character has a secondary type assigned.
 func has_secondary_type() -> bool:
 	return secondary_type >= 0

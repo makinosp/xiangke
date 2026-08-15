@@ -16,3 +16,4 @@ intelligence = 80
 spirit = 80
 moves = PackedStringArray("flame_burst", "fire_strike", "water_surge", "war_cry")
 description = "A swift and fierce Wei general. Met his end at the hands of Huang Zhong at Mount Dingjun."
+portrait_path = ""
