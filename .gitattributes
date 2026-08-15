@@ -2,3 +2,7 @@
 audio/**/*.wav filter=lfs diff=lfs merge=lfs -text lockable
 audio/**/*.ogg filter=lfs diff=lfs merge=lfs -text lockable
 audio/**/*.mp3 filter=lfs diff=lfs merge=lfs -text lockable
+
+# Git LFS configuration for font files (CJK fonts are typically large)
+assets/**/*.otf filter=lfs diff=lfs merge=lfs -text lockable
+assets/**/*.ttf filter=lfs diff=lfs merge=lfs -text lockable
