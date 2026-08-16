@@ -9,13 +9,42 @@
 #   cd emsdk && ./emsdk install 3.1.74 && ./emsdk activate 3.1.74
 #   source ./emsdk_env.sh
 
-# Build Rust GDExtension for native (macOS/Linux/Windows)
-# On macOS, copying the dylib invalidates its code signature (Godot SIGKILL
-# on launch), so re-sign with ad-hoc identity after the copy.
+# Build Rust GDExtension for native (cross-platform)
+# Handles platform-specific extension copying and codesigning (macOS only).
 build-rust:
     cd extensions && cargo build
-    cp extensions/target/debug/libxiangke_godot_bridge.dylib addons/gdext/libxiangke-godot-bridge.macos.debug.dylib
-    codesign --force --sign - addons/gdext/libxiangke-godot-bridge.macos.debug.dylib
+    @if [ "$(uname)" = "Darwin" ]; then \
+        echo "macOS detected: copying and signing dylib"; \
+        cp extensions/target/debug/libxiangke_godot_bridge.dylib addons/gdext/libxiangke-godot-bridge.macos.debug.dylib; \
+        codesign --force --sign - addons/gdext/libxiangke-godot-bridge.macos.debug.dylib; \
+    elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then \
+        echo "Linux detected: copying so"; \
+        cp extensions/target/debug/libxiangke_godot_bridge.so addons/gdext/libxiangke-godot-bridge.linux.debug.so; \
+    elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW64_NT" ]; then \
+        echo "Windows detected: copying dll"; \
+        cp extensions/target/debug/xiangke_godot_bridge.dll addons/gdext/xiangke-godot-bridge.windows.debug.dll; \
+    else \
+        echo "Unknown platform: copying debug library"; \
+        cp extensions/target/debug/libxiangke_godot_bridge.* addons/gdext/; \
+    fi
+
+# Build Rust GDExtension for native in release mode (cross-platform)
+build-rust-release:
+    cd extensions && cargo build --release
+    @if [ "$(uname)" = "Darwin" ]; then \
+        echo "macOS detected: copying and signing release dylib"; \
+        cp extensions/target/release/libxiangke_godot_bridge.dylib addons/gdext/libxiangke-godot-bridge.macos.release.dylib; \
+        codesign --force --sign - addons/gdext/libxiangke-godot-bridge.macos.release.dylib; \
+    elif [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then \
+        echo "Linux detected: copying release so"; \
+        cp extensions/target/release/libxiangke_godot_bridge.so addons/gdext/libxiangke-godot-bridge.linux.release.so; \
+    elif [ "$(expr substr $(uname -s) 1 10)" = "MINGW64_NT" ]; then \
+        echo "Windows detected: copying release dll"; \
+        cp extensions/target/release/xiangke_godot_bridge.dll addons/gdext/xiangke-godot-bridge.windows.release.dll; \
+    else \
+        echo "Unknown platform: copying release library"; \
+        cp extensions/target/release/libxiangke_godot_bridge.* addons/gdext/; \
+    fi
 
 # Build Rust GDExtension for Web (WASM/Emscripten)
 # Requires: nightly toolchain, Emscripten SDK, rust-src component
@@ -50,10 +79,6 @@ run-godot: build-rust
 inspect: build-rust
     godot --headless --check-only --debug --verbose --quit
 
-# Combined: build Rust + run Godot
-run: build-rust
-    godot
-
 # ── Data verification ────────────────────────────────────────
 # Export all .tres resources via Godot and validate against Rust core schema/rules.
 # Requires: local Godot install (headless mode).
@@ -66,7 +91,7 @@ verify-data:
 	echo "Exporting resources to $export_path..."; \
 	godot --headless res://tools/data_export.tscn -- --export-path=$export_path; \
 	echo "Validating with Rust checker..."; \
-	cd extensions && cargo run -p xiangke-checker -- validate $export_path; \
+	cd extensions && cargo run -p xiangke-checker --release -- validate $export_path; \
 	if [ -n "${UPDATE_FIXTURE:-}" ]; then \
 		echo "Updating fixture..."; \
 		cp $export_path core/tests/fixtures/resources.json; \
