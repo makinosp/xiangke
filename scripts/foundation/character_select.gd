@@ -1,6 +1,7 @@
 ## CharacterSelect script.
-## Manages Phase 2 of character selection: select 3 characters from the
-## pre-selected corps for battle deployment.
+## Manages battle preparation: select 3 characters from the saved corps
+## for battle deployment. The saved corps is loaded from the roster, which
+## is populated by the title screen from save data.
 ## Displays opponent's corps as read-only.
 extends Control
 
@@ -8,6 +9,8 @@ extends Control
 @onready var character_grid: GridContainer = $CharacterGrid
 ## Reference to the deploy button.
 @onready var deploy_button: Button = $DeployButton
+## Reference to the back button.
+@onready var back_button: Button = $BackButton
 ## Reference to the phase indicator label.
 @onready var phase_label: Label = $PhaseLabel
 ## Reference to the stats preview panel.
@@ -179,6 +182,11 @@ func _format_type(primary: int, secondary: int) -> String:
 ## Called when the mouse exits a character button.
 func _on_character_hover_exit() -> void:
 	stats_preview.hide()
+
+
+## Called when the Back button is pressed (returns to title).
+func _on_back_pressed() -> void:
+	GameManager.transition_to_state(GameManager.GameState.TITLE)
 
 
 ## Called when the Deploy button is pressed.

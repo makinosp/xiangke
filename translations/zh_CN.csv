@@ -165,3 +165,6 @@ ui.move_stats,威力:%d 命中:%d%% %s
 ui.enemy_acted,敌方行动了。
 ui.action_executed,行动已执行。
 ui.name_type_format,%s（%s）
+ui.corps_settings,编队设置
+ui.save_and_back,保存并返回
+ui.start_disabled_hint,请先编成6名武将

@@ -165,3 +165,6 @@ ui.move_stats,P:%d A:%d%% %s
 ui.enemy_acted,Enemy acted.
 ui.action_executed,Action executed.
 ui.name_type_format,%s (%s)
+ui.corps_settings,Corps Settings
+ui.save_and_back,Save & Back
+ui.start_disabled_hint,Set up your corps first

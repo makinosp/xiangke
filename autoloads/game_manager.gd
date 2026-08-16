@@ -1,14 +1,15 @@
 ## GameManager autoload singleton.
 ## Central state machine for managing game flow and scene transitions.
-## Handles the five-state loop:
-## TITLE → CORPS_CREATION → CHARACTER_SELECT → BATTLE → RESULT → TITLE.
+## TITLE is the navigation hub: it can reach CORPS_SETTINGS,
+## CHARACTER_SELECT, and SETTINGS. All sub-screens return to TITLE
+## via a back button. BATTLE → RESULT → TITLE completes the loop.
 extends Node
 
 ## Application states for the game state machine.
 enum GameState {
-	TITLE, ## Title screen is active. Entry point.
-	CORPS_CREATION, ## Corps creation screen is active (Phase 1: select 6).
-	CHARACTER_SELECT, ## Battle selection screen is active (Phase 2: pick 3 from corps).
+	TITLE, ## Title screen is active. Entry point and navigation hub.
+	CORPS_SETTINGS, ## Corps settings screen is active (select & save 6-character corps).
+	CHARACTER_SELECT, ## Battle preparation screen is active (pick 3 from saved corps).
 	BATTLE, ## Battle scene is active (managed by Unit 3).
 	RESULT, ## Battle result screen is active.
 	SETTINGS ## Settings screen is active (language + volume).
@@ -58,7 +59,7 @@ func get_scene_for_state(state: GameState) -> String:
 	match state:
 		GameState.TITLE:
 			return "res://scenes/title_screen.tscn"
-		GameState.CORPS_CREATION:
+		GameState.CORPS_SETTINGS:
 			return "res://scenes/corps_creation.tscn"
 		GameState.CHARACTER_SELECT:
 			return "res://scenes/character_select.tscn"
@@ -78,11 +79,13 @@ func _is_valid_transition(from: GameState, to: GameState) -> bool:
 
 	match from:
 		GameState.TITLE:
-			return to == GameState.CORPS_CREATION or to == GameState.SETTINGS
-		GameState.CORPS_CREATION:
-			return to == GameState.CHARACTER_SELECT
+			return to == GameState.CORPS_SETTINGS \
+				or to == GameState.CHARACTER_SELECT \
+				or to == GameState.SETTINGS
+		GameState.CORPS_SETTINGS:
+			return to == GameState.TITLE
 		GameState.CHARACTER_SELECT:
-			return to == GameState.BATTLE
+			return to == GameState.TITLE or to == GameState.BATTLE
 		GameState.BATTLE:
 			return to == GameState.RESULT
 		GameState.RESULT:

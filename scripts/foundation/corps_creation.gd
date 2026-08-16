@@ -1,13 +1,15 @@
 ## CorpsCreation script.
-## Manages the corps creation screen where the player selects 6 characters
-## from the full roster to form their corps (Phase 1 of character selection).
-## On confirm, transitions to CharacterSelect (Phase 2).
+## Manages the corps settings screen where the player selects 6 characters
+## from the full roster to form their corps. On save, the corps is persisted
+## and the screen returns to the title screen.
 extends Control
 
 ## Reference to the character grid container.
 @onready var character_grid: GridContainer = $CharacterGrid
-## Reference to the confirm button.
+## Reference to the save button.
 @onready var confirm_button: Button = $ConfirmButton
+## Reference to the back button.
+@onready var back_button: Button = $BackButton
 ## Reference to the phase indicator label.
 @onready var phase_label: Label = $PhaseLabel
 ## Reference to the stats preview panel.
@@ -164,41 +166,26 @@ func _on_character_hover_exit() -> void:
 	stats_preview.hide()
 
 
-## Called when the Confirm button is pressed (corps selection complete).
-func _on_confirm_pressed() -> void:
+## Called when the Back button is pressed (returns to title without saving).
+func _on_back_pressed() -> void:
+	GameManager.transition_to_state(GameManager.GameState.TITLE)
+
+
+## Called when the Save button is pressed (corps selection complete).
+func _on_save_pressed() -> void:
 	if _selected_ids.size() != 6:
 		return
 
 	# Register corps selection
 	GameManager.corps_roster.set_corps_selection(_selected_ids)
 
-	# Generate opponent corps
-	_generate_opponent_corps()
-
 	# Persist corps to save data
 	var save_data := SaveManager.current_data
 	save_data["corps_characters"] = _selected_ids.duplicate()
 	SaveManager.save_game(save_data)
 
-	# Transition to CharacterSelect (Phase 2)
-	GameManager.transition_to_state(GameManager.GameState.CHARACTER_SELECT)
-
-
-## Generates a random opponent corps of 6 characters.
-func _generate_opponent_corps() -> void:
-	var all_chars := DataRegistry.get_all_characters()
-	var pool: Array[String] = []
-	for char_id in all_chars.keys():
-		if not GameManager.corps_roster.corps_characters.has(char_id):
-			pool.append(char_id)
-
-	pool.shuffle()
-	var opponent_ids: Array[String] = []
-	for i in range(min(6, pool.size())):
-		if i < pool.size():
-			opponent_ids.append(pool[i])
-
-	GameManager.corps_roster.opponent_corps = opponent_ids
+	# Return to title (battle preparation can now be started)
+	GameManager.transition_to_state(GameManager.GameState.TITLE)
 
 
 ## Updates UI elements based on current selection state.
