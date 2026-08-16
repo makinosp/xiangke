@@ -68,95 +68,71 @@ anchor_right = 0.95
 anchor_bottom = 0.8
 visible = false
 
-[node name="NameLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 200.0
-offset_bottom = 40.0
+[node name="MarginContainer" type="MarginContainer" parent="StatsPreview"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="StatsPreview/MarginContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NameLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "ui.character_name"
+autowrap_mode = 3
 
-[node name="TypeLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 45.0
-offset_right = 200.0
-offset_bottom = 65.0
+[node name="TypeLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "Type: --"
+autowrap_mode = 3
 
-[node name="HPLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 68.0
-offset_right = 180.0
-offset_bottom = 88.0
+[node name="HPLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "HP: --"
 
-[node name="AttackLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 91.0
-offset_right = 180.0
-offset_bottom = 111.0
+[node name="AttackLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "Attack: --"
 
-[node name="DefenseLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 114.0
-offset_right = 180.0
-offset_bottom = 134.0
+[node name="DefenseLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "Defense: --"
 
-[node name="SpeedLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 137.0
-offset_right = 180.0
-offset_bottom = 157.0
+[node name="SpeedLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "Speed: --"
 
-[node name="IntelligenceLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 160.0
-offset_right = 180.0
-offset_bottom = 180.0
+[node name="IntelligenceLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "Intelligence: --"
 
-[node name="SpiritLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 183.0
-offset_right = 180.0
-offset_bottom = 203.0
+[node name="SpiritLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "Spirit: --"
 
-[node name="MovesContainer" type="VBoxContainer" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 206.0
-offset_right = 200.0
-offset_bottom = 286.0
+[node name="MovesContainer" type="VBoxContainer" parent="StatsPreview/MarginContainer/VBoxContainer"]
 
-[node name="Move1Label" type="Label" parent="StatsPreview/MovesContainer"]
-offset_top = 0.0
-offset_bottom = 20.0
+[node name="Move1Label" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer/MovesContainer"]
 text = "ui.move_1"
+autowrap_mode = 3
 
-[node name="Move2Label" type="Label" parent="StatsPreview/MovesContainer"]
-offset_top = 20.0
-offset_bottom = 40.0
+[node name="Move2Label" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer/MovesContainer"]
 text = "ui.move_2"
+autowrap_mode = 3
 
-[node name="Move3Label" type="Label" parent="StatsPreview/MovesContainer"]
-offset_top = 40.0
-offset_bottom = 60.0
+[node name="Move3Label" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer/MovesContainer"]
 text = "ui.move_3"
+autowrap_mode = 3
 
-[node name="Move4Label" type="Label" parent="StatsPreview/MovesContainer"]
-offset_top = 60.0
-offset_bottom = 80.0
+[node name="Move4Label" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer/MovesContainer"]
 text = "ui.move_4"
+autowrap_mode = 3
 
-[node name="DescLabel" type="Label" parent="StatsPreview"]
-offset_left = 10.0
-offset_top = 290.0
-offset_right = 200.0
-offset_bottom = 370.0
+[node name="DescLabel" type="Label" parent="StatsPreview/MarginContainer/VBoxContainer"]
 text = "ui.desc_placeholder"
-lines_truncated = true
-max_lines_visible = 6
+size_flags_vertical = 2
+autowrap_mode = 3
 
 [connection signal="pressed" from="DeployButton" to="." method="_on_deploy_pressed"]
