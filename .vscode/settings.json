@@ -3,7 +3,7 @@
     "cargo build": true,
     "cargo clippy": true,
     "cargo test": true,
-    "npx openspec": true,
+    "npx openspec": true
   },
   "search.exclude": {
     "**/.vendor": true
