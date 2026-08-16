@@ -15,6 +15,7 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://tests/unit/test_move_selection_ui.gd",
 	"res://tests/unit/test_i18n.gd",
 	"res://tests/unit/test_settings_manager.gd",
+	"res://tests/unit/test_character_select_preview.gd",
 ]
 
 ## Total counters
@@ -25,6 +26,15 @@ var _failures: Array[String] = []
 
 
 func _ready() -> void:
+	# Wait one frame so the root window finishes its initial setup before
+	# tests start adding scenes to the tree.
+	await get_tree().process_frame
+	_run_all()
+
+
+## Runs all test suites. Kept out of _ready() so the root window finishes its
+## initial setup before tests add scenes to the tree.
+func _run_all() -> void:
 	print("\n=== GDScript Test Runner ===")
 	print("Godot version: ", Engine.get_version_info().string)
 	print()
@@ -45,7 +55,7 @@ func _ready() -> void:
 	print("Running ", run_list.size(), " test suite(s)...\n")
 
 	for script_path in run_list:
-		_run_test_suite(script_path)
+		await _run_test_suite(script_path)
 
 	_print_summary()
 	if _total_failed > 0:
@@ -92,7 +102,7 @@ func _run_test_suite(script_path: String) -> void:
 		if instance.has_method("before_each"):
 			instance.before_each()
 
-		var ok = _run_test_method(instance, method_name)
+		var ok = await _run_test_method(instance, method_name)
 		if ok:
 			passed += 1
 		else:
@@ -119,7 +129,7 @@ func _run_test_method(instance: Object, method_name: String) -> bool:
 	var ok := true
 
 	var start_time := Time.get_ticks_usec()
-	var err := _safe_call(instance, method_name)
+	var err := await _safe_call(instance, method_name)
 	var elapsed := (Time.get_ticks_usec() - start_time) / 1000.0
 
 	if err == ERR_SKIP:
@@ -137,8 +147,9 @@ func _run_test_method(instance: Object, method_name: String) -> bool:
 
 ## Safely call a method and capture any errors.
 ## Returns OK on success, ERR_SKIP if the test should be skipped, or ERR_SCRIPT_FAILED on failure.
+## Awaits the call so tests may await frames (e.g. for container layout).
 func _safe_call(instance: Object, method_name: String) -> int:
-	var result = instance.call(method_name)
+	var result = await instance.call(method_name)
 	if result is int:
 		return result as int
 	return OK

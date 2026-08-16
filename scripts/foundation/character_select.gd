@@ -13,30 +13,30 @@ extends Control
 ## Reference to the stats preview panel.
 @onready var stats_preview: Panel = $StatsPreview
 ## Reference to the character name in stats preview.
-@onready var preview_name: Label = $StatsPreview/NameLabel
+@onready var preview_name: Label = $StatsPreview/MarginContainer/VBoxContainer/NameLabel
 ## Reference to the character type in stats preview.
-@onready var preview_type: Label = $StatsPreview/TypeLabel
+@onready var preview_type: Label = $StatsPreview/MarginContainer/VBoxContainer/TypeLabel
 ## Reference to the HP stat in stats preview.
-@onready var preview_hp: Label = $StatsPreview/HPLabel
+@onready var preview_hp: Label = $StatsPreview/MarginContainer/VBoxContainer/HPLabel
 ## Reference to the Attack stat in stats preview.
-@onready var preview_attack: Label = $StatsPreview/AttackLabel
+@onready var preview_attack: Label = $StatsPreview/MarginContainer/VBoxContainer/AttackLabel
 ## Reference to the Defense stat in stats preview.
-@onready var preview_defense: Label = $StatsPreview/DefenseLabel
+@onready var preview_defense: Label = $StatsPreview/MarginContainer/VBoxContainer/DefenseLabel
 ## Reference to the Speed stat in stats preview.
-@onready var preview_speed: Label = $StatsPreview/SpeedLabel
+@onready var preview_speed: Label = $StatsPreview/MarginContainer/VBoxContainer/SpeedLabel
 ## Reference to the Intelligence stat in stats preview.
-@onready var preview_intelligence: Label = $StatsPreview/IntelligenceLabel
+@onready var preview_intelligence: Label = $StatsPreview/MarginContainer/VBoxContainer/IntelligenceLabel
 ## Reference to the Spirit stat in stats preview.
-@onready var preview_spirit: Label = $StatsPreview/SpiritLabel
+@onready var preview_spirit: Label = $StatsPreview/MarginContainer/VBoxContainer/SpiritLabel
 ## Reference to the move labels container in stats preview.
-@onready var preview_moves_container: VBoxContainer = $StatsPreview/MovesContainer
+@onready var preview_moves_container: VBoxContainer = $StatsPreview/MarginContainer/VBoxContainer/MovesContainer
 ## Reference to individual move labels.
-@onready var preview_move_1: Label = $StatsPreview/MovesContainer/Move1Label
-@onready var preview_move_2: Label = $StatsPreview/MovesContainer/Move2Label
-@onready var preview_move_3: Label = $StatsPreview/MovesContainer/Move3Label
-@onready var preview_move_4: Label = $StatsPreview/MovesContainer/Move4Label
+@onready var preview_move_1: Label = $StatsPreview/MarginContainer/VBoxContainer/MovesContainer/Move1Label
+@onready var preview_move_2: Label = $StatsPreview/MarginContainer/VBoxContainer/MovesContainer/Move2Label
+@onready var preview_move_3: Label = $StatsPreview/MarginContainer/VBoxContainer/MovesContainer/Move3Label
+@onready var preview_move_4: Label = $StatsPreview/MarginContainer/VBoxContainer/MovesContainer/Move4Label
 ## Reference to the description in stats preview.
-@onready var preview_desc: Label = $StatsPreview/DescLabel
+@onready var preview_desc: Label = $StatsPreview/MarginContainer/VBoxContainer/DescLabel
 ## Reference to the opponent corps labels container.
 @onready var opponent_label_container: VBoxContainer = $OpponentPanel/ScrollContainer/OpponentList
 
@@ -111,6 +111,11 @@ func _load_opponent_display() -> void:
 		var label := Label.new()
 		label.text = tr("ui.name_type_format") % [tr(char_data.name_key), _format_type(char_data.type, char_data.secondary_type)]
 		label.add_theme_color_override(&"font_color", Color(0.9, 0.7, 0.7)) # Reddish tint for enemy
+		# Labels default to MOUSE_FILTER_IGNORE, which emits no mouse events.
+		# STOP enables hover preview reusing the player character handlers.
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
+		label.connect("mouse_entered", Callable(self, "_on_character_hovered").bind(char_id))
+		label.connect("mouse_exited", Callable(self, "_on_character_hover_exit"))
 		opponent_label_container.add_child(label)
 
 
