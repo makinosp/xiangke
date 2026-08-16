@@ -1,6 +1,6 @@
 ## Tests for GameManager state transitions.
-## Tests the 5-state loop:
-## TITLE → CORPS_CREATION → CHARACTER_SELECT → BATTLE → RESULT → TITLE
+## Tests the hub-and-spoke state flow:
+## TITLE → CORPS_SETTINGS / CHARACTER_SELECT / SETTINGS, all returning to TITLE.
 extends "res://tests/test_base.gd"
 
 var _game_manager = null
@@ -29,10 +29,10 @@ func test_initial_state_is_title() -> int:
 		"Initial state should be TITLE")
 
 
-func test_title_to_corps_creation_valid() -> int:
+func test_title_to_corps_settings_valid() -> int:
 	return assert_eq(
-		_game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION),
-		true, "TITLE -> CORPS_CREATION should be valid")
+		_game_manager.transition_to_state(_game_manager.GameState.CORPS_SETTINGS),
+		true, "TITLE -> CORPS_SETTINGS should be valid")
 
 
 func test_title_to_settings_valid() -> int:
@@ -48,11 +48,11 @@ func test_settings_to_title_valid() -> int:
 		true, "SETTINGS -> TITLE should be valid")
 
 
-func test_settings_to_corps_creation_invalid() -> int:
+func test_settings_to_corps_settings_invalid() -> int:
 	_game_manager.current_state = _game_manager.GameState.SETTINGS
 	return assert_eq(
-		_game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION),
-		false, "SETTINGS -> CORPS_CREATION should be invalid")
+		_game_manager.transition_to_state(_game_manager.GameState.CORPS_SETTINGS),
+		false, "SETTINGS -> CORPS_SETTINGS should be invalid")
 
 
 func test_settings_scene_path() -> int:
@@ -70,22 +70,35 @@ func test_title_to_settings_to_title_round_trip() -> int:
 		true, "SETTINGS -> TITLE")
 
 
-func test_skip_corps_creation_invalid() -> int:
+func test_title_to_character_select_valid() -> int:
 	_game_manager.current_state = _game_manager.GameState.TITLE
 	return assert_eq(
 		_game_manager.transition_to_state(_game_manager.GameState.CHARACTER_SELECT),
-		false, "TITLE -> CHARACTER_SELECT (skip CORPS_CREATION) should be invalid")
+		true, "TITLE -> CHARACTER_SELECT should be valid (independent spoke)")
 
 
-func test_corps_creation_to_character_select_valid() -> int:
-	_game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION)
+func test_corps_settings_to_character_select_invalid() -> int:
+	_game_manager.transition_to_state(_game_manager.GameState.CORPS_SETTINGS)
 	return assert_eq(
 		_game_manager.transition_to_state(_game_manager.GameState.CHARACTER_SELECT),
-		true, "CORPS_CREATION -> CHARACTER_SELECT should be valid")
+		false, "CORPS_SETTINGS -> CHARACTER_SELECT should be invalid (must return to title)")
+
+
+func test_corps_settings_to_title_valid() -> int:
+	_game_manager.transition_to_state(_game_manager.GameState.CORPS_SETTINGS)
+	return assert_eq(
+		_game_manager.transition_to_state(_game_manager.GameState.TITLE),
+		true, "CORPS_SETTINGS -> TITLE should be valid (back button)")
+
+
+func test_character_select_to_title_valid() -> int:
+	_game_manager.transition_to_state(_game_manager.GameState.CHARACTER_SELECT)
+	return assert_eq(
+		_game_manager.transition_to_state(_game_manager.GameState.TITLE),
+		true, "CHARACTER_SELECT -> TITLE should be valid (back button)")
 
 
 func test_character_select_to_battle_valid() -> int:
-	_game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION)
 	_game_manager.transition_to_state(_game_manager.GameState.CHARACTER_SELECT)
 	return assert_eq(
 		_game_manager.transition_to_state(_game_manager.GameState.BATTLE),
@@ -93,7 +106,6 @@ func test_character_select_to_battle_valid() -> int:
 
 
 func test_battle_to_result_valid() -> int:
-	_game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION)
 	_game_manager.transition_to_state(_game_manager.GameState.CHARACTER_SELECT)
 	_game_manager.transition_to_state(_game_manager.GameState.BATTLE)
 	return assert_eq(
@@ -102,7 +114,6 @@ func test_battle_to_result_valid() -> int:
 
 
 func test_result_to_title_valid() -> int:
-	_game_manager.transition_to_state(_game_manager.GameState.CORPS_CREATION)
 	_game_manager.transition_to_state(_game_manager.GameState.CHARACTER_SELECT)
 	_game_manager.transition_to_state(_game_manager.GameState.BATTLE)
 	_game_manager.transition_to_state(_game_manager.GameState.RESULT)
@@ -129,8 +140,8 @@ func test_get_scene_for_state() -> int:
 	var err := OK
 	err = assert_eq(_game_manager.get_scene_for_state(_game_manager.GameState.TITLE),
 		"res://scenes/title_screen.tscn", "TITLE scene path"); if err: return err
-	err = assert_eq(_game_manager.get_scene_for_state(_game_manager.GameState.CORPS_CREATION),
-		"res://scenes/corps_creation.tscn", "CORPS_CREATION scene path"); if err: return err
+	err = assert_eq(_game_manager.get_scene_for_state(_game_manager.GameState.CORPS_SETTINGS),
+		"res://scenes/corps_creation.tscn", "CORPS_SETTINGS scene path"); if err: return err
 	err = assert_eq(_game_manager.get_scene_for_state(_game_manager.GameState.CHARACTER_SELECT),
 		"res://scenes/character_select.tscn", "CHARACTER_SELECT scene path"); if err: return err
 	err = assert_eq(_game_manager.get_scene_for_state(_game_manager.GameState.BATTLE),

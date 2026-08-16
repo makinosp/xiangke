@@ -17,6 +17,13 @@ offset_right = 400.0
 offset_bottom = 50.0
 text = "ui.select_corps"
 
+[node name="BackButton" type="Button" parent="."]
+offset_left = 20.0
+offset_top = 540.0
+offset_right = 100.0
+offset_bottom = 570.0
+text = "ui.back"
+
 [node name="CharacterGrid" type="GridContainer" parent="."]
 offset_left = 20.0
 offset_top = 60.0
@@ -35,7 +42,7 @@ offset_right = 80.0
 offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "ui.confirm"
+text = "ui.save_and_back"
 disabled = true
 
 [node name="StatsPreview" type="Panel" parent="."]
@@ -112,4 +119,5 @@ text = "ui.desc_placeholder"
 size_flags_vertical = 2
 autowrap_mode = 3
 
-[connection signal="pressed" from="ConfirmButton" to="." method="_on_confirm_pressed"]
+[connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="ConfirmButton" to="." method="_on_save_pressed"]

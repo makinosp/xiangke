@@ -165,3 +165,6 @@ ui.move_stats,威力:%d 命中:%d%% %s
 ui.enemy_acted,敵が行動した。
 ui.action_executed,行動を実行した。
 ui.name_type_format,%s（%s）
+ui.corps_settings,部隊編成
+ui.save_and_back,保存して戻る
+ui.start_disabled_hint,まず部隊を編成してください

@@ -26,6 +26,20 @@ text = "Xiangke"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="CorpsSettingsButton" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.45
+anchor_right = 0.5
+anchor_bottom = 0.45
+offset_left = -80.0
+offset_top = -20.0
+offset_right = 80.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "ui.corps_settings"
+
 [node name="StartButton" type="Button" parent="."]
 anchors_preset = 8
 anchor_left = 0.5
@@ -54,6 +68,23 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "ui.settings"
 
+[node name="StartHintLabel" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.73
+anchor_right = 0.5
+anchor_bottom = 0.73
+offset_left = -200.0
+offset_top = -15.0
+offset_right = 200.0
+offset_bottom = 15.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+text = "ui.start_disabled_hint"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="VersionLabel" type="Label" parent="."]
 anchors_preset = 12
 anchor_left = 0.0
@@ -68,5 +99,6 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "v1.0.0"
 
+[connection signal="pressed" from="CorpsSettingsButton" to="." method="_on_corps_settings_button_pressed"]
 [connection signal="pressed" from="StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="SettingsButton" to="." method="_on_settings_button_pressed"]

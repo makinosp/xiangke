@@ -109,6 +109,22 @@ func restore_from_save(data: Dictionary) -> void:
 			corps_characters = ids
 
 
+## Generates a random opponent corps of 6 characters, excluding player corps.
+## Called when battle preparation starts (title screen Start).
+func generate_opponent_corps() -> void:
+	var all_chars := DataRegistry.get_all_characters()
+	var pool: Array[String] = []
+	for char_id in all_chars.keys():
+		if not corps_characters.has(char_id):
+			pool.append(char_id)
+
+	pool.shuffle()
+	var opponent_ids: Array[String] = []
+	for i in range(min(6, pool.size())):
+		opponent_ids.append(pool[i])
+	opponent_corps = opponent_ids
+
+
 ## Checks for duplicate IDs in an array.
 func _has_duplicates(ids: Array[String]) -> bool:
 	var seen: Dictionary = {}

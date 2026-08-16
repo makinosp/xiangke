@@ -17,6 +17,13 @@ offset_right = 400.0
 offset_bottom = 50.0
 text = "ui.select_deploy"
 
+[node name="BackButton" type="Button" parent="."]
+offset_left = 20.0
+offset_top = 540.0
+offset_right = 100.0
+offset_bottom = 570.0
+text = "ui.back"
+
 [node name="CharacterGrid" type="GridContainer" parent="."]
 offset_left = 20.0
 offset_top = 60.0
@@ -135,4 +142,5 @@ text = "ui.desc_placeholder"
 size_flags_vertical = 2
 autowrap_mode = 3
 
+[connection signal="pressed" from="BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="DeployButton" to="." method="_on_deploy_pressed"]
