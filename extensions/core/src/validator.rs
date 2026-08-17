@@ -197,6 +197,10 @@ fn is_valid_stat(value: u32) -> bool {
 /// - TR-1: Expected 7×7 matrix (enforced by type system).
 /// - TR-2: No element is super-effective or immune to itself.
 /// - Yang↔Yin mutual super-effectiveness.
+/// - TR-3: Each 五行 type has exactly 2 super-effective (2.0x), 1 generating
+///   (1.25x), and 1 weak (0.5x) matchup.
+/// - TR-4: The overcoming cycle Wood→Earth→Water→Fire→Metal→Wood is 2.0x.
+/// - TR-5: The reverse-generating edges (e.g. Fire→Wood) are 2.0x.
 pub fn validate_type_chart(
     chart: &[[f64; TypeElement::COUNT]; TypeElement::COUNT],
 ) -> Result<(), Vec<ValidationError>> {
@@ -275,11 +279,11 @@ pub fn validate_type_chart(
             .iter()
             .filter(|&&v| (v - 2.0).abs() < f64::EPSILON)
             .count();
-        if super_effective_count != 1 {
+        if super_effective_count != 2 {
             errors.push(ValidationError {
                 code: "TR-3".into(),
                 message: format!(
-                    "Type {defender} must be super effective against exactly 1 type, got {super_effective_count}"
+                    "Type {defender} must be super effective against exactly 2 types (overcoming + reverse-generating), got {super_effective_count}"
                 ),
                 context: String::new(),
             });
@@ -312,6 +316,46 @@ pub fn validate_type_chart(
                 code: "TR-3".into(),
                 message: format!(
                     "Type {defender} must be weak against exactly 1 type (0.5x), got {weak_count}"
+                ),
+                context: String::new(),
+            });
+        }
+    }
+
+    // TR-4: The overcoming cycle Wood→Earth→Water→Fire→Metal→Wood must be 2.0x.
+    // chart[defender][attacker]; effectiveness(attacker, defender).
+    const OVERCOMING_EDGES: [(usize, usize); 5] = [
+        (TypeElement::Earth as usize, TypeElement::Wood as usize), // Wood→Earth
+        (TypeElement::Water as usize, TypeElement::Earth as usize), // Earth→Water
+        (TypeElement::Fire as usize, TypeElement::Water as usize), // Water→Fire
+        (TypeElement::Metal as usize, TypeElement::Fire as usize), // Fire→Metal
+        (TypeElement::Wood as usize, TypeElement::Metal as usize), // Metal→Wood
+    ];
+    for &(defender, attacker) in &OVERCOMING_EDGES {
+        if (chart[defender][attacker] - 2.0).abs() > f64::EPSILON {
+            errors.push(ValidationError {
+                code: "TR-4".into(),
+                message: format!("Overcoming edge type {attacker} → type {defender} must be 2.0x"),
+                context: String::new(),
+            });
+        }
+    }
+
+    // TR-5: The reverse-generating edges (the child drains the mother) must be
+    // 2.0x: Fire→Wood, Earth→Fire, Metal→Earth, Water→Metal, Wood→Water.
+    const REVERSE_GENERATING_EDGES: [(usize, usize); 5] = [
+        (TypeElement::Wood as usize, TypeElement::Fire as usize), // Fire→Wood
+        (TypeElement::Fire as usize, TypeElement::Earth as usize), // Earth→Fire
+        (TypeElement::Earth as usize, TypeElement::Metal as usize), // Metal→Earth
+        (TypeElement::Metal as usize, TypeElement::Water as usize), // Water→Metal
+        (TypeElement::Water as usize, TypeElement::Wood as usize), // Wood→Water
+    ];
+    for &(defender, attacker) in &REVERSE_GENERATING_EDGES {
+        if (chart[defender][attacker] - 2.0).abs() > f64::EPSILON {
+            errors.push(ValidationError {
+                code: "TR-5".into(),
+                message: format!(
+                    "Reverse-generating edge type {attacker} → type {defender} must be 2.0x"
                 ),
                 context: String::new(),
             });
@@ -722,11 +766,11 @@ mod tests {
         use TypeElement::*;
         let mut chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
         // Row = defender, Col = attacker
-        chart[Wood as usize] = [1.0, 0.5, 2.0, 1.0, 1.25, 1.0, 1.0];
-        chart[Fire as usize] = [1.25, 1.0, 0.5, 2.0, 1.0, 1.0, 1.0];
-        chart[Earth as usize] = [1.0, 1.25, 1.0, 0.5, 2.0, 1.0, 1.0];
-        chart[Metal as usize] = [2.0, 1.0, 1.25, 1.0, 0.5, 1.0, 1.0];
-        chart[Water as usize] = [0.5, 2.0, 1.0, 1.25, 1.0, 1.0, 1.0];
+        chart[Wood as usize] = [1.0, 2.0, 0.5, 2.0, 1.25, 1.0, 1.0];
+        chart[Fire as usize] = [1.25, 1.0, 2.0, 0.5, 2.0, 1.0, 1.0];
+        chart[Earth as usize] = [2.0, 1.25, 1.0, 2.0, 0.5, 1.0, 1.0];
+        chart[Metal as usize] = [0.5, 2.0, 1.25, 1.0, 2.0, 1.0, 1.0];
+        chart[Water as usize] = [2.0, 0.5, 2.0, 1.25, 1.0, 1.0, 1.0];
         chart[Yang as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0];
         chart[Yin as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0];
         assert!(validate_type_chart(&chart).is_ok());
@@ -874,11 +918,11 @@ mod tests {
         // Self-immune (0.0 on diagonal)
         use TypeElement::*;
         let mut chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
-        chart[Wood as usize] = [0.0, 0.5, 2.0, 1.0, 1.25, 1.0, 1.0];
-        chart[Fire as usize] = [1.25, 1.0, 0.5, 2.0, 1.0, 1.0, 1.0];
-        chart[Earth as usize] = [1.0, 1.25, 1.0, 0.5, 2.0, 1.0, 1.0];
-        chart[Metal as usize] = [2.0, 1.0, 1.25, 1.0, 0.5, 1.0, 1.0];
-        chart[Water as usize] = [0.5, 2.0, 1.0, 1.25, 1.0, 1.0, 1.0];
+        chart[Wood as usize] = [0.0, 2.0, 0.5, 2.0, 1.25, 1.0, 1.0];
+        chart[Fire as usize] = [1.25, 1.0, 2.0, 0.5, 2.0, 1.0, 1.0];
+        chart[Earth as usize] = [2.0, 1.25, 1.0, 2.0, 0.5, 1.0, 1.0];
+        chart[Metal as usize] = [0.5, 2.0, 1.25, 1.0, 2.0, 1.0, 1.0];
+        chart[Water as usize] = [2.0, 0.5, 2.0, 1.25, 1.0, 1.0, 1.0];
         chart[TypeElement::Yang as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0];
         chart[TypeElement::Yin as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0];
         assert!(validate_type_chart(&chart).is_err());
@@ -893,6 +937,26 @@ mod tests {
         assert!(validate_type_chart(&chart).is_err());
         let errs = validate_type_chart(&chart).unwrap_err();
         assert!(errs.iter().any(|e| e.code == "TR-3"));
+    }
+
+    #[test]
+    fn test_validate_type_chart_reversed_overcoming_cycle() {
+        // The old (reversed) chart: Fire→Water, Water→Earth, Earth→Wood,
+        // Wood→Metal, Metal→Fire at 2.0x must be rejected by TR-4/TR-5.
+        use TypeElement::*;
+        let mut chart = [[1.0_f64; TypeElement::COUNT]; TypeElement::COUNT];
+        chart[Wood as usize] = [1.0, 0.5, 2.0, 1.0, 1.25, 1.0, 1.0];
+        chart[Fire as usize] = [1.25, 1.0, 0.5, 2.0, 1.0, 1.0, 1.0];
+        chart[Earth as usize] = [1.0, 1.25, 1.0, 0.5, 2.0, 1.0, 1.0];
+        chart[Metal as usize] = [2.0, 1.0, 1.25, 1.0, 0.5, 1.0, 1.0];
+        chart[Water as usize] = [0.5, 2.0, 1.0, 1.25, 1.0, 1.0, 1.0];
+        chart[Yang as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0];
+        chart[Yin as usize] = [1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0];
+        let errs = validate_type_chart(&chart).unwrap_err();
+        assert!(
+            errs.iter().any(|e| e.code == "TR-4" || e.code == "TR-5"),
+            "reversed cycle should fail TR-4/TR-5, got {errs:?}"
+        );
     }
 
     #[test]

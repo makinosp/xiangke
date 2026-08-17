@@ -758,12 +758,9 @@ mod tests {
     #[test]
     fn test_execute_ai_turn_switches_on_type_disadvantage() {
         let mut state = make_state();
-        // Enemy front (index 1) holds a Fire move that is weak against the
+        // Enemy front (index 1) holds an Earth move that is weak against the
         // single-type Wood player front (0.5x), so the AI switches on type
         // disadvantage even at full HP.
-        state.participants[1].character_data.moves = vec!["fire_strike".into()];
-        // Enemy bench (index 2) holds an Earth move (2.0x vs Wood), so it is
-        // not worse off than the current front.
         let mv = state
             .move_lookup
             .get("fire_strike")
@@ -775,8 +772,11 @@ mod tests {
         state
             .move_lookup
             .insert("earth_move".into(), Box::new(earth_move));
+        state.participants[1].character_data.moves = vec!["earth_move".into()];
+        // Enemy bench (index 2) holds a Fire move (2.0x vs Wood), so it is
+        // not worse off than the current front.
         state.participants.push(make_participant(Team::Enemy, 100));
-        state.participants[2].character_data.moves = vec!["earth_move".into()];
+        state.participants[2].character_data.moves = vec!["fire_strike".into()];
         state.active_participant = Some(1);
         let mut rng = StdRng::seed_from_u64(42);
         match execute_ai_turn(&mut state, &mut rng) {
@@ -804,9 +804,9 @@ mod tests {
     fn test_effectiveness_single_type_not_squared() {
         let state = make_state();
         // Player front (index 0) is single-type Wood.
-        // Fire vs Wood is 0.5 — not 0.25 (the squared dual-type result).
+        // Earth vs Wood is 0.5 — not 0.25 (the squared dual-type result).
         let eff =
-            move_effectiveness_against(type_chart(), TypeElement::Fire, &state.participants[0]);
+            move_effectiveness_against(type_chart(), TypeElement::Earth, &state.participants[0]);
         assert!((eff - 0.5).abs() < f64::EPSILON, "got {eff}");
     }
 
@@ -815,10 +815,11 @@ mod tests {
         let mut state = make_state();
         // Give the player front a secondary Fire element: Wood/Fire defender.
         state.participants[0].character_data.secondary_element = Some(TypeElement::Fire);
-        // Metal vs Wood/Fire = chart[Wood][Metal] * chart[Fire][Metal] = 1.0 * 2.0.
+        // Metal vs Wood/Fire = chart[Wood][Metal] * chart[Fire][Metal]
+        // = 2.0 (overcoming) * 0.5 (overcome) = 1.0.
         let eff =
             move_effectiveness_against(type_chart(), TypeElement::Metal, &state.participants[0]);
-        assert!((eff - 2.0).abs() < f64::EPSILON, "got {eff}");
+        assert!((eff - 1.0).abs() < f64::EPSILON, "got {eff}");
     }
 
     #[test]
@@ -827,6 +828,7 @@ mod tests {
         state.participants.push(make_participant(Team::Enemy, 100));
         let mv = state.move_lookup.get("fire_strike").unwrap();
         let mut healing_move = mv.as_ref().clone();
+        healing_move.power = 0;
         healing_move.healing = 50;
         state
             .move_lookup
@@ -868,17 +870,22 @@ mod tests {
         state.participants.push(make_participant(Team::Enemy, 100));
         state.participants.push(make_participant(Team::Enemy, 100));
         // Player front is single-type Wood.
-        // Enemy front holds a Fire move (0.5x vs Wood) → type disadvantage.
-        state.participants[1].character_data.moves = vec!["fire_strike".into()];
-        // Bench 2: Fire move (0.5x vs Wood) — same matchup as the front.
-        state.participants[2].character_data.moves = vec!["fire_strike".into()];
-        // Bench 3: Metal move (1.0x vs Wood) — strictly better matchup.
+        // Enemy front holds an Earth move (0.5x vs Wood) → type disadvantage.
         let mv = state
             .move_lookup
             .get("fire_strike")
             .unwrap()
             .as_ref()
             .clone();
+        let mut earth_strike = mv.clone();
+        earth_strike.element = TypeElement::Earth;
+        state
+            .move_lookup
+            .insert("earth_strike".into(), Box::new(earth_strike));
+        state.participants[1].character_data.moves = vec!["earth_strike".into()];
+        // Bench 2: Earth move (0.5x vs Wood) — same matchup as the front.
+        state.participants[2].character_data.moves = vec!["earth_strike".into()];
+        // Bench 3: Metal move (2.0x vs Wood) — strictly better matchup.
         let mut metal_strike = mv.clone();
         metal_strike.element = TypeElement::Metal;
         state

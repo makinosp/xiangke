@@ -323,15 +323,16 @@ func _validate_type_chart(result: ValidationResult) -> void:
 					"Type %d must have neutral effectiveness against Yin" % i)
 
 	# Five Elements Cycle Compliance
-	# Each 五行 type must be super effective against exactly one other (2.0)
+	# Each 五行 type must be super effective against exactly two others (2.0):
+	# one overcoming target and one reverse-generating source.
 	for defender in range(5):
 		var super_effective_count = 0
 		for attacker in range(5):
 			if chart[defender][attacker] == 2.0:
 				super_effective_count += 1
-		if super_effective_count != 1:
+		if super_effective_count != 2:
 			result.add_error("TR-3",
-					"Type %d must be super effective against exactly 1 type, got %d" % [
+					"Type %d must be super effective against exactly 2 types (overcoming + reverse-generating), got %d" % [
 							defender, super_effective_count])
 
 	# Each 五行 type must generate exactly one other (1.25 when defending)
@@ -355,3 +356,37 @@ func _validate_type_chart(result: ValidationResult) -> void:
 			result.add_error("TR-3",
 					"Type %d must be weak against exactly 1 type (0.5x), got %d" % [
 							defender, weak_count])
+
+	# TR-4: The overcoming cycle Wood→Earth→Water→Fire→Metal→Wood must be 2.0.
+	# chart[defender][attacker]; effectiveness(attacker, defender).
+	var overcoming_edges := [
+		[2, 0], # Wood→Earth (defender=Earth, attacker=Wood)
+		[4, 2], # Earth→Water
+		[1, 4], # Water→Fire
+		[3, 1], # Fire→Metal
+		[0, 3], # Metal→Wood
+	]
+	for edge in overcoming_edges:
+		var defender: int = edge[0]
+		var attacker: int = edge[1]
+		if chart[defender][attacker] != 2.0:
+			result.add_error("TR-4",
+					"Overcoming edge type %d → type %d must be 2.0x" % [
+							attacker, defender])
+
+	# TR-5: The reverse-generating edges (the child drains the mother) must be
+	# 2.0: Fire→Wood, Earth→Fire, Metal→Earth, Water→Metal, Wood→Water.
+	var reverse_generating_edges := [
+		[0, 1], # Fire→Wood
+		[1, 2], # Earth→Fire
+		[2, 3], # Metal→Earth
+		[3, 4], # Water→Metal
+		[4, 0], # Wood→Water
+	]
+	for edge in reverse_generating_edges:
+		var defender: int = edge[0]
+		var attacker: int = edge[1]
+		if chart[defender][attacker] != 2.0:
+			result.add_error("TR-5",
+					"Reverse-generating edge type %d → type %d must be 2.0x" % [
+							attacker, defender])

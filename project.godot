@@ -43,7 +43,6 @@ theme/custom="res://assets/ui/default_theme.tres"
 
 [internationalization]
 
-locale/fallback="en"
 locale/translations=PackedStringArray("res://translations/en.en.translation", "res://translations/ja.ja.translation", "res://translations/zh_CN.zh_CN.translation", "res://translations/zh_TW.zh_TW.translation")
 
 [rendering]

@@ -701,7 +701,7 @@ fn test_arts_damage_category() {
     let mut rng = StdRng::seed_from_u64(8);
 
     let mut attacker = BattleParticipant::new(
-        make_fighter("mage", "Mage", TypeElement::Wood, 100, 50, 50, 50),
+        make_fighter("mage", "Mage", TypeElement::Metal, 100, 50, 50, 50),
         Team::Player,
         0,
     )
@@ -711,7 +711,7 @@ fn test_arts_damage_category() {
     attacker.character_data.base_stats.spirit = 100;
 
     let mut defender = BattleParticipant::new(
-        make_fighter("dummy", "Dummy", TypeElement::Metal, 300, 10, 100, 10),
+        make_fighter("dummy", "Dummy", TypeElement::Wood, 300, 10, 100, 10),
         Team::Enemy,
         0,
     )
@@ -722,7 +722,7 @@ fn test_arts_damage_category() {
     let arts_mv = MoveData {
         id: "arts_blast".into(),
         name: "Arts Blast".into(),
-        element: TypeElement::Wood,
+        element: TypeElement::Metal,
         power: 70,
         accuracy: 100,
         effect: EffectType::None,
@@ -741,10 +741,10 @@ fn test_arts_damage_category() {
 
     assert!(result.hit, "Arts move should hit");
     assert!(result.damage_dealt > 0, "Arts move should deal damage");
-    // Wood → Metal = 2.0×, dual (Metal+Metal) = 2.0 * 2.0 = 4.0 clamped to [0.25, 4.0]
+    // Metal → Wood = 2.0× (single-type defender uses effectiveness, not effectiveness_dual)
     assert!(
-        (result.type_effectiveness - 4.0).abs() < 0.01,
-        "Wood vs single-type Metal should be 4.0× (2.0 × 2.0 dual effectiveness)"
+        (result.type_effectiveness - 2.0).abs() < 0.01,
+        "Metal vs single-type Wood should be 2.0×"
     );
     assert!(
         result.is_super_effective,
@@ -756,33 +756,33 @@ fn test_arts_damage_category() {
 // Type Effectiveness Tests
 // ============================================================
 
-/// Verify resisted type matchup: Wood → Water = 0.5×.
+/// Verify resisted type matchup: Earth → Wood = 0.5×.
 #[test]
 fn test_type_effectiveness_resisted() {
     let mut rng = StdRng::seed_from_u64(9);
 
     let mut attacker = BattleParticipant::new(
-        make_fighter("a", "A", TypeElement::Wood, 100, 100, 50, 50),
+        make_fighter("a", "A", TypeElement::Earth, 100, 100, 50, 50),
         Team::Player,
         0,
     )
     .unwrap();
     let mut defender = BattleParticipant::new(
-        make_fighter("b", "B", TypeElement::Water, 200, 10, 10, 10),
+        make_fighter("b", "B", TypeElement::Wood, 200, 10, 10, 10),
         Team::Enemy,
         0,
     )
     .unwrap();
 
-    let mv = make_strike("strike", TypeElement::Wood, 60, 100);
+    let mv = make_strike("strike", TypeElement::Earth, 60, 100);
 
     let result = calculate_damage(&mut attacker, &mut defender, &mv, 1, &mut rng).unwrap();
 
     assert!(result.hit, "Move should hit");
-    // Wood → Water = 0.5×, dual (Water+Water) = 0.5 * 0.5 = 0.25, clamped to [0.25, 4.0]
+    // Earth → Wood = 0.5× (single-type defender uses effectiveness, not effectiveness_dual)
     assert!(
-        (result.type_effectiveness - 0.25).abs() < 0.01,
-        "Wood vs single-type Water should be 0.25× (0.5 × 0.5 dual effectiveness)"
+        (result.type_effectiveness - 0.5).abs() < 0.01,
+        "Earth vs single-type Wood should be 0.5×"
     );
     assert!(
         result.is_not_very_effective,
@@ -907,20 +907,20 @@ fn test_status_effect_resistance() {
 fn test_asymmetric_team_1v2() {
     let mut rng = StdRng::seed_from_u64(105);
 
-    // Player: Wood element (super-effective vs Metal enemies)
+    // Player: Metal element (super-effective vs Wood enemies)
     let player_chars = vec![make_fighter(
         "hero",
         "Hero",
-        TypeElement::Wood,
+        TypeElement::Metal,
         500,
         150,
         100,
         70,
     )];
-    // Enemies: Metal element (weak to Wood)
+    // Enemies: Wood element (weak to Metal)
     let enemy_chars = [
-        make_fighter("e1", "E1", TypeElement::Metal, 60, 30, 20, 50),
-        make_fighter("e2", "E2", TypeElement::Metal, 60, 30, 20, 50),
+        make_fighter("e1", "E1", TypeElement::Wood, 60, 30, 20, 50),
+        make_fighter("e2", "E2", TypeElement::Wood, 60, 30, 20, 50),
     ];
 
     let mut participants = Vec::new();
@@ -985,7 +985,7 @@ fn test_asymmetric_team_1v2() {
     assert_eq!(
         state.evaluate_status(),
         Status::Victory,
-        "Hero (Wood) should defeat both Metal enemies"
+        "Hero (Metal) should defeat both Wood enemies"
     );
     assert!(
         state.turn_count < 30,

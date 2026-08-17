@@ -6,23 +6,24 @@ extends Node
 
 ## Type effectiveness matrix.
 ## Row = defender's type, Column = attacker's type.
-## Values: 2.0 (super effective / 相克), 1.25 (generating / 相生),
-##         1.0 (neutral), 0.5 (not very effective / 被相克), 0.0 (immune)
+## Values: 2.0 (overcoming / 相克 or reverse-generating / 子盗母气),
+##         1.25 (generating / 相生), 1.0 (neutral),
+##         0.5 (not very effective / 被相克), 0.0 (immune)
 const TYPE_CHART: Array = [
-	# WOOD attacker
-	[1.0, 0.5, 2.0, 1.0, 1.25, 1.0, 1.0], # WOOD defender
-	# FIRE attacker
-	[1.25, 1.0, 0.5, 2.0, 1.0, 1.0, 1.0], # FIRE defender
-	# EARTH attacker
-	[1.0, 1.25, 1.0, 0.5, 2.0, 1.0, 1.0], # EARTH defender
-	# METAL attacker
-	[2.0, 1.0, 1.25, 1.0, 0.5, 1.0, 1.0], # METAL defender
-	# WATER attacker
-	[0.5, 2.0, 1.0, 1.25, 1.0, 1.0, 1.0], # WATER defender
-	# YANG attacker
-	[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0], # YANG defender
-	# YIN attacker
-	[1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0], # YIN defender
+	# WOOD defender
+	[1.0, 2.0, 0.5, 2.0, 1.25, 1.0, 1.0], # WOOD attacker
+	# FIRE defender
+	[1.25, 1.0, 2.0, 0.5, 2.0, 1.0, 1.0], # FIRE attacker
+	# EARTH defender
+	[2.0, 1.25, 1.0, 2.0, 0.5, 1.0, 1.0], # EARTH attacker
+	# METAL defender
+	[0.5, 2.0, 1.25, 1.0, 2.0, 1.0, 1.0], # METAL attacker
+	# WATER defender
+	[2.0, 0.5, 2.0, 1.25, 1.0, 1.0, 1.0], # WATER attacker
+	# YANG defender
+	[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0], # YANG attacker
+	# YIN defender
+	[1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0], # YIN attacker
 ]
 
 ## Minimum multiplier for dual-type calculations.

@@ -125,9 +125,9 @@ fn test_type_chart_character_scenario() {
     let eff = chart.effectiveness(TypeElement::Wood, TypeElement::Fire);
     assert!((eff - 1.25).abs() < f64::EPSILON, "Wood→Fire = {eff}");
 
-    // Zhou Yu (Fire) attacks Zhuge Liang (Water) → strong = 2.0
+    // Zhou Yu (Fire) attacks Zhuge Liang (Water) → overcome = 0.5
     let eff = chart.effectiveness(TypeElement::Fire, TypeElement::Water);
-    assert!((eff - 2.0).abs() < f64::EPSILON, "Fire→Water = {eff}");
+    assert!((eff - 0.5).abs() < f64::EPSILON, "Fire→Water = {eff}");
 
     // Zhuge Liang (Water) attacks Guan Yu (Wood) → generating = 1.25
     let eff = chart.effectiveness(TypeElement::Water, TypeElement::Wood);

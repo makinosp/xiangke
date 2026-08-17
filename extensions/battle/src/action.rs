@@ -142,12 +142,12 @@ fn calculate_raw_damage(
     };
     let raw_damage = calc::calculate_raw_damage(effective_atk, mv.power, effective_def);
 
-    let def_secondary = defender
-        .character_data
-        .secondary_element
-        .unwrap_or(defender.character_data.element);
-    let type_effectiveness =
-        type_chart.effectiveness_dual(mv.element, defender.character_data.element, def_secondary);
+    let type_effectiveness = match defender.character_data.secondary_element {
+        Some(secondary) => {
+            type_chart.effectiveness_dual(mv.element, defender.character_data.element, secondary)
+        }
+        None => type_chart.effectiveness(mv.element, defender.character_data.element),
+    };
     let is_super_effective = type_effectiveness > 1.0;
     let is_not_very_effective = type_effectiveness > 0.0 && type_effectiveness < 1.0;
     let is_immune = type_effectiveness == 0.0;
@@ -637,13 +637,13 @@ mod tests {
     fn test_super_effective_flag() {
         let (mut atk, mut def) = make_attacker();
         let mv = make_move();
-        def.character_data.element = TypeElement::Water; // Fire beats Water (2.0)
+        def.character_data.element = TypeElement::Metal; // Fire beats Metal (2.0)
         let mut rng = StdRng::seed_from_u64(42);
         let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
         assert!(result.hit);
         assert!(
             result.is_super_effective,
-            "Fire vs Water should be super effective (got eff={}, expected 2.0)",
+            "Fire vs Metal should be super effective (got eff={}, expected 2.0)",
             result.type_effectiveness
         );
     }
@@ -652,13 +652,14 @@ mod tests {
     fn test_not_very_effective_flag() {
         let (mut atk, mut def) = make_attacker();
         let mv = make_move();
-        // Attacker is Fire, defender is Wood (default) → Fire vs Wood = 0.5
+        // Attacker is Fire, defender is Water → Fire vs Water = 0.5
+        def.character_data.element = TypeElement::Water;
         let mut rng = StdRng::seed_from_u64(42);
         let result = calculate_damage(&mut atk, &mut def, &mv, 1, &mut rng).unwrap();
         assert!(result.hit);
         assert!(
             result.is_not_very_effective,
-            "Fire vs Wood should be not very effective (got eff={}, expected 0.5)",
+            "Fire vs Water should be not very effective (got eff={}, expected 0.5)",
             result.type_effectiveness
         );
     }
@@ -906,10 +907,10 @@ mod tests {
     /// Type effectiveness 2.0× should deal more damage than 1.0×.
     #[test]
     fn test_type_effectiveness_2x_increases_damage() {
-        // Fire vs Water = 2.0× (super effective)
+        // Fire vs Metal = 2.0× (super effective)
         let damage_2x = compute_damage(
             TypeElement::Fire,
-            TypeElement::Water,
+            TypeElement::Metal,
             None,
             TypeElement::Fire,
             60,
@@ -937,10 +938,10 @@ mod tests {
     /// Type effectiveness 0.5× should deal less damage than 1.0×.
     #[test]
     fn test_type_effectiveness_05x_decreases_damage() {
-        // Fire vs Wood = 0.5× (not very effective)
+        // Fire vs Water = 0.5× (not very effective)
         let damage_05x = compute_damage(
             TypeElement::Fire,
-            TypeElement::Wood,
+            TypeElement::Water,
             None,
             TypeElement::Fire,
             60,
@@ -1012,21 +1013,21 @@ mod tests {
         // type effectiveness values.
         let damage = compute_damage(
             TypeElement::Fire,
-            TypeElement::Water,
+            TypeElement::Metal,
             None,
             TypeElement::Fire,
             60,
             100,
             50,
         );
-        // Fire vs Water = 2.0, so damage should be > 0
+        // Fire vs Metal = 2.0, so damage should be > 0
         assert!(damage > 0, "Super effective move should deal damage");
     }
 
     /// Type match bonus (attacker element == move element) should increase damage.
     #[test]
     fn test_type_match_bonus_increases_damage() {
-        // Same type: Fire attacker, Fire move, vs Wood defender (0.5× effectiveness)
+        // Same type: Fire attacker, Fire move, vs Wood defender — matched gets 1.5×.
         let damage_matched = compute_damage(
             TypeElement::Fire,
             TypeElement::Wood,
@@ -1036,7 +1037,7 @@ mod tests {
             100,
             50,
         );
-        // Different type: Water attacker, Fire move, vs Wood defender (0.5× effectiveness)
+        // Different type: Water attacker, Fire move, vs Wood defender — no bonus.
         let damage_unmatched = compute_damage(
             TypeElement::Water,
             TypeElement::Wood,
