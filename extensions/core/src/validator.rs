@@ -335,9 +335,7 @@ pub fn validate_type_chart(
         if (chart[defender][attacker] - 2.0).abs() > f64::EPSILON {
             errors.push(ValidationError {
                 code: "TR-4".into(),
-                message: format!(
-                    "Overcoming edge type {attacker} → type {defender} must be 2.0x"
-                ),
+                message: format!("Overcoming edge type {attacker} → type {defender} must be 2.0x"),
                 context: String::new(),
             });
         }
