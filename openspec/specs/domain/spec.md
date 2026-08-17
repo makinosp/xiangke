@@ -23,8 +23,8 @@ Intelligence, Spirit).
 ### Requirement: Type Effectiveness
 
 The system SHALL implement the 五行 (Five Elements) and 陰陽 (Yin-Yang) type
-effectiveness system with generating (1.25×), overcoming (2.0×), reverse-
-generating (2.0×), and overcome (0.5×) multipliers.
+effectiveness system with generating (1.25×), overcoming (2.0×), overcome
+(0.5×), and reverse-generating (2.0×) multipliers.
 
 #### Scenario: Generating cycle
 
