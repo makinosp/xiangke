@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://battle_unit_panel"]
 
-[ext_resource type="Script" path="res://scripts/battle_unit_panel.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/battle_unit_panel.gd" id="1_script"]
 
 [node name="BattleUnitPanel" type="PanelContainer"]
 script = ExtResource("1_script")

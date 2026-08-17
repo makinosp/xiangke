@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://title_screen"]
 
-[ext_resource type="Script" path="res://scripts/foundation/title_screen.gd" id="1_w7ybh"]
+[ext_resource type="Script" path="res://scripts/scenes/title_screen.gd" id="1_w7ybh"]
 
 [node name="TitleScreen" type="Control"]
 anchors_preset = 15

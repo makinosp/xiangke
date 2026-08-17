@@ -6,7 +6,7 @@
 extends "res://tests/test_base.gd"
 
 ## Battle scene script, used to call the static grid navigation helper.
-const BattleSceneScript = preload("res://scripts/foundation/battle_scene.gd")
+const BattleSceneScript = preload("res://scripts/scenes/battle_scene.gd")
 
 
 ## Builds a MoveButton without entering the tree (BattleUnitPanel test

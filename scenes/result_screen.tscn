@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://result_screen"]
 
-[ext_resource type="Script" path="res://scripts/foundation/result_screen.gd" id="1_7q3gt"]
+[ext_resource type="Script" path="res://scripts/scenes/result_screen.gd" id="1_7q3gt"]
 
 [node name="ResultScreen" type="Control"]
 anchors_preset = 15

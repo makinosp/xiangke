@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://settings_screen"]
 
-[ext_resource type="Script" path="res://scripts/foundation/settings_screen.gd" id="1_settings"]
+[ext_resource type="Script" path="res://scripts/scenes/settings_screen.gd" id="1_settings"]
 
 [node name="SettingsScreen" type="Control"]
 anchors_preset = 15

@@ -71,12 +71,10 @@ xiangke/
 │   └── status_effects/        # 5 status effect .tres files
 ├── scenes/                    # 7 game scenes
 ├── scripts/
-│   ├── character_data.gd      # Character data resource
-│   ├── move_data.gd           # Move data resource
-│   ├── status_effect_data.gd  # Status effect definitions
-│   ├── type_chart.gd          # Elemental effectiveness chart
-│   ├── type_enums.gd          # Shared enums (Elements, etc.)
-│   └── foundation/            # Scene logic & UI scripts
+│   ├── models/              # Data model resources (CharacterData, MoveData, StatusEffectData, TypeEnums, TypeChart)
+│   ├── scenes/              # Scene controllers (battle_scene, character_select, corps_creation, result_screen, settings_screen, title_screen)
+│   ├── ui/                  # UI components (battle_unit_panel, move_button, scene_transition, type_colors)
+│   └── gameplay/            # Gameplay logic (corps_roster)
 ├── systems/
 │   ├── battle/                # Battle flow, state, participant
 │   └── data/                  # Data loading & validation

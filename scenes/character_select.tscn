@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://character_select"]
 
-[ext_resource type="Script" path="res://scripts/foundation/character_select.gd" id="1_4pibs"]
+[ext_resource type="Script" path="res://scripts/scenes/character_select.gd" id="1_4pibs"]
 
 [node name="CharacterSelect" type="Control"]
 anchors_preset = 15
