@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://d1n4b2jo25xp0"]
 
-[ext_resource type="Script" uid="uid://ditdl3sfqrpht" path="res://scripts/foundation/battle_scene.gd" id="1_wd6yu"]
+[ext_resource type="Script" uid="uid://ditdl3sfqrpht" path="res://scripts/scenes/battle_scene.gd" id="1_wd6yu"]
 [ext_resource type="PackedScene" uid="uid://battle_unit_panel" path="res://scenes/battle_unit_panel.tscn" id="2_panel"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_move_panel"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://scene_transition_layer"]
 
-[ext_resource type="Script" path="res://scripts/foundation/scene_transition.gd" id="1_s32bs"]
+[ext_resource type="Script" path="res://scripts/ui/scene_transition.gd" id="1_s32bs"]
 
 [node name="SceneTransitionLayer" type="CanvasLayer"]
 layer = 128

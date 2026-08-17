@@ -24,7 +24,7 @@ var corps_roster: RefCounted
 
 func _ready() -> void:
 	# Initialize corps_roster using preload to ensure class is resolved
-	corps_roster = preload("res://scripts/foundation/corps_roster.gd").new()
+	corps_roster = preload("res://scripts/gameplay/corps_roster.gd").new()
 	# Restore saved corps data if available
 	var save_data := SaveManager.current_data
 	if save_data.has("corps_characters") and save_data["corps_characters"] is Array:
