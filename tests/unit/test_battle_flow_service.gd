@@ -79,7 +79,9 @@ func _start_3v3() -> bool:
 		_make_char("p_bench2", TypeEnums.Type.EARTH, 150, wood_move),
 	]
 	var enemy_chars: Array[CharacterData] = [
-		_make_char("e_front", TypeEnums.Type.WOOD, 200, wood_move),
+	# 500 HP so the Fire→Wood attack (~320 dmg with type match) does not
+	# defeat the front in one shot.
+		_make_char("e_front", TypeEnums.Type.WOOD, 500, wood_move),
 		_make_char("e_bench1", TypeEnums.Type.METAL, 150, fire_move),
 		_make_char("e_bench2", TypeEnums.Type.WATER, 150, fire_move),
 	]
@@ -300,8 +302,8 @@ func test_perform_ai_turn_switches_on_low_hp() -> int:
 	var enemy_front_id: String = enemy_front.character_data.id
 
 	# Damage the enemy front with the player (iron_cleave is 100% accurate and
-	# deals ~51-60 damage per hit) until it is below the AI's 30% switch
-	# threshold.
+	# deals ~100-120 damage per hit vs the Wood front at 2.0x effectiveness)
+	# until it is below the AI's 30% switch threshold.
 	var iron_cleave := DataRegistry.get_move("iron_cleave")
 	err = assert_true(iron_cleave != null, "iron_cleave move should exist"); if err: return err
 
@@ -334,14 +336,15 @@ func test_perform_ai_turn_switches_on_low_hp() -> int:
 ## The enemy AI switches with a benched character when its front holds a type
 ## disadvantage against the player's front, even at full HP.
 func test_perform_ai_turn_switches_on_type_disadvantage() -> int:
-	var wood_move := PackedStringArray(["wood_heal"])
+	var water_move := PackedStringArray(["wood_heal"])
 	var player_chars: Array[CharacterData] = [
-		_make_char("p_front", TypeEnums.Type.WOOD, 300, wood_move),
-		_make_char("p_bench1", TypeEnums.Type.WOOD, 150, wood_move),
-		_make_char("p_bench2", TypeEnums.Type.EARTH, 150, wood_move),
+		_make_char("p_front", TypeEnums.Type.WATER, 300, water_move),
+		_make_char("p_bench1", TypeEnums.Type.WOOD, 150, water_move),
+		_make_char("p_bench2", TypeEnums.Type.EARTH, 150, water_move),
 	]
-	# The enemy front holds a Fire move that is weak against the Wood player
-	# front; the enemy bench holds a Metal move that is neutral or better.
+	# The enemy front holds a Fire move that is weak against the Water player
+	# front (Fire→Water = 0.5x); the enemy bench holds a Metal move that is
+	# neutral or better.
 	var fire_move := PackedStringArray(["fire_strike"])
 	var metal_move := PackedStringArray(["iron_cleave"])
 	var enemy_chars: Array[CharacterData] = [

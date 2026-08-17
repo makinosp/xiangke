@@ -23,13 +23,13 @@ func test_same_type_effectiveness_is_neutral() -> int:
 
 
 func test_fire_vs_water() -> int:
-	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.FIRE, TypeEnums.Type.WATER), 2.0,
-		"FIRE vs WATER should be 2.0 (strong)")
+	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.FIRE, TypeEnums.Type.WATER), 0.5,
+		"FIRE vs WATER should be 0.5 (being overcome)")
 
 
 func test_water_vs_fire() -> int:
-	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.WATER, TypeEnums.Type.FIRE), 1.0,
-		"WATER vs FIRE should be 1.0 (neutral in this chart)")
+	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.WATER, TypeEnums.Type.FIRE), 2.0,
+		"WATER vs FIRE should be 2.0 (overcoming)")
 
 
 func test_yang_vs_yin() -> int:
@@ -40,6 +40,21 @@ func test_yang_vs_yin() -> int:
 func test_wood_vs_fire_generating() -> int:
 	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.WOOD, TypeEnums.Type.FIRE), 1.25,
 		"WOOD vs FIRE should be 1.25 (generating)")
+
+
+func test_wood_vs_earth_overcoming() -> int:
+	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.WOOD, TypeEnums.Type.EARTH), 2.0,
+		"WOOD vs EARTH should be 2.0 (overcoming)")
+
+
+func test_earth_vs_wood_overcome() -> int:
+	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.EARTH, TypeEnums.Type.WOOD), 0.5,
+		"EARTH vs WOOD should be 0.5 (being overcome)")
+
+
+func test_fire_vs_wood_reverse_generating() -> int:
+	return assert_eq(_type_chart.get_effectiveness(TypeEnums.Type.FIRE, TypeEnums.Type.WOOD), 2.0,
+		"FIRE vs WOOD should be 2.0 (reverse-generating)")
 
 
 func test_invalid_type_returns_neutral() -> int:
