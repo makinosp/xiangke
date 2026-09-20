@@ -6,6 +6,6 @@
     "npx openspec": true
   },
   "search.exclude": {
-    "**/.vendor": true
+    "**/references": true
   }
 }
