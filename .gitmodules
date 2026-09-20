@@ -1,14 +1,11 @@
-[submodule ".vendor/aidlc-workflows"]
-	path = .vendor/aidlc-workflows
-	url = https://github.com/awslabs/aidlc-workflows.git
-[submodule ".vendor/rust-reference"]
-	path = .vendor/rust-reference
+[submodule "references/rust-reference"]
+	path = references/rust-reference
 	url = https://github.com/rust-lang/reference.git
-[submodule ".vendor/godot-docs"]
-	path = .vendor/godot-docs
+[submodule "references/godot-docs"]
+	path = references/godot-docs
 	url = https://github.com/godotengine/godot-docs.git
 	branch = master
-[submodule ".vendor/godot-rust"]
-	path = .vendor/godot-rust-book
+[submodule "references/godot-rust"]
+	path = references/godot-rust-book
 	url = https://github.com/godot-rust/book.git
 	branch = master
